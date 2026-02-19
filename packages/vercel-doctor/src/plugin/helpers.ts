@@ -7,10 +7,7 @@ import {
 } from "./constants.js";
 import type { EsTreeNode } from "./types.js";
 
-export const walkAst = (
-  node: EsTreeNode,
-  visitor: (child: EsTreeNode) => void,
-): void => {
+export const walkAst = (node: EsTreeNode, visitor: (child: EsTreeNode) => void): void => {
   if (!node || typeof node !== "object") return;
   visitor(node);
   for (const key of Object.keys(node)) {
@@ -28,13 +25,9 @@ export const walkAst = (
   }
 };
 
-export const isUppercaseName = (name: string): boolean =>
-  UPPERCASE_PATTERN.test(name);
+export const isUppercaseName = (name: string): boolean => UPPERCASE_PATTERN.test(name);
 
-export const isMemberProperty = (
-  node: EsTreeNode,
-  propertyName: string,
-): boolean =>
+export const isMemberProperty = (node: EsTreeNode, propertyName: string): boolean =>
   node.type === "MemberExpression" &&
   node.property?.type === "Identifier" &&
   node.property.name === propertyName;
@@ -42,10 +35,7 @@ export const isMemberProperty = (
 export const getEffectCallback = (node: EsTreeNode): EsTreeNode | null => {
   if (!node.arguments?.length) return null;
   const callback = node.arguments[0];
-  if (
-    callback.type === "ArrowFunctionExpression" ||
-    callback.type === "FunctionExpression"
-  ) {
+  if (callback.type === "ArrowFunctionExpression" || callback.type === "FunctionExpression") {
     return callback;
   }
   return null;
@@ -56,23 +46,14 @@ export const isComponentAssignment = (node: EsTreeNode): boolean =>
   node.id?.type === "Identifier" &&
   isUppercaseName(node.id.name) &&
   Boolean(node.init) &&
-  (node.init.type === "ArrowFunctionExpression" ||
-    node.init.type === "FunctionExpression");
+  (node.init.type === "ArrowFunctionExpression" || node.init.type === "FunctionExpression");
 
-export const isHookCall = (
-  node: EsTreeNode,
-  hookName: string | Set<string>,
-): boolean =>
+export const isHookCall = (node: EsTreeNode, hookName: string | Set<string>): boolean =>
   node.type === "CallExpression" &&
   node.callee?.type === "Identifier" &&
-  (typeof hookName === "string"
-    ? node.callee.name === hookName
-    : hookName.has(node.callee.name));
+  (typeof hookName === "string" ? node.callee.name === hookName : hookName.has(node.callee.name));
 
-export const hasDirective = (
-  programNode: EsTreeNode,
-  directive: string,
-): boolean =>
+export const hasDirective = (programNode: EsTreeNode, directive: string): boolean =>
   Boolean(
     programNode.body?.some(
       (statement: EsTreeNode) =>
@@ -87,8 +68,7 @@ export const hasUseServerDirective = (node: EsTreeNode): boolean => {
   return Boolean(
     node.body.body?.some(
       (statement: EsTreeNode) =>
-        statement.type === "ExpressionStatement" &&
-        statement.directive === "use server",
+        statement.type === "ExpressionStatement" && statement.directive === "use server",
     ),
   );
 };
@@ -97,10 +77,7 @@ export const containsFetchCall = (node: EsTreeNode): boolean => {
   let didFindFetchCall = false;
   walkAst(node, (child) => {
     if (didFindFetchCall || child.type !== "CallExpression") return;
-    if (
-      child.callee?.type === "Identifier" &&
-      FETCH_CALLEE_NAMES.has(child.callee.name)
-    ) {
+    if (child.callee?.type === "Identifier" && FETCH_CALLEE_NAMES.has(child.callee.name)) {
       didFindFetchCall = true;
     }
     if (
@@ -125,50 +102,28 @@ export const findJsxAttribute = (
       attr.name.name === attributeName,
   );
 
-export const hasJsxAttribute = (
-  attributes: EsTreeNode[],
-  attributeName: string,
-): boolean => Boolean(findJsxAttribute(attributes, attributeName));
+export const hasJsxAttribute = (attributes: EsTreeNode[], attributeName: string): boolean =>
+  Boolean(findJsxAttribute(attributes, attributeName));
 
-const isCookiesOrHeadersCall = (
-  node: EsTreeNode,
-  methodName: string,
-): boolean => {
-  if (
-    node.type !== "CallExpression" ||
-    node.callee?.type !== "MemberExpression"
-  )
-    return false;
+const isCookiesOrHeadersCall = (node: EsTreeNode, methodName: string): boolean => {
+  if (node.type !== "CallExpression" || node.callee?.type !== "MemberExpression") return false;
   const { object, property } = node.callee;
-  if (
-    property?.type !== "Identifier" ||
-    !MUTATION_METHOD_NAMES.has(property.name)
-  )
-    return false;
-  if (object?.type !== "CallExpression" || object.callee?.type !== "Identifier")
-    return false;
+  if (property?.type !== "Identifier" || !MUTATION_METHOD_NAMES.has(property.name)) return false;
+  if (object?.type !== "CallExpression" || object.callee?.type !== "Identifier") return false;
   return object.callee.name === methodName;
 };
 
 const isMutatingDbCall = (node: EsTreeNode): boolean => {
-  if (
-    node.type !== "CallExpression" ||
-    node.callee?.type !== "MemberExpression"
-  )
-    return false;
+  if (node.type !== "CallExpression" || node.callee?.type !== "MemberExpression") return false;
   const { property } = node.callee;
-  return (
-    property?.type === "Identifier" && MUTATION_METHOD_NAMES.has(property.name)
-  );
+  return property?.type === "Identifier" && MUTATION_METHOD_NAMES.has(property.name);
 };
 
 const isMutatingFetchCall = (node: EsTreeNode): boolean => {
   if (node.type !== "CallExpression") return false;
-  if (node.callee?.type !== "Identifier" || node.callee.name !== "fetch")
-    return false;
+  if (node.callee?.type !== "Identifier" || node.callee.name !== "fetch") return false;
   const optionsArgument = node.arguments?.[1];
-  if (!optionsArgument || optionsArgument.type !== "ObjectExpression")
-    return false;
+  if (!optionsArgument || optionsArgument.type !== "ObjectExpression") return false;
   return optionsArgument.properties?.some(
     (property: EsTreeNode) =>
       property.type === "Property" &&
@@ -199,28 +154,19 @@ export const findSideEffect = (node: EsTreeNode): string | null => {
     } else if (isMutatingDbCall(child)) {
       const methodName = child.callee.property.name;
       const objectName =
-        child.callee.object?.type === "Identifier"
-          ? child.callee.object.name
-          : null;
-      sideEffectDescription = objectName
-        ? `${objectName}.${methodName}()`
-        : `.${methodName}()`;
+        child.callee.object?.type === "Identifier" ? child.callee.object.name : null;
+      sideEffectDescription = objectName ? `${objectName}.${methodName}()` : `.${methodName}()`;
     }
   });
   return sideEffectDescription;
 };
 
-export const extractDestructuredPropNames = (
-  params: EsTreeNode[],
-): Set<string> => {
+export const extractDestructuredPropNames = (params: EsTreeNode[]): Set<string> => {
   const propNames = new Set<string>();
   for (const param of params) {
     if (param.type === "ObjectPattern") {
       for (const property of param.properties ?? []) {
-        if (
-          property.type === "Property" &&
-          property.key?.type === "Identifier"
-        ) {
+        if (property.type === "Property" && property.key?.type === "Identifier") {
           propNames.add(property.key.name);
         }
       }

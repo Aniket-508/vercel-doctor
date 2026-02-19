@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Image from "next/image";
 import { Copy, Check, ChevronRight, RotateCcw } from "lucide-react";
 
 const COPIED_RESET_DELAY_MS = 2000;
@@ -65,7 +66,10 @@ const DIAGNOSTICS: Diagnostic[] = [
     files: [
       { path: "src/components/TodoList.tsx", lines: [24, 51] },
       { path: "src/components/CommentThread.tsx", lines: [33, 67, 89] },
-      { path: "src/components/SearchResults.tsx", lines: [19, 42, 55, 78, 91, 103, 112] },
+      {
+        path: "src/components/SearchResults.tsx",
+        lines: [19, 42, 55, 78, 91, 103, 112],
+      },
     ],
   },
   {
@@ -225,7 +229,9 @@ const DiagnosticItem = ({ diagnostic }: { diagnostic: Diagnostic }) => {
         >
           <ChevronRight
             size={16}
-            className={`mt-[0.35em] shrink-0 text-neutral-500 transition-transform duration-150 ${isOpen ? "rotate-90" : ""}`}
+            className={`mt-[0.35em] shrink-0 text-neutral-500 transition-transform duration-150 ${
+              isOpen ? "rotate-90" : ""
+            }`}
           />
           <span>
             <span className="text-red-400">✗</span>
@@ -344,7 +350,9 @@ const Terminal = () => {
 
       for (let frame = 0; frame <= SCORE_FRAME_COUNT; frame++) {
         if (cancelled) return;
-        update({ score: Math.round(easeOutCubic(frame / SCORE_FRAME_COUNT) * TARGET_SCORE) });
+        update({
+          score: Math.round(easeOutCubic(frame / SCORE_FRAME_COUNT) * TARGET_SCORE),
+        });
         await sleep(SCORE_FRAME_DELAY_MS);
       }
 
@@ -372,7 +380,7 @@ const Terminal = () => {
         <FadeIn>
           <Spacer />
           <div className="flex items-center gap-2">
-            <img src="/favicon.svg" alt="Vercel Doctor" width={24} height={24} />
+            <Image src="/favicon.svg" alt="Vercel Doctor" width={24} height={24} />
             vercel-doctor
           </div>
           <div className="text-neutral-500">

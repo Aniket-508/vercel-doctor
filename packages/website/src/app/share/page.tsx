@@ -21,8 +21,7 @@ interface ShareSearchParams {
   f?: string;
 }
 
-const clampScore = (value: number): number =>
-  Math.max(0, Math.min(PERFECT_SCORE, value));
+const clampScore = (value: number): number => Math.max(0, Math.min(PERFECT_SCORE, value));
 
 const getScoreLabel = (score: number): string => {
   if (score >= SCORE_GOOD_THRESHOLD) return "Great";
@@ -68,12 +67,9 @@ export const generateMetadata = async ({
   const titlePrefix = projectName ? `${projectName} - ` : "";
   const title = `Vercel Doctor - ${titlePrefix}Score: ${score}/100 (${label})`;
   const descriptionParts: string[] = [];
-  if (errorCount > 0)
-    descriptionParts.push(`${errorCount} error${errorCount === 1 ? "" : "s"}`);
+  if (errorCount > 0) descriptionParts.push(`${errorCount} error${errorCount === 1 ? "" : "s"}`);
   if (warningCount > 0)
-    descriptionParts.push(
-      `${warningCount} warning${warningCount === 1 ? "" : "s"}`,
-    );
+    descriptionParts.push(`${warningCount} warning${warningCount === 1 ? "" : "s"}`);
   const description =
     descriptionParts.length > 0
       ? `${descriptionParts.join(
@@ -102,11 +98,7 @@ export const generateMetadata = async ({
   };
 };
 
-const SharePage = async ({
-  searchParams,
-}: {
-  searchParams: Promise<ShareSearchParams>;
-}) => {
+const SharePage = async ({ searchParams }: { searchParams: Promise<ShareSearchParams> }) => {
   const resolvedParams = await searchParams;
   const projectName = resolvedParams.p ?? null;
   const score = clampScore(Number(resolvedParams.s) || 0);
@@ -135,13 +127,10 @@ const SharePage = async ({
   return (
     <div className="mx-auto min-h-screen w-full max-w-3xl bg-[#0a0a0a] p-6 pb-32 font-mono text-base leading-relaxed text-neutral-300 sm:p-8 sm:pb-40 sm:text-lg">
       <div className="mb-6">
-        {projectName && (
-          <div className="mb-4 text-xl text-white">{projectName}</div>
-        )}
+        {projectName && <div className="mb-4 text-xl text-white">{projectName}</div>}
         <DoctorFace score={score} />
         <div className="mt-2 text-neutral-500">
-          Vercel Doctor{" "}
-          <span className="text-neutral-600">(www.vercel.doctor)</span>
+          Vercel Doctor <span className="text-neutral-600">(www.vercel.doctor)</span>
         </div>
       </div>
 
@@ -170,9 +159,7 @@ const SharePage = async ({
 
       <div className="text-neutral-500">Run it on your codebase:</div>
       <div className="mt-2">
-        <span className="border border-white/20 px-3 py-1.5 text-white">
-          {COMMAND}
-        </span>
+        <span className="border border-white/20 px-3 py-1.5 text-white">{COMMAND}</span>
       </div>
 
       <div className="mt-8 flex flex-wrap items-center gap-3">

@@ -41,8 +41,7 @@ const plugin: RulePlugin = {
     "nextjs-no-img-element": nextjsNoImgElement,
     "nextjs-async-client-component": nextjsAsyncClientComponent,
     "nextjs-no-a-element": nextjsNoAElement,
-    "nextjs-no-use-search-params-without-suspense":
-      nextjsNoUseSearchParamsWithoutSuspense,
+    "nextjs-no-use-search-params-without-suspense": nextjsNoUseSearchParamsWithoutSuspense,
     "nextjs-no-client-fetch-for-server-data": nextjsNoClientFetchForServerData,
     "nextjs-missing-metadata": nextjsMissingMetadata,
     "nextjs-no-client-side-redirect": nextjsNoClientSideRedirect,

@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 const DEFAULT_ICON_SIZE_PX = 40;
 
 interface VercelDoctorIconProps {
@@ -11,7 +13,7 @@ const VercelDoctorIcon = ({
   className,
   alt = "Vercel Doctor icon",
 }: VercelDoctorIconProps) => (
-  <img
+  <Image
     src="/vercel-doctor-icon.svg"
     width={sizePx}
     height={sizePx}

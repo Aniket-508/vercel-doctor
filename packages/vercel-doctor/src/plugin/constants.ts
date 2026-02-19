@@ -60,8 +60,7 @@ export const NEXTJS_NAVIGATION_FUNCTIONS = new Set([
 
 export const GOOGLE_FONTS_PATTERN = /fonts\.googleapis\.com/;
 
-export const POLYFILL_SCRIPT_PATTERN =
-  /polyfill\.io|polyfill\.min\.js|cdn\.polyfill/;
+export const POLYFILL_SCRIPT_PATTERN = /polyfill\.io|polyfill\.min\.js|cdn\.polyfill/;
 
 export const APP_DIRECTORY_PATTERN = /\/app\//;
 
@@ -80,12 +79,7 @@ export const MUTATION_METHOD_NAMES = new Set([
   "append",
 ]);
 
-export const MUTATING_HTTP_METHODS = new Set([
-  "POST",
-  "PUT",
-  "DELETE",
-  "PATCH",
-]);
+export const MUTATING_HTTP_METHODS = new Set(["POST", "PUT", "DELETE", "PATCH"]);
 
 export const MUTATING_ROUTE_SEGMENTS = new Set([
   "logout",

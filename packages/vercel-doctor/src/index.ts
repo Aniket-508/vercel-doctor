@@ -16,13 +16,7 @@ import { runKnip } from "./utils/run-knip.js";
 import { runOxlint } from "./utils/run-oxlint.js";
 import { runVercelChecks } from "./utils/run-vercel-checks.js";
 
-export type {
-  Diagnostic,
-  DiffInfo,
-  ProjectInfo,
-  VercelDoctorConfig,
-  ScoreResult,
-};
+export type { Diagnostic, DiffInfo, ProjectInfo, VercelDoctorConfig, ScoreResult };
 export { getDiffInfo, filterSourceFiles } from "./utils/get-diff-files.js";
 
 export interface DiagnoseOptions {
@@ -91,13 +85,12 @@ export const diagnose = async (
     return [];
   });
 
-  const [lintDiagnostics, deadCodeDiagnostics, vercelDiagnostics] =
-    await Promise.all([lintPromise, deadCodePromise, vercelChecksPromise]);
-  const allDiagnostics = [
-    ...lintDiagnostics,
-    ...deadCodeDiagnostics,
-    ...vercelDiagnostics,
-  ];
+  const [lintDiagnostics, deadCodeDiagnostics, vercelDiagnostics] = await Promise.all([
+    lintPromise,
+    deadCodePromise,
+    vercelChecksPromise,
+  ]);
+  const allDiagnostics = [...lintDiagnostics, ...deadCodeDiagnostics, ...vercelDiagnostics];
   const diagnostics = userConfig
     ? filterIgnoredDiagnostics(allDiagnostics, userConfig)
     : allDiagnostics;

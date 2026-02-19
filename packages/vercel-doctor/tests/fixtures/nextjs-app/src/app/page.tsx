@@ -7,10 +7,13 @@ const useSearchParams = () => new URLSearchParams();
 
 const Page = () => {
   const params = useSearchParams();
+  const [_data, setData] = useState(null);
 
   useEffect(() => {
+    // Dummy use of params to avoid unused-vars
+    console.log(params.get("query"));
     fetch("/api/data");
-  }, []);
+  }, [params]);
 
   useEffect(() => {
     router.push("/dashboard");
@@ -18,6 +21,9 @@ const Page = () => {
 
   return (
     <div>
+      <Head>
+        <title>Page</title>
+      </Head>
       <img src="/photo.jpg" alt="photo" />
       <a href="/about">About</a>
       <Image fill src="/hero.jpg" alt="hero" />
@@ -26,6 +32,7 @@ const Page = () => {
       <Script src="https://cdn.polyfill.io/v3/polyfill.min.js" />
       <link href="https://fonts.googleapis.com/css2?family=Inter" rel="stylesheet" />
       <link rel="stylesheet" href="/styles/main.css" />
+      <div onClick={() => setData(null)}>click</div>
     </div>
   );
 };

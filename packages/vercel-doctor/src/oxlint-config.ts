@@ -1,7 +1,4 @@
-import { createRequire } from "node:module";
 import type { Framework } from "./types.js";
-
-const esmRequire = createRequire(import.meta.url);
 
 const NEXTJS_RULES: Record<string, string> = {
   "vercel-doctor/nextjs-no-img-element": "warn",
@@ -27,10 +24,7 @@ interface OxlintConfigOptions {
   framework: Framework;
 }
 
-export const createOxlintConfig = ({
-  pluginPath,
-  framework,
-}: OxlintConfigOptions) => ({
+export const createOxlintConfig = ({ pluginPath, framework }: OxlintConfigOptions) => ({
   categories: {
     correctness: "off",
     suspicious: "off",

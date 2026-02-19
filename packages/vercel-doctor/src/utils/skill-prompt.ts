@@ -42,23 +42,15 @@ const installSkill = (): void => {
   }
 };
 
-export const maybePromptSkillInstall = async (
-  shouldSkipPrompts: boolean,
-): Promise<void> => {
+export const maybePromptSkillInstall = async (shouldSkipPrompts: boolean): Promise<void> => {
   const config = readSkillPromptConfig();
   if (config.skillPromptDismissed) return;
   if (shouldSkipPrompts) return;
 
   logger.break();
-  logger.log(
-    `${highlighter.info(
-      "💡",
-    )} Have your coding agent fix these issues automatically?`,
-  );
+  logger.log(`${highlighter.info("💡")} Have your coding agent fix these issues automatically?`);
   logger.dim(
-    `   Install the ${highlighter.info(
-      "vercel-doctor",
-    )} skill to teach Cursor, Claude Code,`,
+    `   Install the ${highlighter.info("vercel-doctor")} skill to teach Cursor, Claude Code,`,
   );
   logger.dim("   and other AI agents how to diagnose and fix React issues.");
   logger.break();

@@ -44,9 +44,7 @@ const resolveDiffMode = async (
   if (effectiveDiff !== undefined && effectiveDiff !== false) {
     if (diffInfo) return true;
     if (!isScoreOnly) {
-      logger.warn(
-        "No feature branch or uncommitted changes detected. Running full scan.",
-      );
+      logger.warn("No feature branch or uncommitted changes detected. Running full scan.");
       logger.break();
     }
     return false;
@@ -82,15 +80,9 @@ const program = new Command()
   .option("--verbose", "show file details per rule")
   .option("--score", "output only the score")
   .option("-y, --yes", "skip prompts, scan all workspace projects")
-  .option(
-    "--project <name>",
-    "select workspace project (comma-separated for multiple)",
-  )
+  .option("--project <name>", "select workspace project (comma-separated for multiple)")
   .option("--diff [base]", "scan only files changed vs base branch")
-  .option(
-    "--offline",
-    "skip telemetry (anonymous, not stored, only used to calculate score)",
-  )
+  .option("--offline", "skip telemetry (anonymous, not stored, only used to calculate score)")
   .action(async (directory: string, flags: CliFlags) => {
     const isScoreOnly = flags.score;
 
@@ -107,15 +99,11 @@ const program = new Command()
         program.getOptionValueSource(optionName) === "cli";
 
       const scanOptions: ScanOptions = {
-        lint: isCliOverride("lint")
-          ? flags.lint
-          : userConfig?.lint ?? flags.lint,
+        lint: isCliOverride("lint") ? flags.lint : (userConfig?.lint ?? flags.lint),
         deadCode: isCliOverride("deadCode")
           ? flags.deadCode
-          : userConfig?.deadCode ?? flags.deadCode,
-        verbose: isCliOverride("verbose")
-          ? Boolean(flags.verbose)
-          : userConfig?.verbose ?? false,
+          : (userConfig?.deadCode ?? flags.deadCode),
+        verbose: isCliOverride("verbose") ? Boolean(flags.verbose) : (userConfig?.verbose ?? false),
         scoreOnly: isScoreOnly,
         offline: flags.offline,
       };
@@ -128,19 +116,15 @@ const program = new Command()
         process.env.OPENCODE,
         process.env.AMP_HOME,
       ].some(Boolean);
-      const shouldSkipPrompts =
-        flags.yes || isAutomatedEnvironment || !process.stdin.isTTY;
+      const shouldSkipPrompts = flags.yes || isAutomatedEnvironment || !process.stdin.isTTY;
       const projectDirectories = await selectProjects(
         resolvedDirectory,
         flags.project,
         shouldSkipPrompts,
       );
 
-      const effectiveDiff = isCliOverride("diff")
-        ? flags.diff
-        : userConfig?.diff;
-      const explicitBaseBranch =
-        typeof effectiveDiff === "string" ? effectiveDiff : undefined;
+      const effectiveDiff = isCliOverride("diff") ? flags.diff : userConfig?.diff;
+      const explicitBaseBranch = typeof effectiveDiff === "string" ? effectiveDiff : undefined;
       const diffInfo = getDiffInfo(resolvedDirectory, explicitBaseBranch);
       const isDiffMode = await resolveDiffMode(
         diffInfo,
@@ -167,19 +151,12 @@ const program = new Command()
       for (const projectDirectory of projectDirectories) {
         let includePaths: string[] | undefined;
         if (isDiffMode) {
-          const projectDiffInfo = getDiffInfo(
-            projectDirectory,
-            explicitBaseBranch,
-          );
+          const projectDiffInfo = getDiffInfo(projectDirectory, explicitBaseBranch);
           if (projectDiffInfo) {
-            const changedSourceFiles = filterSourceFiles(
-              projectDiffInfo.changedFiles,
-            );
+            const changedSourceFiles = filterSourceFiles(projectDiffInfo.changedFiles);
             if (changedSourceFiles.length === 0) {
               if (!isScoreOnly) {
-                logger.dim(
-                  `No changed source files in ${projectDirectory}, skipping.`,
-                );
+                logger.dim(`No changed source files in ${projectDirectory}, skipping.`);
                 logger.break();
               }
               continue;

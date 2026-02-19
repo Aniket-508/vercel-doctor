@@ -39,10 +39,7 @@ export const asyncParallel: Rule = {
   },
 };
 
-const reportIfIndependent = (
-  statements: EsTreeNode[],
-  context: RuleContext,
-): void => {
+const reportIfIndependent = (statements: EsTreeNode[], context: RuleContext): void => {
   const declaredNames = new Set<string>();
 
   for (const statement of statements) {

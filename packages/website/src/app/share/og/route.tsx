@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { ImageResponse } from "next/og";
 
 const PERFECT_SCORE = 100;
@@ -47,7 +48,12 @@ export const GET = (request: Request): ImageResponse => {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
-        <img src={brandMarkUrl} width={OG_BRAND_MARK_WIDTH_PX} height={OG_BRAND_MARK_HEIGHT_PX} />
+        <img
+          src={brandMarkUrl}
+          width={OG_BRAND_MARK_WIDTH_PX}
+          height={OG_BRAND_MARK_HEIGHT_PX}
+          alt=""
+        />
         {projectName && (
           <div
             style={{
@@ -62,12 +68,33 @@ export const GET = (request: Request): ImageResponse => {
         )}
       </div>
 
-      <div style={{ display: "flex", alignItems: "baseline", gap: "16px", marginTop: "48px" }}>
-        <span style={{ fontSize: "120px", color: scoreColor, fontWeight: 700, lineHeight: 1 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "baseline",
+          gap: "16px",
+          marginTop: "48px",
+        }}
+      >
+        <span
+          style={{
+            fontSize: "120px",
+            color: scoreColor,
+            fontWeight: 700,
+            lineHeight: 1,
+          }}
+        >
           {score}
         </span>
         <span style={{ fontSize: "40px", color: "#525252", lineHeight: 1 }}>/ {PERFECT_SCORE}</span>
-        <span style={{ fontSize: "40px", color: scoreColor, lineHeight: 1, marginLeft: "8px" }}>
+        <span
+          style={{
+            fontSize: "40px",
+            color: scoreColor,
+            lineHeight: 1,
+            marginLeft: "8px",
+          }}
+        >
           {getScoreLabel(score)}
         </span>
       </div>
@@ -94,7 +121,14 @@ export const GET = (request: Request): ImageResponse => {
       </div>
 
       {(errorCount > 0 || warningCount > 0 || fileCount > 0) && (
-        <div style={{ display: "flex", gap: "24px", marginTop: "36px", fontSize: "24px" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "24px",
+            marginTop: "36px",
+            fontSize: "24px",
+          }}
+        >
           {errorCount > 0 && (
             <span style={{ color: "#f87171" }}>
               {errorCount} error{errorCount === 1 ? "" : "s"}

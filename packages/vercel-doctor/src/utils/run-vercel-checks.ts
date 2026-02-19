@@ -83,7 +83,8 @@ const AWAIT_TOKEN_PATTERN = /\bawait\b/g;
 const AWAIT_LINE_PATTERN = /\bawait\b/;
 const NEXT_LINK_IMPORT_PATTERN = /from\s+["']next\/link["']/;
 const LINK_WITH_PREFETCH_DISABLED_PATTERN = /<Link\b[^>]*\bprefetch\s*=\s*\{\s*false\s*\}[^>]*>/g;
-const INTERNAL_LINK_HREF_PATTERN = /\bhref\s*=\s*(?:"\/[^"]*"|'\/[^']*'|\{\s*["']\/[^"']*["']\s*\})/;
+const INTERNAL_LINK_HREF_PATTERN =
+  /\bhref\s*=\s*(?:"\/[^"]*"|'\/[^']*'|\{\s*["']\/[^"']*["']\s*\})/;
 const NEXT_IMAGE_IMPORT_PATTERN = /from\s+["']next\/image["']/;
 const IMAGE_WITH_UNOPTIMIZED_PATTERN =
   /<Image\b[^>]*\bunoptimized(?:\s*=\s*(?:\{\s*true\s*\}|["']true["']))?[^>]*>/g;
@@ -171,7 +172,8 @@ const collectProjectFilePaths = (rootDirectory: string): string[] => {
 const isStaticAssetPath = (relativeFilePath: string): boolean =>
   STATIC_ASSET_EXTENSIONS.has(path.extname(relativeFilePath).toLowerCase());
 
-const isPublicAssetPath = (relativeFilePath: string): boolean => relativeFilePath.startsWith("public/");
+const isPublicAssetPath = (relativeFilePath: string): boolean =>
+  relativeFilePath.startsWith("public/");
 
 const isSourceCodePath = (relativeFilePath: string): boolean =>
   SOURCE_CODE_FILE_PATTERN.test(relativeFilePath);
@@ -506,7 +508,8 @@ const collectImageOptimizationDiagnostics = (
           NEXT_IMAGE_REMOTE_PATTERN_OBJECT_PATTERN,
         )) {
           const matchedRemotePatternObject = remotePatternMatch[0];
-          if (!NEXT_IMAGE_REMOTE_PATTERN_HOSTNAME_PATTERN.test(matchedRemotePatternObject)) continue;
+          if (!NEXT_IMAGE_REMOTE_PATTERN_HOSTNAME_PATTERN.test(matchedRemotePatternObject))
+            continue;
 
           const pathnameMatch = matchedRemotePatternObject.match(
             NEXT_IMAGE_REMOTE_PATTERN_PATHNAME_PATTERN,

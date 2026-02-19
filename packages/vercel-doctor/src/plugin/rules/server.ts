@@ -1,9 +1,4 @@
-import {
-  AUTH_CHECK_LOOKAHEAD_STATEMENTS,
-  AUTH_FUNCTION_NAMES,
-  SERVER_ACTION_DIRECTORY_PATTERN,
-  SERVER_ACTION_FILE_PATTERN,
-} from "../constants.js";
+import { AUTH_CHECK_LOOKAHEAD_STATEMENTS, AUTH_FUNCTION_NAMES } from "../constants.js";
 import { hasDirective, hasUseServerDirective, walkAst } from "../helpers.js";
 import type { EsTreeNode, Rule, RuleContext } from "../types.js";
 

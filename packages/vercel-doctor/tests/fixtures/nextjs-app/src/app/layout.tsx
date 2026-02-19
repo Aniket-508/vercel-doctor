@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
-  const [data, setData] = useState(null);
+  const [, setData] = useState(null);
 
   useEffect(() => {
     fetch("/api/layout-data")
