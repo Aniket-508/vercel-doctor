@@ -11,7 +11,7 @@ const API_CORS_HEADERS = {
 
 const SITE = {
   NAME: "Vercel Doctor",
-  URL: "https://www.vercel.doctor",
+  URL: "https://www.vercel-doctor.com",
   OG_IMAGE: "/og.png",
   AUTHOR: {
     NAME: "Aniket Pawar",

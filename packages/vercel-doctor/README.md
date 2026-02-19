@@ -4,25 +4,28 @@
   <img alt="Vercel Doctor" src="./assets/vercel-doctor-readme-logo-light.svg" width="180" height="40">
 </picture>
 
-[![version](https://img.shields.io/npm/v/vercel-doctor?style=flat&colorA=000000&colorB=000000)](https://npmjs.com/package/vercel-doctor)
-[![downloads](https://img.shields.io/npm/dt/vercel-doctor.svg?style=flat&colorA=000000&colorB=000000)](https://npmjs.com/package/vercel-doctor)
+Reduce your Vercel bill with one command.
 
-Let coding agents diagnose and fix your Next.js code.
+Scans your Next.js codebase for patterns that increase your Vercel bill — long function durations, uncached routes, unoptimized images, expensive cron jobs, and more — then outputs actionable diagnostics.
 
-One command scans your codebase for patterns that increase your Vercel bill, then outputs a **0–100 score** with actionable diagnostics.
+### [See it in action →](https://vercel-doctor.com)
 
-### [See it in action →](https://vercel.doctor)
-
-https://github.com/user-attachments/assets/6e942014-83ce-4d7e-88f5-7f00c407ba9b
+https://github.com/user-attachments/assets/e03596de-4b68-4a3e-8623-51c765647b26
 
 ## How it works
 
 Vercel Doctor detects your framework and project setup, then runs two analysis passes **in parallel**:
 
-1. **Lint**: Checks billing-focused rules across function duration, caching, invocations, image optimization, and Vercel platform configuration. Rules are toggled automatically based on your project setup.
-2. **Dead code**: Detects unused files, exports, types, and duplicates.
+1. **Billing lint** — detects patterns that inflate your Vercel invoice:
+   - **Function duration**: sequential `await`s, blocking `after()` calls, side effects in GET handlers
+   - **Caching**: missing cache policies, `force-dynamic` / `no-store` overrides, SSR where SSG would work
+   - **Image optimization**: unoptimized images, overly broad remote patterns, missing `sizes` prop
+   - **Edge functions**: heavy imports, sequential awaits that burn CPU time
+   - **Static assets**: large files that should be served from an external CDN
+   - **Platform usage**: Vercel Cron vs. GitHub Actions / Cloudflare Workers, Fluid Compute, Bun runtime
+2. **Dead code** — detects unused files, exports, types, and duplicates that slow cold starts.
 
-Diagnostics are filtered through your config, then scored by severity (errors weigh more than warnings) to produce a **0–100 health score** (75+ Great, 50–74 Needs work, <50 Critical).
+Diagnostics are filtered through your config to produce actionable results.
 
 ## Install
 
@@ -43,7 +46,7 @@ npx -y vercel-doctor@latest . --verbose
 Teach your coding agent Vercel cost optimization rules:
 
 ```bash
-curl -fsSL https://vercel.doctor/install-skill.sh | bash
+curl -fsSL https://vercel-doctor.com/install-skill.sh | bash
 ```
 
 Supports Cursor, Claude Code, Amp Code, Codex, Gemini CLI, OpenCode, Windsurf, and Antigravity.
@@ -75,7 +78,7 @@ Create a `vercel-doctor.config.json` in your project root to customize behavior:
 ```json
 {
   "ignore": {
-    "rules": ["react/no-danger", "jsx-a11y/no-autofocus", "knip/exports"],
+    "rules": ["vercel-doctor/nextjs-no-img-element", "knip/exports"],
     "files": ["src/generated/**"]
   }
 }
@@ -87,7 +90,7 @@ You can also use the `"vercelDoctor"` key in your `package.json` instead:
 {
   "vercelDoctor": {
     "ignore": {
-      "rules": ["react/no-danger"]
+      "rules": ["vercel-doctor/nextjs-no-img-element"]
     }
   }
 }
@@ -97,14 +100,14 @@ If both exist, `vercel-doctor.config.json` takes precedence.
 
 ### Config options
 
-| Key            | Type                | Default | Description                                                                                                                         |
-| -------------- | ------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `ignore.rules` | `string[]`          | `[]`    | Rules to suppress, using the `plugin/rule` format shown in diagnostic output (e.g. `react/no-danger`, `knip/exports`, `knip/types`) |
-| `ignore.files` | `string[]`          | `[]`    | File paths to exclude, supports glob patterns (`src/generated/**`, `**/*.test.tsx`)                                                 |
-| `lint`         | `boolean`           | `true`  | Enable/disable lint checks (same as `--no-lint`)                                                                                    |
-| `deadCode`     | `boolean`           | `true`  | Enable/disable dead code detection (same as `--no-dead-code`)                                                                       |
-| `verbose`      | `boolean`           | `false` | Show file details per rule (same as `--verbose`)                                                                                    |
-| `diff`         | `boolean \| string` | —       | Force diff mode (`true`) or pin a base branch (`"main"`). Set to `false` to disable auto-detection.                                 |
+| Key            | Type                | Default | Description                                                                                                                        |
+| -------------- | ------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `ignore.rules` | `string[]`          | `[]`    | Rules to suppress, using the `plugin/rule` format shown in diagnostic output (e.g. `vercel-doctor/async-parallel`, `knip/exports`) |
+| `ignore.files` | `string[]`          | `[]`    | File paths to exclude, supports glob patterns (`src/generated/**`, `**/*.test.tsx`)                                                |
+| `lint`         | `boolean`           | `true`  | Enable/disable lint checks (same as `--no-lint`)                                                                                   |
+| `deadCode`     | `boolean`           | `true`  | Enable/disable dead code detection (same as `--no-dead-code`)                                                                      |
+| `verbose`      | `boolean`           | `false` | Show file details per rule (same as `--verbose`)                                                                                   |
+| `diff`         | `boolean \| string` | —       | Force diff mode (`true`) or pin a base branch (`"main"`). Set to `false` to disable auto-detection.                                |
 
 CLI flags always override config values.
 
@@ -146,23 +149,6 @@ interface Diagnostic {
   category: string;
 }
 ```
-
-## [Scores for popular open-source projects](https://vercel.doctor/leaderboard)
-
-| Project                                                | Score  | Share                                                                                    |
-| ------------------------------------------------------ | ------ | ---------------------------------------------------------------------------------------- |
-| [tldraw](https://github.com/tldraw/tldraw)             | **84** | [view](https://www.vercel.doctor/share?p=tldraw&s=84&e=98&w=139&f=40)                    |
-| [excalidraw](https://github.com/excalidraw/excalidraw) | **84** | [view](https://www.vercel.doctor/share?p=%40excalidraw%2Fexcalidraw&s=84&e=2&w=196&f=80) |
-| [twenty](https://github.com/twentyhq/twenty)           | **78** | [view](https://www.vercel.doctor/share?p=twenty-front&s=78&e=99&w=293&f=268)             |
-| [plane](https://github.com/makeplane/plane)            | **78** | [view](https://www.vercel.doctor/share?p=web&s=78&e=7&w=525&f=292)                       |
-| [formbricks](https://github.com/formbricks/formbricks) | **75** | [view](https://www.vercel.doctor/share?p=%40formbricks%2Fweb&s=75&e=15&w=389&f=242)      |
-| [posthog](https://github.com/PostHog/posthog)          | **72** | [view](https://www.vercel.doctor/share?p=%40posthog%2Ffrontend&s=72&e=82&w=1177&f=585)   |
-| [supabase](https://github.com/supabase/supabase)       | **69** | [view](https://www.vercel.doctor/share?p=studio&s=69&e=74&w=1087&f=566)                  |
-| [onlook](https://github.com/onlook-dev/onlook)         | **69** | [view](https://www.vercel.doctor/share?p=%40onlook%2Fweb-client&s=69&e=64&w=418&f=178)   |
-| [payload](https://github.com/payloadcms/payload)       | **68** | [view](https://www.vercel.doctor/share?p=%40payloadcms%2Fui&s=68&e=139&w=408&f=298)      |
-| [sentry](https://github.com/getsentry/sentry)          | **64** | [view](https://www.vercel.doctor/share?p=sentry&s=64&e=94&w=1345&f=818)                  |
-| [cal.com](https://github.com/calcom/cal.com)           | **63** | [view](https://www.vercel.doctor/share?p=%40calcom%2Fweb&s=63&e=31&w=558&f=311)          |
-| [dub](https://github.com/dubinc/dub)                   | **62** | [view](https://www.vercel.doctor/share?p=web&s=62&e=52&w=966&f=457)                      |
 
 ## Contributing
 
