@@ -7,7 +7,7 @@
 [![version](https://img.shields.io/npm/v/vercel-doctor?style=flat&colorA=000000&colorB=000000)](https://npmjs.com/package/vercel-doctor)
 [![downloads](https://img.shields.io/npm/dt/vercel-doctor.svg?style=flat&colorA=000000&colorB=000000)](https://npmjs.com/package/vercel-doctor)
 
-Let coding agents diagnose and fix your React code.
+Let coding agents diagnose and fix your Next.js code.
 
 One command scans your codebase for security, performance, correctness, and architecture issues, then outputs a **0–100 score** with actionable diagnostics.
 
@@ -17,9 +17,9 @@ https://github.com/user-attachments/assets/07cc88d9-9589-44c3-aa73-5d603cb1c570
 
 ## How it works
 
-Vercel Doctor detects your framework (Next.js, Vite, Remix, etc.), React version, and compiler setup, then runs two analysis passes **in parallel**:
+Vercel Doctor detects your framework, React version, and compiler setup, then runs two analysis passes **in parallel**:
 
-1. **Lint**: Checks 60+ rules across state & effects, performance, architecture, bundle size, security, correctness, accessibility, and framework-specific categories (Next.js, React Native). Rules are toggled automatically based on your project setup.
+1. **Lint**: Checks 60+ rules across state & effects, performance, architecture, bundle size, security, correctness, accessibility, and Next.js-specific categories. Rules are toggled automatically based on your project setup.
 2. **Dead code**: Detects unused files, exports, types, and duplicates.
 
 Diagnostics are filtered through your config, then scored by severity (errors weigh more than warnings) to produce a **0–100 health score** (75+ Great, 50–74 Needs work, <50 Critical).
@@ -40,7 +40,7 @@ npx -y vercel-doctor@latest . --verbose
 
 ## Install for your coding agent
 
-Teach your coding agent all 47+ React best practice rules:
+Teach your coding agent all 47+ Next.js best practice rules:
 
 ```bash
 curl -fsSL https://vercel.doctor/install-skill.sh | bash
@@ -115,7 +115,7 @@ You can also use Vercel Doctor programmatically:
 ```js
 import { diagnose } from "vercel-doctor/api";
 
-const result = await diagnose("./path/to/your/react-project");
+const result = await diagnose("./path/to/your/nextjs-project");
 
 console.log(result.score); // { score: 82, label: "Good" } or null
 console.log(result.diagnostics); // Array of Diagnostic objects
@@ -178,7 +178,7 @@ pnpm -r run build
 Run locally:
 
 ```bash
-node packages/vercel-doctor/dist/cli.js /path/to/your/react-project
+node packages/vercel-doctor/dist/cli.js /path/to/your/nextjs-project
 ```
 
 ### License
