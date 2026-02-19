@@ -1,8 +1,13 @@
-<svg width="244" height="82" viewBox="0 0 244 82" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="244" height="82" fill="black"/>
-  <path d="M51 20L67 48H35L51 20Z" fill="white"/>
-  <path d="M51 30V38M47 34H55" stroke="black" stroke-width="2.5" stroke-linecap="round"/>
-  <text x="78" y="50" fill="white" font-size="24" font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif" font-weight="700">
-    Vercel Doctor
-  </text>
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="black"/>
+  <g transform="translate(600, 315)">
+    <!-- Triangle Icon (Centered on 0,0) -->
+    <path d="M-220 -80L-120 100H-320L-220 -80Z" fill="white"/>
+    <!-- Plus Sign inside triangle (Visually centered in the triangle) -->
+    <path d="M-220 -5V45M-245 20H-195" stroke="black" stroke-width="12" stroke-linecap="round"/>
+    <!-- Text -->
+    <text x="-80" y="45" fill="white" font-size="84" font-family="ui-sans-serif, system-ui, sans-serif" font-weight="700">
+      Vercel Doctor
+    </text>
+  </g>
 </svg>

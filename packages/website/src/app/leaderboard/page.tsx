@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { LEADERBOARD_ENTRIES, type ResolvedLeaderboardEntry } from "./leaderboard-entries";
@@ -64,10 +63,13 @@ const LeaderboardRow = ({ entry, rank }: { entry: ResolvedLeaderboardEntry; rank
   );
 };
 
-export const metadata: Metadata = {
-  title: "Leaderboard - Vercel Doctor",
+import { createMetadata } from "@/seo/metadata";
+
+export const metadata = createMetadata({
+  title: "Leaderboard",
   description: "Vercel cost optimization scores for popular open-source projects.",
-};
+  canonical: "/leaderboard",
+});
 
 const LeaderboardPage = () => {
   const topScore = LEADERBOARD_ENTRIES[0]?.score ?? 0;

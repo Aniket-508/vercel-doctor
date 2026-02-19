@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
 import { IBM_Plex_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { baseMetadata } from "@/seo/metadata";
+import { JsonLdScripts } from "@/seo/json-ld";
 import "./globals.css";
 
 const ibmPlexMono = IBM_Plex_Mono({
@@ -9,20 +10,7 @@ const ibmPlexMono = IBM_Plex_Mono({
   weight: ["400", "500"],
 });
 
-const SITE_URL = "https://www.vercel.doctor";
-const TWITTER_IMAGE_PATH = "/vercel-doctor-og-banner.svg";
-
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: "Vercel Doctor",
-  description:
-    "Reduce your Vercel bill by optimizing function duration, bundle size, and platform usage for Next.js projects.",
-  twitter: {
-    card: "summary_large_image",
-    images: [TWITTER_IMAGE_PATH],
-  },
-  icons: { icon: "/vercel-doctor-icon.svg" },
-};
+export const metadata = baseMetadata;
 
 export default function RootLayout({
   children,
@@ -33,6 +21,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${ibmPlexMono.variable} antialiased`}>
         {children}
+        <JsonLdScripts />
         <Analytics />
       </body>
     </html>
