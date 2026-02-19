@@ -113,27 +113,23 @@ export const DIAGNOSTICS = [
     count: 5,
   },
   {
-    message: 'Server action "deleteUser" missing authentication check',
-    count: 2,
-  },
-  {
-    message: "Using <img> tag instead of next/image, increases bandwidth & LCP",
+    message: "Using <img> tag instead of next/image, increases bandwidth costs",
     count: 12,
   },
   {
-    message: "Client-side redirect in useEffect, use redirect() in server components",
+    message: "useEffect + fetch in page/layout, fetch server-side to avoid extra invocations",
     count: 4,
   },
   {
-    message: "Heavy library usage (moment.js) found, use date-fns to reduce bundle",
+    message: "console.log() in server action, use after() for non-blocking logging",
     count: 8,
   },
   {
-    message: "Next.js: useSearchParams() used without a Suspense boundary",
+    message: "GET handler has side effects, use POST to enable ISR caching",
     count: 3,
   },
   {
-    message: "barrel-file import found, increases bundle size and cold starts",
+    message: "next/image with fill but no sizes, browser downloads the largest image",
     count: 2,
   },
 ];

@@ -11,39 +11,6 @@ import type {
 } from "../types.js";
 import { readPackageJson } from "./read-package-json.js";
 
-const REACT_COMPILER_PACKAGES = new Set([
-  "babel-plugin-react-compiler",
-  "react-compiler-runtime",
-  "eslint-plugin-react-compiler",
-]);
-
-const NEXT_CONFIG_FILENAMES = [
-  "next.config.js",
-  "next.config.mjs",
-  "next.config.ts",
-  "next.config.cjs",
-];
-
-const BABEL_CONFIG_FILENAMES = [
-  ".babelrc",
-  ".babelrc.json",
-  "babel.config.js",
-  "babel.config.json",
-  "babel.config.cjs",
-  "babel.config.mjs",
-];
-
-const VITE_CONFIG_FILENAMES = [
-  "vite.config.js",
-  "vite.config.ts",
-  "vite.config.mjs",
-  "vite.config.cjs",
-];
-
-const EXPO_APP_CONFIG_FILENAMES = ["app.json", "app.config.js", "app.config.ts"];
-
-const REACT_COMPILER_CONFIG_PATTERN = /react-compiler|reactCompiler/;
-
 const FRAMEWORK_PACKAGES: Record<string, Framework> = {
   next: "nextjs",
   vite: "vite",
@@ -285,45 +252,6 @@ export const listWorkspacePackages = (rootDirectory: string): WorkspacePackage[]
   return packages;
 };
 
-const hasCompilerPackage = (packageJson: PackageJson): boolean => {
-  const allDependencies = collectAllDependencies(packageJson);
-  return Object.keys(allDependencies).some((packageName) =>
-    REACT_COMPILER_PACKAGES.has(packageName),
-  );
-};
-
-const fileContainsPattern = (filePath: string, pattern: RegExp): boolean => {
-  if (!fs.existsSync(filePath)) return false;
-  const content = fs.readFileSync(filePath, "utf-8");
-  return pattern.test(content);
-};
-
-const hasCompilerInConfigFiles = (directory: string, filenames: string[]): boolean =>
-  filenames.some((filename) =>
-    fileContainsPattern(path.join(directory, filename), REACT_COMPILER_CONFIG_PATTERN),
-  );
-
-const detectReactCompiler = (directory: string, packageJson: PackageJson): boolean => {
-  if (hasCompilerPackage(packageJson)) return true;
-
-  if (hasCompilerInConfigFiles(directory, NEXT_CONFIG_FILENAMES)) return true;
-  if (hasCompilerInConfigFiles(directory, BABEL_CONFIG_FILENAMES)) return true;
-  if (hasCompilerInConfigFiles(directory, VITE_CONFIG_FILENAMES)) return true;
-  if (hasCompilerInConfigFiles(directory, EXPO_APP_CONFIG_FILENAMES)) return true;
-
-  let ancestorDirectory = path.dirname(directory);
-  while (ancestorDirectory !== path.dirname(ancestorDirectory)) {
-    const ancestorPackagePath = path.join(ancestorDirectory, "package.json");
-    if (fs.existsSync(ancestorPackagePath)) {
-      const ancestorPackageJson = readPackageJson(ancestorPackagePath);
-      if (hasCompilerPackage(ancestorPackageJson)) return true;
-    }
-    ancestorDirectory = path.dirname(ancestorDirectory);
-  }
-
-  return false;
-};
-
 export const discoverProject = (directory: string): ProjectInfo => {
   const packageJsonPath = path.join(directory, "package.json");
   if (!fs.existsSync(packageJsonPath)) {
@@ -357,15 +285,12 @@ export const discoverProject = (directory: string): ProjectInfo => {
   const hasTypeScript = fs.existsSync(path.join(directory, "tsconfig.json"));
   const sourceFileCount = countSourceFiles(directory);
 
-  const hasReactCompiler = detectReactCompiler(directory, packageJson);
-
   return {
     rootDirectory: directory,
     projectName,
     reactVersion,
     framework,
     hasTypeScript,
-    hasReactCompiler,
     sourceFileCount,
   };
 };

@@ -9,7 +9,7 @@
 
 Let coding agents diagnose and fix your Next.js code.
 
-One command scans your codebase for security, performance, correctness, and architecture issues, then outputs a **0–100 score** with actionable diagnostics.
+One command scans your codebase for patterns that increase your Vercel bill, then outputs a **0–100 score** with actionable diagnostics.
 
 ### [See it in action →](https://vercel.doctor)
 
@@ -17,9 +17,9 @@ https://github.com/user-attachments/assets/6e942014-83ce-4d7e-88f5-7f00c407ba9b
 
 ## How it works
 
-Vercel Doctor detects your framework, React version, and compiler setup, then runs two analysis passes **in parallel**:
+Vercel Doctor detects your framework and project setup, then runs two analysis passes **in parallel**:
 
-1. **Lint**: Checks 60+ rules across state & effects, performance, architecture, bundle size, security, correctness, accessibility, and Next.js-specific categories. Rules are toggled automatically based on your project setup.
+1. **Lint**: Checks billing-focused rules across function duration, caching, invocations, image optimization, and Vercel platform configuration. Rules are toggled automatically based on your project setup.
 2. **Dead code**: Detects unused files, exports, types, and duplicates.
 
 Diagnostics are filtered through your config, then scored by severity (errors weigh more than warnings) to produce a **0–100 health score** (75+ Great, 50–74 Needs work, <50 Critical).
@@ -40,7 +40,7 @@ npx -y vercel-doctor@latest . --verbose
 
 ## Install for your coding agent
 
-Teach your coding agent all 47+ Next.js best practice rules:
+Teach your coding agent Vercel cost optimization rules:
 
 ```bash
 curl -fsSL https://vercel.doctor/install-skill.sh | bash

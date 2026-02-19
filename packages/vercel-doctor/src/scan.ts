@@ -354,11 +354,6 @@ export const scan = async (
       `Detecting React version. Found ${highlighter.info(`React ${projectInfo.reactVersion}`)}.`,
     );
     completeStep(`Detecting language. Found ${highlighter.info(languageLabel)}.`);
-    completeStep(
-      `Detecting React Compiler. ${
-        projectInfo.hasReactCompiler ? highlighter.info("Found React Compiler.") : "Not found."
-      }`,
-    );
 
     if (isDiffMode) {
       completeStep(`Scanning ${highlighter.info(`${includePaths.length}`)} changed source files.`);
@@ -385,7 +380,6 @@ export const scan = async (
             directory,
             projectInfo.hasTypeScript,
             projectInfo.framework,
-            projectInfo.hasReactCompiler,
             jsxIncludePaths,
           );
           lintSpinner?.succeed("Running lint checks.");

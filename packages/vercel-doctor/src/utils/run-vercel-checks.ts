@@ -81,10 +81,6 @@ const NEXT_FETCH_REVALIDATE_PATTERN = /next\s*:\s*\{[^}]*revalidate\s*:/s;
 const PROMISE_ALL_PATTERN = /Promise\.all\s*\(/;
 const AWAIT_TOKEN_PATTERN = /\bawait\b/g;
 const AWAIT_LINE_PATTERN = /\bawait\b/;
-const NEXT_LINK_IMPORT_PATTERN = /from\s+["']next\/link["']/;
-const LINK_WITH_PREFETCH_DISABLED_PATTERN = /<Link\b[^>]*\bprefetch\s*=\s*\{\s*false\s*\}[^>]*>/g;
-const INTERNAL_LINK_HREF_PATTERN =
-  /\bhref\s*=\s*(?:"\/[^"]*"|'\/[^']*'|\{\s*["']\/[^"']*["']\s*\})/;
 const NEXT_IMAGE_IMPORT_PATTERN = /from\s+["']next\/image["']/;
 const IMAGE_WITH_UNOPTIMIZED_PATTERN =
   /<Image\b[^>]*\bunoptimized(?:\s*=\s*(?:\{\s*true\s*\}|["']true["']))?[^>]*>/g;
@@ -453,30 +449,6 @@ const collectCachingDiagnostics = (
   }
 };
 
-const collectPrefetchDiagnostics = (
-  relativeFilePath: string,
-  fileContent: string,
-  diagnostics: Diagnostic[],
-): void => {
-  if (!NEXT_LINK_IMPORT_PATTERN.test(fileContent)) return;
-
-  for (const linkMatch of fileContent.matchAll(LINK_WITH_PREFETCH_DISABLED_PATTERN)) {
-    const matchedLinkElement = linkMatch[0];
-    if (!INTERNAL_LINK_HREF_PATTERN.test(matchedLinkElement)) continue;
-
-    diagnostics.push(
-      createVercelWarningDiagnostic(
-        relativeFilePath,
-        "vercel-link-prefetch-disabled",
-        "Internal next/link has `prefetch={false}` — this can reduce route cache warmup and increase navigation latency",
-        "Enable prefetch for cacheable internal routes, and disable it only for intentionally uncached or highly personalized pages.",
-        getLineNumberForCharacterIndex(fileContent, linkMatch.index ?? -1),
-      ),
-    );
-    return;
-  }
-};
-
 const collectImageOptimizationDiagnostics = (
   relativeFilePath: string,
   fileContent: string,
@@ -694,7 +666,6 @@ export const runVercelChecks = (
     collectSsgDiagnostics(relativeFilePath, fileContent, diagnostics);
     collectEdgeDiagnostics(relativeFilePath, fileContent, diagnostics);
     collectCachingDiagnostics(relativeFilePath, fileContent, diagnostics);
-    collectPrefetchDiagnostics(relativeFilePath, fileContent, diagnostics);
     collectImageOptimizationDiagnostics(relativeFilePath, fileContent, diagnostics);
     collectDatabaseAwaitDiagnostics(relativeFilePath, fileContent, diagnostics);
 

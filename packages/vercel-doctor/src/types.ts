@@ -6,7 +6,6 @@ export interface ProjectInfo {
   reactVersion: string | null;
   framework: Framework;
   hasTypeScript: boolean;
-  hasReactCompiler: boolean;
   sourceFileCount: number;
 }
 

@@ -33,22 +33,22 @@ npx -y vercel-doctor@latest . --verbose --diff
 
 ## Cost Optimization Scans
 
-### 1. Compute Duration & Cold Starts
-- **Dead Code Detection** — Removes unused files and exports to shrink bundles and speed up cold starts.
-- **Bundle Size Optimization** — Detects barrel imports, full lodash imports, moment.js, and heavy libraries that should be dynamic.
+### 1. Function Duration
+- **Dead Code Detection** — Removes unused files and exports to speed up cold starts.
 - **Parallel Execution** — Identifies sequential await statements that can be run in parallel with Promise.all() to reduce function execution time.
 - **Server Post-Processing** — Recommends using after() for non-blocking tasks to end the response earlier.
 
-### 2. Function Invocations & Execution
-- **Next.js & Server Patterns** — Flags patterns that cause extra function invocations or longer execution.
-- **Vercel Platform Checks** — Scans for SSG data fetching, edge runtime constraints, caching/revalidation config, and sequential database awaits.
+### 2. Caching & Invocations
+- **Client-Side Fetch Detection** — Flags useEffect + fetch patterns in pages/layouts that should be server-side (eliminates API round-trips).
+- **Vercel Platform Checks** — Scans for force-dynamic, missing cache policies, no-store fetches, and GET handlers with side effects that prevent ISR.
 
-### 3. Rendering & Bandwidth
-- **Image Optimization** — Detects unoptimized images, missing sizes, and inefficient image handling.
+### 3. Bandwidth & Image Optimization
+- **Image Optimization** — Detects unoptimized images, missing sizes, and global image optimization disabled.
+- **Static Assets** — Finds large static files that consume CDN bandwidth.
 
 ## Workflow
 
-Run after making changes to catch cost-heavy patterns early. Focus on fixing issues that reduce function execution time and bundle size first.
+Run after making changes to catch cost-heavy patterns early. Focus on fixing issues that reduce function execution time and invocations first.
 EOF
 )
 
@@ -65,7 +65,7 @@ npx -y vercel-doctor@latest . --verbose --diff
 
 ## Workflow
 
-Run after making changes to catch cost-heavy patterns early. Focus on fixing issues that reduce function execution time and bundle size first.
+Run after making changes to catch cost-heavy patterns early. Focus on fixing issues that reduce function execution time and invocations first.
 EOF
 )
 

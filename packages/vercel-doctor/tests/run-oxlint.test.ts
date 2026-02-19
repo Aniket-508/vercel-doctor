@@ -39,12 +39,12 @@ let nextjsDiagnostics: Diagnostic[];
 
 describe("runOxlint", () => {
   it("loads basic-react diagnostics", async () => {
-    basicReactDiagnostics = await runOxlint(BASIC_REACT_DIRECTORY, true, "unknown", false);
+    basicReactDiagnostics = await runOxlint(BASIC_REACT_DIRECTORY, true, "unknown");
     expect(basicReactDiagnostics.length).toBeGreaterThan(0);
   });
 
   it("loads nextjs diagnostics", async () => {
-    nextjsDiagnostics = await runOxlint(NEXTJS_APP_DIRECTORY, true, "nextjs", false);
+    nextjsDiagnostics = await runOxlint(NEXTJS_APP_DIRECTORY, true, "nextjs");
     expect(nextjsDiagnostics.length).toBeGreaterThan(0);
   });
 
@@ -68,128 +68,45 @@ describe("runOxlint", () => {
   });
 
   describeRules(
-    "async performance rules",
+    "function duration rules",
     {
       "async-parallel": {
         fixture: "js-performance-issues.tsx",
         ruleSource: "rules/js-performance.ts",
+        category: "Function Duration",
       },
     },
     () => basicReactDiagnostics,
   );
 
   describeRules(
-    "bundle size rules",
-    {
-      "no-full-lodash-import": {
-        fixture: "bundle-issues.tsx",
-        ruleSource: "rules/bundle-size.ts",
-        category: "Bundle Size",
-      },
-      "no-moment": {
-        fixture: "bundle-issues.tsx",
-        ruleSource: "rules/bundle-size.ts",
-      },
-      "use-lazy-motion": {
-        fixture: "bundle-issues.tsx",
-        ruleSource: "rules/bundle-size.ts",
-      },
-      "prefer-dynamic-import": {
-        fixture: "bundle-issues.tsx",
-        ruleSource: "rules/bundle-size.ts",
-      },
-      "no-undeferred-third-party": {
-        fixture: "bundle-issues.tsx",
-        ruleSource: "rules/bundle-size.ts",
-      },
-    },
-    () => basicReactDiagnostics,
-  );
-
-  describeRules(
-    "nextjs rules",
+    "billing-focused nextjs rules",
     {
       "nextjs-no-img-element": {
         fixture: "app/page.tsx",
         ruleSource: "rules/nextjs.ts",
-        category: "Next.js",
-      },
-      "nextjs-async-client-component": {
-        fixture: "app/page.tsx",
-        ruleSource: "rules/nextjs.ts",
-        severity: "error",
-      },
-      "nextjs-no-a-element": {
-        fixture: "app/page.tsx",
-        ruleSource: "rules/nextjs.ts",
-      },
-      "nextjs-no-use-search-params-without-suspense": {
-        fixture: "app/page.tsx",
-        ruleSource: "rules/nextjs.ts",
+        category: "Image Optimization",
       },
       "nextjs-no-client-fetch-for-server-data": {
         fixture: "app/layout.tsx",
         ruleSource: "rules/nextjs.ts",
-      },
-      "nextjs-missing-metadata": {
-        fixture: "app/page.tsx",
-        ruleSource: "rules/nextjs.ts",
-      },
-      "nextjs-no-client-side-redirect": {
-        fixture: "app/page.tsx",
-        ruleSource: "rules/nextjs.ts",
-      },
-      "nextjs-no-redirect-in-try-catch": {
-        fixture: "app/page.tsx",
-        ruleSource: "rules/nextjs.ts",
+        category: "Invocations",
       },
       "nextjs-image-missing-sizes": {
         fixture: "app/page.tsx",
         ruleSource: "rules/nextjs.ts",
-      },
-      "nextjs-no-native-script": {
-        fixture: "app/page.tsx",
-        ruleSource: "rules/nextjs.ts",
-      },
-      "nextjs-inline-script-missing-id": {
-        fixture: "app/page.tsx",
-        ruleSource: "rules/nextjs.ts",
-      },
-      "nextjs-no-font-link": {
-        fixture: "app/page.tsx",
-        ruleSource: "rules/nextjs.ts",
-      },
-      "nextjs-no-css-link": {
-        fixture: "app/page.tsx",
-        ruleSource: "rules/nextjs.ts",
-      },
-      "nextjs-no-polyfill-script": {
-        fixture: "app/page.tsx",
-        ruleSource: "rules/nextjs.ts",
-      },
-      "nextjs-no-head-import": {
-        fixture: "app/page.tsx",
-        ruleSource: "rules/nextjs.ts",
-        severity: "error",
+        category: "Image Optimization",
       },
       "nextjs-no-side-effect-in-get-handler": {
         fixture: "app/logout/route.tsx",
         ruleSource: "rules/nextjs.ts",
         severity: "error",
-      },
-      "nextjs-no-link-element-for-external": {
-        fixture: "app/page.tsx",
-        ruleSource: "rules/nextjs.ts",
-      },
-      "server-auth-actions": {
-        fixture: "app/actions.tsx",
-        ruleSource: "rules/server.ts",
-        severity: "error",
-        category: "Server",
+        category: "Caching",
       },
       "server-after-nonblocking": {
         fixture: "app/actions.tsx",
         ruleSource: "rules/server.ts",
+        category: "Function Duration",
       },
     },
     () => nextjsDiagnostics,

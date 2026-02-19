@@ -70,17 +70,6 @@ export default async function Page() {
 );
 
 writeTestFile(
-  "app/navigation/page.tsx",
-  `
-import Link from "next/link";
-
-export default function NavigationPage() {
-  return <Link href="/dashboard" prefetch={false}>Dashboard</Link>;
-}
-`,
-);
-
-writeTestFile(
   "app/gallery/page.tsx",
   `
 import Image from "next/image";
@@ -178,7 +167,6 @@ describe("runVercelChecks", () => {
     expect(reportedRules).toContain("vercel-consider-bun-runtime");
     expect(reportedRules).toContain("vercel-avoid-platform-cron");
     expect(reportedRules).toContain("vercel-consider-fluid-compute");
-    expect(reportedRules).toContain("vercel-link-prefetch-disabled");
     expect(reportedRules).toContain("vercel-image-unoptimized-prop");
     expect(reportedRules).toContain("vercel-image-global-unoptimized");
     expect(reportedRules).toContain("vercel-image-remote-pattern-too-broad");

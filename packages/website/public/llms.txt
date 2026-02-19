@@ -1,6 +1,6 @@
 # Vercel Doctor
 
-Reduce your Vercel bill by optimizing function duration, bundle size, and platform usage for Next.js projects. Scans for cost-related issues and outputs a 0–100 score with actionable diagnostics.
+Reduce your Vercel bill by optimizing function duration, caching, and platform usage for Next.js projects. Scans for cost-related issues and outputs a 0–100 score with actionable diagnostics.
 
 ## Usage
 

@@ -17,13 +17,13 @@ INSTALLED=0
 SKILL_CONTENT=$(cat << 'EOF'
 ---
 name: vercel-doctor
-description: Reduce your Vercel bill by optimizing function duration, bundle size, and platform usage for Next.js projects.
+description: Reduce your Vercel bill by optimizing function duration, caching, and platform usage for Next.js projects.
 version: 1.0.0
 ---
 
 # Vercel Doctor
 
-Scans your Next.js codebase for function duration, bundle size, and platform optimization issues. Outputs a 0-100 score with actionable diagnostics.
+Scans your Next.js codebase for function duration, caching, and platform optimization issues that increase your Vercel bill. Outputs a 0-100 score with actionable diagnostics.
 
 ## Usage
 
@@ -42,7 +42,7 @@ AGENTS_CONTENT=$(cat << 'EOF'
 
 Run after making Next.js changes to catch cost issues early. Use when reviewing code, finishing a feature, or optimizing your Vercel bill.
 
-Scans your Next.js codebase for function duration, bundle size, and platform optimization issues. Outputs a 0-100 score with actionable diagnostics.
+Scans your Next.js codebase for function duration, caching, and platform optimization issues that increase your Vercel bill. Outputs a 0-100 score with actionable diagnostics.
 
 ## Usage
 

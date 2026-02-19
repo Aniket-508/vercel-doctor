@@ -16,4 +16,4 @@ npx -y vercel-doctor@latest . --verbose --diff
 
 ## Workflow
 
-Run after making changes to catch cost-heavy patterns early. Focus on fixing issues that reduce function execution time and bundle size first.
+Run after making changes to catch cost-heavy patterns early. Focus on fixing issues that reduce function execution time and invocations first.

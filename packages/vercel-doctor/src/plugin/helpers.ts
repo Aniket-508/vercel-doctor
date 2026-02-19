@@ -3,7 +3,6 @@ import {
   FETCH_MEMBER_OBJECTS,
   MUTATING_HTTP_METHODS,
   MUTATION_METHOD_NAMES,
-  UPPERCASE_PATTERN,
 } from "./constants.js";
 import type { EsTreeNode } from "./types.js";
 
@@ -25,13 +24,6 @@ export const walkAst = (node: EsTreeNode, visitor: (child: EsTreeNode) => void):
   }
 };
 
-export const isUppercaseName = (name: string): boolean => UPPERCASE_PATTERN.test(name);
-
-export const isMemberProperty = (node: EsTreeNode, propertyName: string): boolean =>
-  node.type === "MemberExpression" &&
-  node.property?.type === "Identifier" &&
-  node.property.name === propertyName;
-
 export const getEffectCallback = (node: EsTreeNode): EsTreeNode | null => {
   if (!node.arguments?.length) return null;
   const callback = node.arguments[0];
@@ -40,13 +32,6 @@ export const getEffectCallback = (node: EsTreeNode): EsTreeNode | null => {
   }
   return null;
 };
-
-export const isComponentAssignment = (node: EsTreeNode): boolean =>
-  node.type === "VariableDeclarator" &&
-  node.id?.type === "Identifier" &&
-  isUppercaseName(node.id.name) &&
-  Boolean(node.init) &&
-  (node.init.type === "ArrowFunctionExpression" || node.init.type === "FunctionExpression");
 
 export const isHookCall = (node: EsTreeNode, hookName: string | Set<string>): boolean =>
   node.type === "CallExpression" &&
@@ -62,16 +47,6 @@ export const hasDirective = (programNode: EsTreeNode, directive: string): boolea
         statement.expression.value === directive,
     ),
   );
-
-export const hasUseServerDirective = (node: EsTreeNode): boolean => {
-  if (node.body?.type !== "BlockStatement") return false;
-  return Boolean(
-    node.body.body?.some(
-      (statement: EsTreeNode) =>
-        statement.type === "ExpressionStatement" && statement.directive === "use server",
-    ),
-  );
-};
 
 export const containsFetchCall = (node: EsTreeNode): boolean => {
   let didFindFetchCall = false;
@@ -91,7 +66,7 @@ export const containsFetchCall = (node: EsTreeNode): boolean => {
   return didFindFetchCall;
 };
 
-export const findJsxAttribute = (
+const findJsxAttribute = (
   attributes: EsTreeNode[],
   attributeName: string,
 ): EsTreeNode | undefined =>
@@ -159,20 +134,4 @@ export const findSideEffect = (node: EsTreeNode): string | null => {
     }
   });
   return sideEffectDescription;
-};
-
-export const extractDestructuredPropNames = (params: EsTreeNode[]): Set<string> => {
-  const propNames = new Set<string>();
-  for (const param of params) {
-    if (param.type === "ObjectPattern") {
-      for (const property of param.properties ?? []) {
-        if (property.type === "Property" && property.key?.type === "Identifier") {
-          propNames.add(property.key.name);
-        }
-      }
-    } else if (param.type === "Identifier") {
-      propNames.add(param.name);
-    }
-  }
-  return propNames;
 };

@@ -60,7 +60,6 @@ export const diagnose = async (
         resolvedDirectory,
         projectInfo.hasTypeScript,
         projectInfo.framework,
-        projectInfo.hasReactCompiler,
         jsxIncludePaths,
       ).catch((error: unknown) => {
         console.error("Lint failed:", error);

@@ -77,7 +77,7 @@ const FAQJsonLd = () => {
   const faqs = [
     {
       question: "What is Vercel Doctor?",
-      answer: `${SITE.NAME} is an open-source tool for Next.js projects that identifies patterns increasing your Vercel costs, such as long function durations and large bundle sizes.`,
+      answer: `${SITE.NAME} is an open-source tool for Next.js projects that identifies patterns increasing your Vercel costs, such as long function durations, uncached routes, and unnecessary invocations.`,
     },
     {
       question: "How do I use Vercel Doctor?",

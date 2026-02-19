@@ -74,35 +74,35 @@ const DIAGNOSTICS: Diagnostic[] = [
     ],
   },
   {
-    message: "Client-side redirect in useEffect, use redirect() in server components",
+    message: "useEffect + fetch in page/layout, fetch server-side to avoid extra invocations",
     count: 4,
     files: [
-      { path: "src/components/Auth.tsx", lines: [56, 112] },
-      { path: "src/components/Checkout.tsx", lines: [34, 78] },
+      { path: "src/app/dashboard/page.tsx", lines: [12, 28] },
+      { path: "src/app/settings/layout.tsx", lines: [8, 15] },
     ],
   },
   {
-    message: "Heavy library usage (moment.js) found, use date-fns to reduce bundle",
+    message: "Sequential awaits in server action, use Promise.all() to reduce function duration",
     count: 8,
     files: [
-      { path: "src/utils/date.ts", lines: [22] },
-      { path: "src/components/Scheduler.tsx", lines: [45, 89] },
+      { path: "src/app/api/report/route.ts", lines: [22, 23, 24] },
+      { path: "src/app/actions.ts", lines: [45, 46] },
     ],
   },
   {
-    message: "Next.js 15: useSearchParams() used without a Suspense boundary",
+    message: "console.log() in server action, use after() for non-blocking logging",
     count: 3,
     files: [
-      { path: "src/app/search/page.tsx", lines: [15, 16] },
-      { path: "src/components/Filters.tsx", lines: [28] },
+      { path: "src/app/actions.ts", lines: [15, 32] },
+      { path: "src/app/api/users/route.ts", lines: [28] },
     ],
   },
   {
-    message: "barrel-file import found, increases bundle size and cold starts",
+    message: "GET handler has side effects, use POST to enable ISR caching",
     count: 2,
     files: [
-      { path: "src/app/page.tsx", lines: [41] },
-      { path: "src/components/Header.tsx", lines: [63] },
+      { path: "src/app/api/logout/route.ts", lines: [5] },
+      { path: "src/app/api/track/route.ts", lines: [8] },
     ],
   },
 ];
@@ -337,8 +337,7 @@ const Terminal = () => {
             vercel-doctor
           </div>
           <div className="text-neutral-500">
-            Reduce your Vercel bill by optimizing function duration, bundle size, and platform
-            usage.
+            Reduce your Vercel bill by optimizing function duration, caching, and platform usage.
           </div>
           <Spacer />
         </FadeIn>
