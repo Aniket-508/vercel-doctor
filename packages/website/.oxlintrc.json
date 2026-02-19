@@ -1,0 +1,5 @@
+{
+  "extends": ["../../.oxlintrc.json"],
+  "plugins": ["typescript", "react", "import", "nextjs", "jsx-a11y"],
+  "rules": {}
+}

@@ -1,0 +1,9 @@
+<svg width="180" height="40" viewBox="0 0 180 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g>
+    <path d="M20 6L33 29H7L20 6Z" fill="#000000"/>
+    <path d="M20 16V24M16 20H24" stroke="#FFFFFF" stroke-width="2.25" stroke-linecap="round"/>
+  </g>
+  <text x="46" y="26" fill="#00242C" font-size="16" font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif" font-weight="700">
+    Vercel Doctor
+  </text>
+</svg>

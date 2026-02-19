@@ -1,0 +1,64 @@
+{
+  "name": "vercel-doctor",
+  "version": "0.0.26",
+  "description": "Find ways to cut your Vercel bill (Next.js)",
+  "keywords": [
+    "diagnostics",
+    "linter",
+    "nextjs",
+    "performance",
+    "react"
+  ],
+  "homepage": "https://github.com/Aniket-508/vercel-doctor#readme",
+  "bugs": {
+    "url": "https://github.com/Aniket-508/vercel-doctor/issues"
+  },
+  "license": "MIT",
+  "author": "Aniket-508",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Aniket-508/vercel-doctor.git",
+    "directory": "packages/vercel-doctor"
+  },
+  "bin": {
+    "vercel-doctor": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/cli.d.ts",
+      "default": "./dist/cli.js"
+    },
+    "./api": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./oxlint-plugin": {
+      "types": "./dist/vercel-doctor-plugin.d.ts",
+      "default": "./dist/vercel-doctor-plugin.js"
+    }
+  },
+  "scripts": {
+    "dev": "tsdown --watch",
+    "build": "rm -rf dist && NODE_ENV=production tsdown",
+    "typecheck": "tsc --noEmit",
+    "test": "pnpm build && vitest run"
+  },
+  "dependencies": {
+    "commander": "^14.0.3",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "knip": "^5.83.1",
+    "ora": "^9.3.0",
+    "oxlint": "^1.47.0",
+    "picocolors": "^1.1.1",
+    "prompts": "^2.4.2",
+    "typescript": ">=5.0.4 <7"
+  },
+  "devDependencies": {
+    "@types/prompts": "^2.4.9",
+    "tsdown": "^0.20.3"
+  }
+}

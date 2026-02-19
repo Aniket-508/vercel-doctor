@@ -1,0 +1,50 @@
+name: "Vercel Doctor"
+description: "Scan React codebases for security, performance, and correctness issues"
+branding:
+  icon: "activity"
+  color: "blue"
+
+inputs:
+  directory:
+    description: "Project directory to scan"
+    default: "."
+  verbose:
+    description: "Show file details per rule"
+    default: "true"
+  project:
+    description: "Workspace project(s) to scan (comma-separated)"
+    required: false
+  node-version:
+    description: "Node.js version to use"
+    default: "20"
+
+outputs:
+  score:
+    description: "Health score (0-100)"
+    value: ${{ steps.score.outputs.score }}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - shell: bash
+      env:
+        INPUT_DIRECTORY: ${{ inputs.directory }}
+        INPUT_VERBOSE: ${{ inputs.verbose }}
+        INPUT_PROJECT: ${{ inputs.project }}
+      run: |
+        FLAGS=""
+        if [ "$INPUT_VERBOSE" = "true" ]; then FLAGS="$FLAGS --verbose"; fi
+        if [ -n "$INPUT_PROJECT" ]; then FLAGS="$FLAGS --project $INPUT_PROJECT"; fi
+        npx -y vercel-doctor@latest "$INPUT_DIRECTORY" $FLAGS
+
+    - id: score
+      shell: bash
+      env:
+        INPUT_DIRECTORY: ${{ inputs.directory }}
+      run: |
+        SCORE=$(npx -y vercel-doctor@latest "$INPUT_DIRECTORY" --score 2>/dev/null || echo "")
+        echo "score=$SCORE" >> "$GITHUB_OUTPUT"
