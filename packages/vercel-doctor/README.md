@@ -13,7 +13,7 @@ One command scans your codebase for security, performance, correctness, and arch
 
 ### [See it in action →](https://vercel.doctor)
 
-https://github.com/user-attachments/assets/07cc88d9-9589-44c3-aa73-5d603cb1c570
+https://github.com/user-attachments/assets/6e942014-83ce-4d7e-88f5-7f00c407ba9b
 
 ## How it works
 
