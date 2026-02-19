@@ -1,5 +1,5 @@
 name: "Vercel Doctor"
-description: "Scan React codebases for security, performance, and correctness issues"
+description: "Scan Next.js codebases for patterns that increase your Vercel bill; get actionable diagnostics to reduce costs"
 branding:
   icon: "activity"
   color: "blue"

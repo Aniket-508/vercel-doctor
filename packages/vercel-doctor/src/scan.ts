@@ -14,23 +14,11 @@ import {
   SCORE_OK_THRESHOLD,
   SHARE_BASE_URL,
 } from "./constants.js";
-import type {
-  Diagnostic,
-  ScanOptions,
-  ScanResult,
-  ScoreResult,
-} from "./types.js";
+import type { Diagnostic, ScanOptions, ScanResult, ScoreResult } from "./types.js";
 import { calculateScore } from "./utils/calculate-score.js";
-import {
-  discoverProject,
-  formatFrameworkName,
-} from "./utils/discover-project.js";
+import { discoverProject, formatFrameworkName } from "./utils/discover-project.js";
 import { filterIgnoredDiagnostics } from "./utils/filter-diagnostics.js";
-import {
-  type FramedLine,
-  createFramedLine,
-  printFramedBox,
-} from "./utils/framed-box.js";
+import { type FramedLine, createFramedLine, printFramedBox } from "./utils/framed-box.js";
 import { groupBy } from "./utils/group-by.js";
 import { highlighter } from "./utils/highlighter.js";
 import { indentMultilineText } from "./utils/indent-multiline-text.js";
@@ -51,15 +39,10 @@ const SEVERITY_ORDER: Record<Diagnostic["severity"], number> = {
   warning: 1,
 };
 
-const colorizeBySeverity = (
-  text: string,
-  severity: Diagnostic["severity"],
-): string =>
+const colorizeBySeverity = (text: string, severity: Diagnostic["severity"]): string =>
   severity === "error" ? highlighter.error(text) : highlighter.warn(text);
 
-const sortBySeverity = (
-  diagnosticGroups: [string, Diagnostic[]][],
-): [string, Diagnostic[]][] =>
+const sortBySeverity = (diagnosticGroups: [string, Diagnostic[]][]): [string, Diagnostic[]][] =>
   diagnosticGroups.toSorted(([, diagnosticsA], [, diagnosticsB]) => {
     const severityA = SEVERITY_ORDER[diagnosticsA[0].severity];
     const severityB = SEVERITY_ORDER[diagnosticsB[0].severity];
@@ -81,10 +64,7 @@ const buildFileLineMap = (diagnostics: Diagnostic[]): Map<string, number[]> => {
   return fileLines;
 };
 
-const printDiagnostics = (
-  diagnostics: Diagnostic[],
-  isVerbose: boolean,
-): void => {
+const printDiagnostics = (diagnostics: Diagnostic[], isVerbose: boolean): void => {
   const ruleGroups = groupBy(
     diagnostics,
     (diagnostic) => `${diagnostic.plugin}/${diagnostic.rule}`,
@@ -97,10 +77,7 @@ const printDiagnostics = (
     const severitySymbol = firstDiagnostic.severity === "error" ? "✗" : "⚠";
     const icon = colorizeBySeverity(severitySymbol, firstDiagnostic.severity);
     const count = ruleDiagnostics.length;
-    const countLabel =
-      count > 1
-        ? colorizeBySeverity(` (${count})`, firstDiagnostic.severity)
-        : "";
+    const countLabel = count > 1 ? colorizeBySeverity(` (${count})`, firstDiagnostic.severity) : "";
 
     logger.log(`  ${icon} ${firstDiagnostic.message}${countLabel}`);
     if (firstDiagnostic.help) {
@@ -127,10 +104,7 @@ const formatElapsedTime = (elapsedMilliseconds: number): string => {
   return `${(elapsedMilliseconds / MILLISECONDS_PER_SECOND).toFixed(1)}s`;
 };
 
-const formatRuleSummary = (
-  ruleKey: string,
-  ruleDiagnostics: Diagnostic[],
-): string => {
+const formatRuleSummary = (ruleKey: string, ruleDiagnostics: Diagnostic[]): string => {
   const firstDiagnostic = ruleDiagnostics[0];
   const fileLines = buildFileLineMap(ruleDiagnostics);
 
@@ -168,16 +142,10 @@ const writeDiagnosticsDirectory = (diagnostics: Diagnostic[]): string => {
 
   for (const [ruleKey, ruleDiagnostics] of sortedRuleGroups) {
     const fileName = ruleKey.replace(/\//g, "--") + ".txt";
-    writeFileSync(
-      join(outputDirectory, fileName),
-      formatRuleSummary(ruleKey, ruleDiagnostics),
-    );
+    writeFileSync(join(outputDirectory, fileName), formatRuleSummary(ruleKey, ruleDiagnostics));
   }
 
-  writeFileSync(
-    join(outputDirectory, "diagnostics.json"),
-    JSON.stringify(diagnostics, null, 2),
-  );
+  writeFileSync(join(outputDirectory, "diagnostics.json"), JSON.stringify(diagnostics, null, 2));
 
   return outputDirectory;
 };
@@ -189,9 +157,7 @@ const colorizeByScore = (text: string, score: number): string => {
 };
 
 const buildScoreBarSegments = (score: number): ScoreBarSegments => {
-  const filledCount = Math.round(
-    (score / PERFECT_SCORE) * SCORE_BAR_WIDTH_CHARS,
-  );
+  const filledCount = Math.round((score / PERFECT_SCORE) * SCORE_BAR_WIDTH_CHARS);
   const emptyCount = SCORE_BAR_WIDTH_CHARS - filledCount;
 
   return {
@@ -243,12 +209,8 @@ const buildShareUrl = (
   scoreResult: ScoreResult | null,
   projectName: string,
 ): string => {
-  const errorCount = diagnostics.filter(
-    (diagnostic) => diagnostic.severity === "error",
-  ).length;
-  const warningCount = diagnostics.filter(
-    (diagnostic) => diagnostic.severity === "warning",
-  ).length;
+  const errorCount = diagnostics.filter((diagnostic) => diagnostic.severity === "error").length;
+  const warningCount = diagnostics.filter((diagnostic) => diagnostic.severity === "warning").length;
   const affectedFileCount = collectAffectedFiles(diagnostics).size;
 
   const params = new URLSearchParams();
@@ -269,12 +231,8 @@ const printSummary = (
   totalSourceFileCount: number,
   noScoreMessage: string,
 ): void => {
-  const errorCount = diagnostics.filter(
-    (diagnostic) => diagnostic.severity === "error",
-  ).length;
-  const warningCount = diagnostics.filter(
-    (diagnostic) => diagnostic.severity === "warning",
-  ).length;
+  const errorCount = diagnostics.filter((diagnostic) => diagnostic.severity === "error").length;
+  const warningCount = diagnostics.filter((diagnostic) => diagnostic.severity === "warning").length;
   const affectedFileCount = collectAffectedFiles(diagnostics).size;
   const elapsed = formatElapsedTime(elapsedMilliseconds);
 
@@ -286,9 +244,7 @@ const printSummary = (
     summaryLineParts.push(highlighter.error(errorText));
   }
   if (warningCount > 0) {
-    const warningText = `⚠ ${warningCount} warning${
-      warningCount === 1 ? "" : "s"
-    }`;
+    const warningText = `⚠ ${warningCount} warning${warningCount === 1 ? "" : "s"}`;
     summaryLinePartsPlain.push(warningText);
     summaryLineParts.push(highlighter.warn(warningText));
   }
@@ -306,21 +262,12 @@ const printSummary = (
   const summaryFramedLines: FramedLine[] = [];
   if (scoreResult) {
     const [eyes, mouth] = getDoctorFace(scoreResult.score);
-    const scoreColorizer = (text: string): string =>
-      colorizeByScore(text, scoreResult.score);
+    const scoreColorizer = (text: string): string => colorizeByScore(text, scoreResult.score);
 
-    summaryFramedLines.push(
-      createFramedLine("┌─────┐", scoreColorizer("┌─────┐")),
-    );
-    summaryFramedLines.push(
-      createFramedLine(`│ ${eyes} │`, scoreColorizer(`│ ${eyes} │`)),
-    );
-    summaryFramedLines.push(
-      createFramedLine(`│ ${mouth} │`, scoreColorizer(`│ ${mouth} │`)),
-    );
-    summaryFramedLines.push(
-      createFramedLine("└─────┘", scoreColorizer("└─────┘")),
-    );
+    summaryFramedLines.push(createFramedLine("┌─────┐", scoreColorizer("┌─────┐")));
+    summaryFramedLines.push(createFramedLine(`│ ${eyes} │`, scoreColorizer(`│ ${eyes} │`)));
+    summaryFramedLines.push(createFramedLine(`│ ${mouth} │`, scoreColorizer(`│ ${mouth} │`)));
+    summaryFramedLines.push(createFramedLine("└─────┘", scoreColorizer("└─────┘")));
     summaryFramedLines.push(
       createFramedLine(
         "Vercel Doctor (www.vercel-doctor.com)",
@@ -333,19 +280,11 @@ const printSummary = (
     const scoreLineRenderedText = `${colorizeByScore(
       String(scoreResult.score),
       scoreResult.score,
-    )} / ${PERFECT_SCORE}  ${colorizeByScore(
-      scoreResult.label,
-      scoreResult.score,
-    )}`;
-    summaryFramedLines.push(
-      createFramedLine(scoreLinePlainText, scoreLineRenderedText),
-    );
+    )} / ${PERFECT_SCORE}  ${colorizeByScore(scoreResult.label, scoreResult.score)}`;
+    summaryFramedLines.push(createFramedLine(scoreLinePlainText, scoreLineRenderedText));
     summaryFramedLines.push(createFramedLine(""));
     summaryFramedLines.push(
-      createFramedLine(
-        buildPlainScoreBar(scoreResult.score),
-        buildScoreBar(scoreResult.score),
-      ),
+      createFramedLine(buildPlainScoreBar(scoreResult.score), buildScoreBar(scoreResult.score)),
     );
     summaryFramedLines.push(createFramedLine(""));
   } else {
@@ -356,17 +295,12 @@ const printSummary = (
       ),
     );
     summaryFramedLines.push(createFramedLine(""));
-    summaryFramedLines.push(
-      createFramedLine(noScoreMessage, highlighter.dim(noScoreMessage)),
-    );
+    summaryFramedLines.push(createFramedLine(noScoreMessage, highlighter.dim(noScoreMessage)));
     summaryFramedLines.push(createFramedLine(""));
   }
 
   summaryFramedLines.push(
-    createFramedLine(
-      summaryLinePartsPlain.join("  "),
-      summaryLineParts.join("  "),
-    ),
+    createFramedLine(summaryLinePartsPlain.join("  "), summaryLineParts.join("  ")),
   );
   printFramedBox(summaryFramedLines);
 
@@ -409,38 +343,22 @@ export const scan = async (
 
   if (!options.scoreOnly) {
     const frameworkLabel = formatFrameworkName(projectInfo.framework);
-    const languageLabel = projectInfo.hasTypeScript
-      ? "TypeScript"
-      : "JavaScript";
+    const languageLabel = projectInfo.hasTypeScript ? "TypeScript" : "JavaScript";
 
     const completeStep = (message: string) => {
       spinner(message).start().succeed(message);
     };
 
+    completeStep(`Detecting framework. Found ${highlighter.info(frameworkLabel)}.`);
     completeStep(
-      `Detecting framework. Found ${highlighter.info(frameworkLabel)}.`,
+      `Detecting React version. Found ${highlighter.info(`React ${projectInfo.reactVersion}`)}.`,
     );
-    completeStep(
-      `Detecting React version. Found ${highlighter.info(
-        `React ${projectInfo.reactVersion}`,
-      )}.`,
-    );
-    completeStep(
-      `Detecting language. Found ${highlighter.info(languageLabel)}.`,
-    );
+    completeStep(`Detecting language. Found ${highlighter.info(languageLabel)}.`);
 
     if (isDiffMode) {
-      completeStep(
-        `Scanning ${highlighter.info(
-          `${includePaths.length}`,
-        )} changed source files.`,
-      );
+      completeStep(`Scanning ${highlighter.info(`${includePaths.length}`)} changed source files.`);
     } else {
-      completeStep(
-        `Found ${highlighter.info(
-          `${projectInfo.sourceFileCount}`,
-        )} source files.`,
-      );
+      completeStep(`Found ${highlighter.info(`${projectInfo.sourceFileCount}`)} source files.`);
     }
 
     if (userConfig) {
@@ -456,9 +374,7 @@ export const scan = async (
 
   const lintPromise = options.lint
     ? (async () => {
-        const lintSpinner = options.scoreOnly
-          ? null
-          : spinner("Running lint checks...").start();
+        const lintSpinner = options.scoreOnly ? null : spinner("Running lint checks...").start();
         try {
           const lintDiagnostics = await runOxlint(
             directory,
@@ -494,9 +410,7 @@ export const scan = async (
             deadCodeSpinner?.succeed("Detecting dead code.");
             return knipDiagnostics;
           } catch (error) {
-            deadCodeSpinner?.fail(
-              "Dead code detection failed (non-fatal, skipping).",
-            );
+            deadCodeSpinner?.fail("Dead code detection failed (non-fatal, skipping).");
             logger.error(String(error));
             return [];
           }
@@ -514,33 +428,26 @@ export const scan = async (
       vercelChecksSpinner?.succeed("Running Vercel optimization checks.");
       return vercelDiagnostics;
     } catch (error) {
-      vercelChecksSpinner?.fail(
-        "Vercel optimization checks failed (non-fatal, skipping).",
-      );
+      vercelChecksSpinner?.fail("Vercel optimization checks failed (non-fatal, skipping).");
       logger.error(String(error));
       return [];
     }
   })();
 
-  const [lintDiagnostics, deadCodeDiagnostics, vercelDiagnostics] =
-    await Promise.all([lintPromise, deadCodePromise, vercelChecksPromise]);
-  const allDiagnostics = [
-    ...lintDiagnostics,
-    ...deadCodeDiagnostics,
-    ...vercelDiagnostics,
-  ];
+  const [lintDiagnostics, deadCodeDiagnostics, vercelDiagnostics] = await Promise.all([
+    lintPromise,
+    deadCodePromise,
+    vercelChecksPromise,
+  ]);
+  const allDiagnostics = [...lintDiagnostics, ...deadCodeDiagnostics, ...vercelDiagnostics];
   const diagnostics = userConfig
     ? filterIgnoredDiagnostics(allDiagnostics, userConfig)
     : allDiagnostics;
 
   const elapsedMilliseconds = performance.now() - startTime;
 
-  const scoreResult = options.offline
-    ? null
-    : await calculateScore(diagnostics);
-  const noScoreMessage = options.offline
-    ? OFFLINE_FLAG_MESSAGE
-    : OFFLINE_MESSAGE;
+  const scoreResult = options.offline ? null : await calculateScore(diagnostics);
+  const noScoreMessage = options.offline ? OFFLINE_FLAG_MESSAGE : OFFLINE_MESSAGE;
 
   if (options.scoreOnly) {
     if (scoreResult) {
@@ -565,9 +472,7 @@ export const scan = async (
 
   printDiagnostics(diagnostics, options.verbose);
 
-  const displayedSourceFileCount = isDiffMode
-    ? includePaths.length
-    : projectInfo.sourceFileCount;
+  const displayedSourceFileCount = isDiffMode ? includePaths.length : projectInfo.sourceFileCount;
 
   printSummary(
     diagnostics,
