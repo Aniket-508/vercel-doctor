@@ -179,7 +179,6 @@ if [ $INSTALLED -eq 0 ]; then
   echo "No supported tools detected."
   echo ""
   echo "Install one of these first:"
-  echo "  • Amp Code: https://ampcode.com"
   echo "  • Antigravity: https://antigravity.google"
   echo "  • Claude Code: https://claude.ai/code"
   echo "  • Codex: https://codex.openai.com"
@@ -190,7 +189,7 @@ if [ $INSTALLED -eq 0 ]; then
   exit 1
 fi
 
-echo "Done! The skill will activate when working on React projects."
+echo "Done! The skill will activate when working on Next.js projects."
 `;
 
 export const GET = (): Response =>

@@ -15,7 +15,8 @@ const TWITTER_IMAGE_PATH = "/vercel-doctor-og-banner.svg";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: "Vercel Doctor",
-  description: "Let coding agents diagnose and fix your React code.",
+  description:
+    "Reduce your Vercel bill by optimizing function duration, bundle size, and platform usage for Next.js projects.",
   twitter: {
     card: "summary_large_image",
     images: [TWITTER_IMAGE_PATH],

@@ -66,7 +66,7 @@ const LeaderboardRow = ({ entry, rank }: { entry: ResolvedLeaderboardEntry; rank
 
 export const metadata: Metadata = {
   title: "Leaderboard - Vercel Doctor",
-  description: "Scores for popular open-source React projects, diagnosed by Vercel Doctor.",
+  description: "Vercel cost optimization scores for popular open-source projects.",
 };
 
 const LeaderboardPage = () => {

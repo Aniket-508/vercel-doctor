@@ -1,8 +1,8 @@
 <svg width="244" height="82" viewBox="0 0 244 82" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="244" height="82" fill="#00242C"/>
-  <path d="M51 22.5L64.5 47H37.5L51 22.5Z" fill="#4EDEFF"/>
-  <path d="M51 34.5V43.5M46.5 39H55.5" stroke="#00242C" stroke-width="3" stroke-linecap="round"/>
-  <text x="78" y="50" fill="#F4FDFF" font-size="24" font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif" font-weight="700">
+  <rect width="244" height="82" fill="black"/>
+  <path d="M51 20L67 48H35L51 20Z" fill="white"/>
+  <path d="M51 30V38M47 34H55" stroke="black" stroke-width="2.5" stroke-linecap="round"/>
+  <text x="78" y="50" fill="white" font-size="24" font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif" font-weight="700">
     Vercel Doctor
   </text>
 </svg>

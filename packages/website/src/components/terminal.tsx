@@ -45,15 +45,15 @@ interface Diagnostic {
 
 const DIAGNOSTICS: Diagnostic[] = [
   {
-    message: "Derived state computed in useEffect, compute during render instead",
+    message: "Sequential awaits in server action, use Promise.all to reduce duration",
     count: 5,
     files: [
-      { path: "src/components/Dashboard.tsx", lines: [42, 87] },
-      { path: "src/hooks/useFilters.ts", lines: [15, 23, 31] },
+      { path: "src/app/actions/settings.ts", lines: [42, 87] },
+      { path: "src/hooks/useData.ts", lines: [15, 23, 31] },
     ],
   },
   {
-    message: 'Server action "deleteUser" missing authentication check',
+    message: 'Server action "updateProfile" missing authentication check',
     count: 2,
     files: [
       { path: "src/app/actions/users.ts", lines: [18] },
@@ -61,49 +61,47 @@ const DIAGNOSTICS: Diagnostic[] = [
     ],
   },
   {
-    message: "Array index used as key, causes bugs when items are reordered",
+    message: "Using <img> tag instead of next/image, increases bandwidth & LCP",
     count: 12,
     files: [
-      { path: "src/components/TodoList.tsx", lines: [24, 51] },
-      { path: "src/components/CommentThread.tsx", lines: [33, 67, 89] },
+      { path: "src/components/Hero.tsx", lines: [24, 51] },
+      { path: "src/components/Gallery.tsx", lines: [33, 67, 89] },
       {
-        path: "src/components/SearchResults.tsx",
+        path: "src/components/ProductCard.tsx",
         lines: [19, 42, 55, 78, 91, 103, 112],
       },
     ],
   },
   {
-    message: 'Component "UserCard" inside "Dashboard", destroys state every render',
+    message: "Client-side redirect in useEffect, use redirect() in server components",
     count: 4,
     files: [
-      { path: "src/components/Dashboard.tsx", lines: [56, 112] },
-      { path: "src/components/Settings.tsx", lines: [34, 78] },
+      { path: "src/components/Auth.tsx", lines: [56, 112] },
+      { path: "src/components/Checkout.tsx", lines: [34, 78] },
     ],
   },
   {
-    message: "Data fetched in useEffect without cleanup, causes race conditions",
+    message: "Heavy library usage (moment.js) found, use date-fns to reduce bundle",
     count: 8,
     files: [
-      { path: "src/components/Profile.tsx", lines: [22] },
-      { path: "src/components/Feed.tsx", lines: [45, 89] },
-      { path: "src/hooks/useUser.ts", lines: [12, 34] },
-      { path: "src/hooks/usePosts.ts", lines: [8, 19, 27] },
+      { path: "src/utils/date.ts", lines: [22] },
+      { path: "src/components/Scheduler.tsx", lines: [45, 89] },
     ],
   },
   {
-    message: "useState initialized from prop, derive during render instead of syncing",
+    message: "Next.js 15: useSearchParams() used without a Suspense boundary",
     count: 3,
     files: [
-      { path: "src/components/EditForm.tsx", lines: [15, 16] },
-      { path: "src/components/Modal.tsx", lines: [28] },
+      { path: "src/app/search/page.tsx", lines: [15, 16] },
+      { path: "src/components/Filters.tsx", lines: [28] },
     ],
   },
   {
-    message: "Missing prefers-reduced-motion check for animations",
+    message: "barrel-file import found, increases bundle size and cold starts",
     count: 2,
     files: [
-      { path: "src/components/Hero.tsx", lines: [41] },
-      { path: "src/components/Carousel.tsx", lines: [63] },
+      { path: "src/app/page.tsx", lines: [41] },
+      { path: "src/components/Header.tsx", lines: [63] },
     ],
   },
 ];
@@ -307,13 +305,9 @@ const markAnimationCompleted = () => {
 };
 
 const Terminal = () => {
-  const [state, setState] = useState<AnimationState>(
-    didAnimationComplete() ? COMPLETED_STATE : INITIAL_STATE,
-  );
+  const [state, setState] = useState<AnimationState>(INITIAL_STATE);
 
   useEffect(() => {
-    if (didAnimationComplete()) return;
-
     let cancelled = false;
 
     const update = (patch: Partial<AnimationState>) => {
@@ -321,6 +315,11 @@ const Terminal = () => {
     };
 
     const run = async () => {
+      if (didAnimationComplete()) {
+        update(COMPLETED_STATE);
+        return;
+      }
+
       await sleep(INITIAL_DELAY_MS);
 
       for (let index = 0; index <= COMMAND.length; index++) {
@@ -384,7 +383,8 @@ const Terminal = () => {
             vercel-doctor
           </div>
           <div className="text-neutral-500">
-            Let coding agents diagnose and fix your React code.
+            Reduce your Vercel bill by optimizing function duration, bundle size, and platform
+            usage.
           </div>
           <Spacer />
         </FadeIn>

@@ -17,13 +17,13 @@ INSTALLED=0
 SKILL_CONTENT=$(cat << 'EOF'
 ---
 name: vercel-doctor
-description: Run after making React changes to catch issues early. Use when reviewing code, finishing a feature, or fixing bugs in a React project.
+description: Reduce your Vercel bill by optimizing function duration, bundle size, and platform usage for Next.js projects.
 version: 1.0.0
 ---
 
 # Vercel Doctor
 
-Scans your React codebase for security, performance, correctness, and architecture issues. Outputs a 0-100 score with actionable diagnostics.
+Scans your Next.js codebase for function duration, bundle size, and platform optimization issues. Outputs a 0-100 score with actionable diagnostics.
 
 ## Usage
 
@@ -40,9 +40,9 @@ EOF
 AGENTS_CONTENT=$(cat << 'EOF'
 # Vercel Doctor
 
-Run after making React changes to catch issues early. Use when reviewing code, finishing a feature, or fixing bugs in a React project.
+Run after making Next.js changes to catch cost issues early. Use when reviewing code, finishing a feature, or optimizing your Vercel bill.
 
-Scans your React codebase for security, performance, correctness, and architecture issues. Outputs a 0-100 score with actionable diagnostics.
+Scans your Next.js codebase for function duration, bundle size, and platform optimization issues. Outputs a 0-100 score with actionable diagnostics.
 
 ## Usage
 
@@ -147,7 +147,7 @@ if command -v codex &> /dev/null || [ -d "$HOME/.codex" ]; then
   cat > "$SKILL_DIR/agents/openai.yaml" << 'YAMLEOF'
 interface:
   display_name: "vercel-doctor"
-  short_description: "Diagnose and fix React codebase health issues"
+  short_description: "Reduce Vercel costs by optimizing Next.js projects"
 YAMLEOF
   printf "${GREEN}✔${RESET} Codex\n"
   INSTALLED=$((INSTALLED + 1))
@@ -166,7 +166,6 @@ if [ $INSTALLED -eq 0 ]; then
   echo "No supported tools detected."
   echo ""
   echo "Install one of these first:"
-  echo "  • Ami: https://ami.dev"
   echo "  • Amp Code: https://ampcode.com"
   echo "  • Antigravity: https://antigravity.google"
   echo "  • Claude Code: https://claude.ai/code"
@@ -178,4 +177,4 @@ if [ $INSTALLED -eq 0 ]; then
   exit 1
 fi
 
-echo "Done! The skill will activate when working on React projects."
+echo "Done! The skill will activate when working on Next.js projects."

@@ -74,8 +74,8 @@ export const generateMetadata = async ({
     descriptionParts.length > 0
       ? `${descriptionParts.join(
           ", ",
-        )} found. Run vercel-doctor on your codebase to find React issues.`
-      : "Run vercel-doctor on your codebase to find React issues.";
+        )} found. Run vercel-doctor on your codebase to reduce your Vercel bill.`
+      : "Run vercel-doctor on your codebase to reduce your Vercel bill.";
 
   const ogSearchParams = new URLSearchParams();
   if (resolvedParams.p) ogSearchParams.set("p", resolvedParams.p);
