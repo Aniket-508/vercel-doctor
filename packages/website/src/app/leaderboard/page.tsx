@@ -69,7 +69,7 @@ const LeaderboardPage = () => {
       </div>
 
       <div className="mb-1 text-xl text-white">Leaderboard</div>
-      <div className="mb-8 text-neutral-500">Scores for popular open-source React projects.</div>
+      <div className="mb-8 text-neutral-500">Scores for popular open-source Next.js projects.</div>
 
       <div className="mb-8">
         {LEADERBOARD_ENTRIES.map((entry, index) => (

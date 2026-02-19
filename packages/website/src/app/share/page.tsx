@@ -85,7 +85,7 @@ const SharePage = async ({ searchParams }: { searchParams: Promise<ShareSearchPa
   if (resolvedParams.f) shareSearchParams.set("f", resolvedParams.f);
   const shareUrl = `${SHARE_BASE_URL}?${shareSearchParams.toString()}`;
 
-  const projectLabel = projectName ? `${projectName} ` : "My React codebase ";
+  const projectLabel = projectName ? `${projectName} ` : "My Next.js project ";
   const tweetText = `${projectLabel}scored ${score}/${PERFECT_SCORE} (${label}) on Vercel Doctor. Run it on yours:`;
   const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
     tweetText,
