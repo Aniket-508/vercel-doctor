@@ -440,3 +440,38 @@ export const nextjsNoSideEffectInGetHandler: Rule = {
     },
   }),
 };
+
+export const nextjsNoLinkElementForExternal: Rule = {
+  create: (context: RuleContext) => ({
+    JSXOpeningElement(node: EsTreeNode) {
+      if (node.name?.type !== "JSXIdentifier" || node.name.name !== "Link") return;
+
+      const hrefAttribute = findJsxAttribute(node.attributes ?? [], "href");
+      if (!hrefAttribute?.value) return;
+
+      let hrefValue = null;
+      if (hrefAttribute.value.type === "Literal") {
+        hrefValue = hrefAttribute.value.value;
+      } else if (
+        hrefAttribute.value.type === "JSXExpressionContainer" &&
+        hrefAttribute.value.expression?.type === "Literal"
+      ) {
+        hrefValue = hrefAttribute.value.expression.value;
+      }
+
+      const isExternal =
+        typeof hrefValue === "string" &&
+        (hrefValue.startsWith("http://") ||
+          hrefValue.startsWith("https://") ||
+          hrefValue.startsWith("//"));
+
+      if (isExternal) {
+        context.report({
+          node,
+          message:
+            "Use <a> instead of next/link for external links — next/link is for internal client-side navigation and prefetching",
+        });
+      }
+    },
+  }),
+};

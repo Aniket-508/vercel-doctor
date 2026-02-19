@@ -17,6 +17,7 @@ const NEXTJS_RULES: Record<string, string> = {
   "vercel-doctor/nextjs-no-polyfill-script": "warn",
   "vercel-doctor/nextjs-no-head-import": "error",
   "vercel-doctor/nextjs-no-side-effect-in-get-handler": "error",
+  "vercel-doctor/nextjs-no-link-element-for-external": "warn",
 };
 
 interface OxlintConfigOptions {

@@ -19,6 +19,7 @@ import {
   nextjsNoFontLink,
   nextjsNoHeadImport,
   nextjsNoImgElement,
+  nextjsNoLinkElementForExternal,
   nextjsNoNativeScript,
   nextjsNoPolyfillScript,
   nextjsNoRedirectInTryCatch,
@@ -54,6 +55,7 @@ const plugin: RulePlugin = {
     "nextjs-no-polyfill-script": nextjsNoPolyfillScript,
     "nextjs-no-head-import": nextjsNoHeadImport,
     "nextjs-no-side-effect-in-get-handler": nextjsNoSideEffectInGetHandler,
+    "nextjs-no-link-element-for-external": nextjsNoLinkElementForExternal,
 
     "server-auth-actions": serverAuthActions,
     "server-after-nonblocking": serverAfterNonblocking,

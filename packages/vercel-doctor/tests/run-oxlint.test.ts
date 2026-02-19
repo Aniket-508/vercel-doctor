@@ -177,6 +177,10 @@ describe("runOxlint", () => {
         ruleSource: "rules/nextjs.ts",
         severity: "error",
       },
+      "nextjs-no-link-element-for-external": {
+        fixture: "app/page.tsx",
+        ruleSource: "rules/nextjs.ts",
+      },
       "server-auth-actions": {
         fixture: "app/actions.tsx",
         ruleSource: "rules/server.ts",

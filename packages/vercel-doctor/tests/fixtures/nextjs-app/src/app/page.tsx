@@ -33,6 +33,7 @@ const Page = () => {
       <link href="https://fonts.googleapis.com/css2?family=Inter" rel="stylesheet" />
       <link rel="stylesheet" href="/styles/main.css" />
       <div onClick={() => setData(null)}>click</div>
+      <Link href="https://example.com">External Link</Link>
     </div>
   );
 };
@@ -55,6 +56,7 @@ const router = { push: (_path: string) => {} };
 const redirect = (_path: string) => {};
 const Image = (props: any) => <img {...props} />;
 const Script = (props: any) => <script {...props} />;
+const Link = (props: any) => <a {...props} />;
 
 export default Page;
 export { AsyncClientComponent, RedirectInTryCatchComponent };
