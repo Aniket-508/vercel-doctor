@@ -30,12 +30,7 @@ const BadgeSnippet = ({ searchParamsString }: BadgeSnippetProps) => {
       <div className="text-neutral-500">Add a badge to your README:</div>
       <div className="mt-3 flex flex-wrap items-center gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={badgePreviewPath}
-          alt="Vercel Doctor score badge"
-          height={20}
-          className="block"
-        />
+        <img src={badgePreviewPath} alt="Vercel Doctor score badge" height={20} className="block" />
         <a
           href={badgePreviewPath}
           target="_blank"
