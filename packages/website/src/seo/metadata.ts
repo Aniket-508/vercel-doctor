@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { LINK, SITE } from "@/constants";
 
-type CreateMetadataOptions = {
+interface CreateMetadataOptions {
   title?: string;
   description?: string;
   canonical?: string;
   ogTitle?: string;
   ogDescription?: string;
   noIndex?: boolean;
-};
+}
 
 const createMetadata = (options: CreateMetadataOptions = {}): Metadata => {
   const {

@@ -130,7 +130,7 @@ const RAW_ENTRIES: LeaderboardEntry[] = [
   },
   {
     name: "nodejs.org",
-    githubUrl: "https://github.com/nodejs/node",
+    githubUrl: "https://github.com/nodejs/nodejs.org",
     packageName: "@node-core/website",
     score: 88,
     errorCount: 9,

@@ -1,7 +1,18 @@
+const PERFECT_SCORE = 100;
+const SCORE_GOOD_THRESHOLD = 75;
+const SCORE_OK_THRESHOLD = 50;
+const COMMAND = "npx -y vercel-doctor@latest .";
+
+const API_CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
 const SITE = {
   NAME: "Vercel Doctor",
   URL: "https://www.vercel.doctor",
-  OG_IMAGE: "/vercel-doctor-og-banner.svg",
+  OG_IMAGE: "/og.png",
   AUTHOR: {
     NAME: "Aniket Pawar",
     TWITTER: "@alaymanguy",
@@ -33,4 +44,12 @@ const LINK = {
   SPONSOR: "https://github.com/sponsors/Aniket-508",
 } as const;
 
-export { LINK, SITE };
+export {
+  API_CORS_HEADERS,
+  COMMAND,
+  LINK,
+  PERFECT_SCORE,
+  SCORE_GOOD_THRESHOLD,
+  SCORE_OK_THRESHOLD,
+  SITE,
+};

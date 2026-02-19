@@ -1,26 +1,14 @@
 /* eslint-disable @next/next/no-img-element */
 import { ImageResponse } from "next/og";
+import { PERFECT_SCORE } from "@/constants";
+import getScoreLabel from "@/utils/get-score-label";
+import getScoreHexColor from "@/utils/get-score-hex-color";
 
-const PERFECT_SCORE = 100;
-const SCORE_GOOD_THRESHOLD = 75;
-const SCORE_OK_THRESHOLD = 50;
 const IMAGE_WIDTH_PX = 1200;
 const IMAGE_HEIGHT_PX = 630;
-const OG_BRAND_MARK_WIDTH_PX = 244;
-const OG_BRAND_MARK_HEIGHT_PX = 82;
-const OG_BRAND_MARK_PATH = "/vercel-doctor-og-banner.svg";
-
-const getScoreLabel = (score: number): string => {
-  if (score >= SCORE_GOOD_THRESHOLD) return "Great";
-  if (score >= SCORE_OK_THRESHOLD) return "Needs work";
-  return "Critical";
-};
-
-const getScoreColor = (score: number): string => {
-  if (score >= SCORE_GOOD_THRESHOLD) return "#4ade80";
-  if (score >= SCORE_OK_THRESHOLD) return "#eab308";
-  return "#f87171";
-};
+const OG_LOGO_WIDTH_PX = 360;
+const OG_LOGO_HEIGHT_PX = 80;
+const OG_LOGO_PATH = "/vercel-doctor-logo-dark.svg";
 
 export const GET = (request: Request): ImageResponse => {
   const { searchParams } = new URL(request.url);
@@ -30,8 +18,8 @@ export const GET = (request: Request): ImageResponse => {
   const errorCount = Math.max(0, Number(searchParams.get("e")) || 0);
   const warningCount = Math.max(0, Number(searchParams.get("w")) || 0);
   const fileCount = Math.max(0, Number(searchParams.get("f")) || 0);
-  const scoreColor = getScoreColor(score);
-  const brandMarkUrl = new URL(OG_BRAND_MARK_PATH, request.url).toString();
+  const scoreColor = getScoreHexColor(score);
+  const logoUrl = new URL(OG_LOGO_PATH, request.url).toString();
   const scoreBarPercent = (score / PERFECT_SCORE) * 100;
 
   return new ImageResponse(
@@ -48,12 +36,7 @@ export const GET = (request: Request): ImageResponse => {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
-        <img
-          src={brandMarkUrl}
-          width={OG_BRAND_MARK_WIDTH_PX}
-          height={OG_BRAND_MARK_HEIGHT_PX}
-          alt=""
-        />
+        <img src={logoUrl} width={OG_LOGO_WIDTH_PX} height={OG_LOGO_HEIGHT_PX} alt="" />
         {projectName && (
           <div
             style={{

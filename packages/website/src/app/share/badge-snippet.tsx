@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import { SITE } from "@/constants";
 
 const COPY_FEEDBACK_DURATION_MS = 2000;
-const BADGE_BASE_URL = "https://www.vercel.doctor/share/badge";
-const SHARE_BASE_URL = "https://www.vercel.doctor/share";
 
 interface BadgeSnippetProps {
   searchParamsString: string;
@@ -14,26 +12,28 @@ interface BadgeSnippetProps {
 const BadgeSnippet = ({ searchParamsString }: BadgeSnippetProps) => {
   const [didCopy, setDidCopy] = useState(false);
 
-  const badgeFullUrl = `${BADGE_BASE_URL}?${searchParamsString}`;
-  const shareFullUrl = `${SHARE_BASE_URL}?${searchParamsString}`;
+  const badgeFullUrl = `${SITE.URL}/share/badge?${searchParamsString}`;
+  const shareFullUrl = `${SITE.URL}/share?${searchParamsString}`;
   const badgePreviewPath = `/share/badge?${searchParamsString}`;
   const markdownSnippet = `[![Vercel Doctor](${badgeFullUrl})](${shareFullUrl})`;
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(markdownSnippet);
-    setDidCopy(true);
-    setTimeout(() => setDidCopy(false), COPY_FEEDBACK_DURATION_MS);
+    try {
+      await navigator.clipboard.writeText(markdownSnippet);
+      setDidCopy(true);
+      setTimeout(() => setDidCopy(false), COPY_FEEDBACK_DURATION_MS);
+    } catch {}
   };
 
   return (
     <div className="mt-8">
       <div className="text-neutral-500">Add a badge to your README:</div>
       <div className="mt-3 flex flex-wrap items-center gap-3">
-        <Image
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src={badgePreviewPath}
           alt="Vercel Doctor score badge"
           height={20}
-          width={200}
           className="block"
         />
         <a

@@ -1,39 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
+import { COMMAND, PERFECT_SCORE } from "@/constants";
+import { createMetadata } from "@/seo/metadata";
+import getScoreColorClass from "@/utils/get-score-color-class";
+import DoctorFace from "@/components/doctor-face";
+import ScoreBar from "@/components/score-bar";
 import { LEADERBOARD_ENTRIES, type ResolvedLeaderboardEntry } from "./leaderboard-entries";
 
-const PERFECT_SCORE = 100;
-const SCORE_GOOD_THRESHOLD = 75;
-const SCORE_OK_THRESHOLD = 50;
 const SCORE_BAR_WIDTH = 20;
-const COMMAND = "npx -y vercel-doctor@latest .";
 const CONTRIBUTE_URL =
   "https://github.com/Aniket-508/vercel-doctor/edit/main/packages/website/src/app/leaderboard/leaderboard-entries.ts";
-
-const getScoreColorClass = (score: number): string => {
-  if (score >= SCORE_GOOD_THRESHOLD) return "text-green-400";
-  if (score >= SCORE_OK_THRESHOLD) return "text-yellow-500";
-  return "text-red-400";
-};
-
-const getDoctorFace = (score: number): [string, string] => {
-  if (score >= SCORE_GOOD_THRESHOLD) return ["◠ ◠", " ▽ "];
-  if (score >= SCORE_OK_THRESHOLD) return ["• •", " ─ "];
-  return ["x x", " ▽ "];
-};
-
-const ScoreBar = ({ score }: { score: number }) => {
-  const filledCount = Math.round((score / PERFECT_SCORE) * SCORE_BAR_WIDTH);
-  const emptyCount = SCORE_BAR_WIDTH - filledCount;
-  const colorClass = getScoreColorClass(score);
-
-  return (
-    <span className="text-xs sm:text-sm">
-      <span className={colorClass}>{"█".repeat(filledCount)}</span>
-      <span className="text-neutral-700">{"░".repeat(emptyCount)}</span>
-    </span>
-  );
-};
 
 const LeaderboardRow = ({ entry, rank }: { entry: ResolvedLeaderboardEntry; rank: number }) => {
   const colorClass = getScoreColorClass(entry.score);
@@ -52,7 +28,11 @@ const LeaderboardRow = ({ entry, rank }: { entry: ResolvedLeaderboardEntry; rank
       </a>
 
       <span className="hidden sm:inline">
-        <ScoreBar score={entry.score} />
+        <ScoreBar
+          score={entry.score}
+          barWidth={SCORE_BAR_WIDTH}
+          emptyColorClass="text-neutral-700"
+        />
       </span>
 
       <Link href={entry.shareUrl} className="ml-4 text-right transition-colors hover:underline">
@@ -63,8 +43,6 @@ const LeaderboardRow = ({ entry, rank }: { entry: ResolvedLeaderboardEntry; rank
   );
 };
 
-import { createMetadata } from "@/seo/metadata";
-
 export const metadata = createMetadata({
   title: "Leaderboard",
   description: "Vercel cost optimization scores for popular open-source projects.",
@@ -73,8 +51,6 @@ export const metadata = createMetadata({
 
 const LeaderboardPage = () => {
   const topScore = LEADERBOARD_ENTRIES[0]?.score ?? 0;
-  const [eyes, mouth] = getDoctorFace(topScore);
-  const topScoreColor = getScoreColorClass(topScore);
 
   return (
     <div className="mx-auto min-h-screen w-full max-w-3xl bg-[#0a0a0a] p-6 pb-32 font-mono text-base leading-relaxed text-neutral-300 sm:p-8 sm:pb-40 sm:text-lg">
@@ -89,9 +65,7 @@ const LeaderboardPage = () => {
       </div>
 
       <div className="mb-2">
-        <pre className={`${topScoreColor} leading-tight`}>
-          {`  ┌─────┐\n  │ ${eyes} │\n  │ ${mouth} │\n  └─────┘`}
-        </pre>
+        <DoctorFace score={topScore} />
       </div>
 
       <div className="mb-1 text-xl text-white">Leaderboard</div>

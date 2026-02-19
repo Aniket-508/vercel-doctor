@@ -3,6 +3,12 @@
 import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { Copy, Check, ChevronRight, RotateCcw } from "lucide-react";
+import { COMMAND, LINK, PERFECT_SCORE } from "@/constants";
+import getScoreColorClass from "@/utils/get-score-color-class";
+import getScoreLabel from "@/utils/get-score-label";
+import easeOutCubic from "@/utils/ease-out-cubic";
+import DoctorFace from "@/components/doctor-face";
+import ScoreBar from "@/components/score-bar";
 
 const COPIED_RESET_DELAY_MS = 2000;
 const INITIAL_DELAY_MS = 500;
@@ -16,19 +22,14 @@ const SCORE_FRAME_COUNT = 20;
 const SCORE_FRAME_DELAY_MS = 30;
 const POST_SCORE_DELAY_MS = 700;
 const TARGET_SCORE = 42;
-const PERFECT_SCORE = 100;
 const SCORE_BAR_WIDTH_MOBILE = 15;
 const SCORE_BAR_WIDTH_DESKTOP = 30;
-const SCORE_GOOD_THRESHOLD = 75;
-const SCORE_OK_THRESHOLD = 50;
 const DIAGNOSTIC_COUNT_MOBILE = 3;
 const TOTAL_ERROR_COUNT = 22;
 const AFFECTED_FILE_COUNT = 18;
 const ELAPSED_TIME = "2.1s";
 
 const ANIMATION_COMPLETED_KEY = "vercel-doctor-animation-completed";
-const COMMAND = "npx -y vercel-doctor@latest .";
-const GITHUB_URL = "https://github.com/Aniket-508/vercel-doctor";
 const GITHUB_ICON_PATH =
   "M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z";
 
@@ -106,20 +107,6 @@ const DIAGNOSTICS: Diagnostic[] = [
   },
 ];
 
-const getScoreColor = (score: number) => {
-  if (score >= SCORE_GOOD_THRESHOLD) return "text-green-400";
-  if (score >= SCORE_OK_THRESHOLD) return "text-yellow-500";
-  return "text-red-400";
-};
-
-const getScoreLabel = (score: number) => {
-  if (score >= SCORE_GOOD_THRESHOLD) return "Great";
-  if (score >= SCORE_OK_THRESHOLD) return "Needs work";
-  return "Critical";
-};
-
-const easeOutCubic = (progress: number) => 1 - Math.pow(1 - progress, 3);
-
 const sleep = (milliseconds: number) =>
   new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
 
@@ -129,43 +116,8 @@ const FadeIn = ({ children }: { children: React.ReactNode }) => (
   <div className="animate-fade-in">{children}</div>
 );
 
-const getDoctorFace = (score: number): [string, string] => {
-  if (score >= SCORE_GOOD_THRESHOLD) return ["◠ ◠", " ▽ "];
-  if (score >= SCORE_OK_THRESHOLD) return ["• •", " ─ "];
-  return ["x x", " ▽ "];
-};
-
-const BOX_TOP = "┌─────┐";
-const BOX_BOTTOM = "└─────┘";
-
-const DoctorBranding = ({ score }: { score: number }) => {
-  const [eyes, mouth] = getDoctorFace(score);
-  const colorClass = getScoreColor(score);
-
-  return (
-    <div>
-      <pre className={`${colorClass} leading-tight`}>
-        {`  ${BOX_TOP}\n  │ ${eyes} │\n  │ ${mouth} │\n  ${BOX_BOTTOM}`}
-      </pre>
-    </div>
-  );
-};
-
-const ScoreBar = ({ score, barWidth }: { score: number; barWidth: number }) => {
-  const filledCount = Math.round((score / PERFECT_SCORE) * barWidth);
-  const emptyCount = barWidth - filledCount;
-  const colorClass = getScoreColor(score);
-
-  return (
-    <>
-      <span className={colorClass}>{"█".repeat(filledCount)}</span>
-      <span className="text-neutral-600">{"░".repeat(emptyCount)}</span>
-    </>
-  );
-};
-
 const ScoreGauge = ({ score }: { score: number }) => {
-  const colorClass = getScoreColor(score);
+  const colorClass = getScoreColorClass(score);
 
   return (
     <div className="pl-2">
@@ -190,9 +142,11 @@ const CopyCommand = () => {
   const [didCopy, setDidCopy] = useState(false);
 
   const handleCopy = useCallback(async () => {
-    await navigator.clipboard.writeText(COMMAND);
-    setDidCopy(true);
-    setTimeout(() => setDidCopy(false), COPIED_RESET_DELAY_MS);
+    try {
+      await navigator.clipboard.writeText(COMMAND);
+      setDidCopy(true);
+      setTimeout(() => setDidCopy(false), COPIED_RESET_DELAY_MS);
+    } catch {}
   }, []);
 
   const IconComponent = didCopy ? Check : Copy;
@@ -411,7 +365,7 @@ const Terminal = () => {
 
       {state.score !== null && (
         <FadeIn>
-          <DoctorBranding score={state.score} />
+          <DoctorFace score={state.score} />
           <Spacer />
           <ScoreGauge score={state.score} />
         </FadeIn>
@@ -432,7 +386,7 @@ const Terminal = () => {
           <div className="flex flex-wrap items-center gap-3">
             <CopyCommand />
             <a
-              href={GITHUB_URL}
+              href={LINK.GITHUB}
               target="_blank"
               rel="noreferrer"
               className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap border border-white/20 bg-white px-3 py-1.5 text-black transition-all hover:bg-white/90 active:scale-[0.98]"

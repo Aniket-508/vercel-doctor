@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
+import { COMMAND, PERFECT_SCORE, SITE } from "@/constants";
+import getScoreLabel from "@/utils/get-score-label";
+import getScoreColorClass from "@/utils/get-score-color-class";
+import clampScore from "@/utils/clamp-score";
+import DoctorFace from "@/components/doctor-face";
 import AnimatedScore from "./animated-score";
 import BadgeSnippet from "./badge-snippet";
-import { SITE } from "@/constants";
-
-const PERFECT_SCORE = 100;
-const SCORE_GOOD_THRESHOLD = 75;
-const SCORE_OK_THRESHOLD = 50;
-const COMMAND = `npx -y vercel-doctor@latest .`;
 
 const SHARE_BASE_URL = `${SITE.URL}/share`;
 const X_ICON_PATH =
@@ -22,37 +21,6 @@ interface ShareSearchParams {
   f?: string;
 }
 
-const clampScore = (value: number): number => Math.max(0, Math.min(PERFECT_SCORE, value));
-
-const getScoreLabel = (score: number): string => {
-  if (score >= SCORE_GOOD_THRESHOLD) return "Great";
-  if (score >= SCORE_OK_THRESHOLD) return "Needs work";
-  return "Critical";
-};
-
-const getScoreColorClass = (score: number): string => {
-  if (score >= SCORE_GOOD_THRESHOLD) return "text-green-400";
-  if (score >= SCORE_OK_THRESHOLD) return "text-yellow-500";
-  return "text-red-400";
-};
-
-const getDoctorFace = (score: number): [string, string] => {
-  if (score >= SCORE_GOOD_THRESHOLD) return ["\u25E0 \u25E0", " \u25BD "];
-  if (score >= SCORE_OK_THRESHOLD) return ["\u2022 \u2022", " \u2500 "];
-  return ["x x", " \u25BD "];
-};
-
-const DoctorFace = ({ score }: { score: number }) => {
-  const [eyes, mouth] = getDoctorFace(score);
-  const colorClass = getScoreColorClass(score);
-
-  return (
-    <pre className={`${colorClass} leading-tight`}>
-      {`  \u250C\u2500\u2500\u2500\u2500\u2500\u2510\n  \u2502 ${eyes} \u2502\n  \u2502 ${mouth} \u2502\n  \u2514\u2500\u2500\u2500\u2500\u2500\u2518`}
-    </pre>
-  );
-};
-
 export const generateMetadata = async ({
   searchParams,
 }: {
@@ -66,7 +34,7 @@ export const generateMetadata = async ({
   const label = getScoreLabel(score);
 
   const titlePrefix = projectName ? `${projectName} - ` : "";
-  const title = `Vercel Doctor - ${titlePrefix}Score: ${score}/100 (${label})`;
+  const title = `Vercel Doctor - ${titlePrefix}Score: ${score}/${PERFECT_SCORE} (${label})`;
   const descriptionParts: string[] = [];
   if (errorCount > 0) descriptionParts.push(`${errorCount} error${errorCount === 1 ? "" : "s"}`);
   if (warningCount > 0)
@@ -107,6 +75,7 @@ const SharePage = async ({ searchParams }: { searchParams: Promise<ShareSearchPa
   const warningCount = Math.max(0, Number(resolvedParams.w) || 0);
   const fileCount = Math.max(0, Number(resolvedParams.f) || 0);
   const label = getScoreLabel(score);
+  const colorClass = getScoreColorClass(score);
 
   const shareSearchParams = new URLSearchParams();
   if (resolvedParams.p) shareSearchParams.set("p", resolvedParams.p);
@@ -117,7 +86,7 @@ const SharePage = async ({ searchParams }: { searchParams: Promise<ShareSearchPa
   const shareUrl = `${SHARE_BASE_URL}?${shareSearchParams.toString()}`;
 
   const projectLabel = projectName ? `${projectName} ` : "My React codebase ";
-  const tweetText = `${projectLabel}scored ${score}/100 (${label}) on Vercel Doctor. Run it on yours:`;
+  const tweetText = `${projectLabel}scored ${score}/${PERFECT_SCORE} (${label}) on Vercel Doctor. Run it on yours:`;
   const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
     tweetText,
   )}&url=${encodeURIComponent(shareUrl)}`;
@@ -141,7 +110,7 @@ const SharePage = async ({ searchParams }: { searchParams: Promise<ShareSearchPa
       {(errorCount > 0 || warningCount > 0 || fileCount > 0) && (
         <div className="mb-8 pl-2">
           {errorCount > 0 && (
-            <span className="text-red-400">
+            <span className={colorClass}>
               {errorCount} error{errorCount === 1 ? "" : "s"}
             </span>
           )}
