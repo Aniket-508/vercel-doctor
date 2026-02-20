@@ -44,14 +44,14 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Tag and create GitHub release
-        if: steps.changesets.outputs.published == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          PUBLISHED='${{ steps.changesets.outputs.publishedPackages }}'
-          VERSION=$(echo "$PUBLISHED" | jq -r '.[0].version // empty')
-          if [ -n "$VERSION" ]; then
-            TAG="v$VERSION"
+          VERSION=$(node -p "require('./packages/vercel-doctor/package.json').version")
+          TAG="v$VERSION"
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "Release $TAG already exists, skipping"
+          else
             gh release create "$TAG" \
               --title "$TAG" \
               --generate-notes \
