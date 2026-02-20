@@ -25,7 +25,9 @@ export const clearSelectBanner = (): void => {
 const onCancel = () => {
   logger.break();
   logger.log("Cancelled.");
-  logger.dim("Run `npx vercel-doctor@latest --fix` to fix issues.");
+  logger.dim(
+    "Run with --verbose for file details. Documentation: https://github.com/Aniket-508/vercel-doctor",
+  );
   logger.break();
   process.exit(0);
 };

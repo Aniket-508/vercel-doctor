@@ -52,7 +52,7 @@ export const maybePromptSkillInstall = async (shouldSkipPrompts: boolean): Promi
   logger.dim(
     `   Install the ${highlighter.info("vercel-doctor")} skill to teach Cursor, Claude Code,`,
   );
-  logger.dim("   and other AI agents how to diagnose and fix React issues.");
+  logger.dim("   and other AI agents how to diagnose and fix Vercel cost issues.");
   logger.break();
 
   const { shouldInstall } = await prompts({
