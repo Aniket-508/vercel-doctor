@@ -12,7 +12,6 @@ const WebsiteJsonLd = () => {
 
   return (
     <script
-      // biome-ignore lint/security/noDangerouslySetInnerHtml: ignore
       dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       type="application/ld+json"
     />
@@ -47,7 +46,6 @@ const SoftwareSourceCodeJsonLd = () => {
 
   return (
     <script
-      // biome-ignore lint/security/noDangerouslySetInnerHtml: ignore
       dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       type="application/ld+json"
     />
@@ -66,7 +64,6 @@ const OrganizationJsonLd = () => {
 
   return (
     <script
-      // biome-ignore lint/security/noDangerouslySetInnerHtml: ignore
       dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       type="application/ld+json"
     />
@@ -105,7 +102,6 @@ const FAQJsonLd = () => {
 
   return (
     <script
-      // biome-ignore lint/security/noDangerouslySetInnerHtml: ignore
       dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       type="application/ld+json"
     />
