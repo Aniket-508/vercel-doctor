@@ -4,6 +4,13 @@
   <img alt="Vercel Doctor" src="./assets/vercel-doctor-readme-logo-light.svg" width="180" height="40">
 </picture>
 
+<p align="left">
+  <a href="https://www.npmjs.com/package/vercel-doctor"><img src="https://img.shields.io/npm/v/vercel-doctor.svg" alt="npm version" /></a>
+  <a href="https://www.npmjs.com/package/vercel-doctor"><img src="https://img.shields.io/npm/dm/vercel-doctor.svg" alt="npm downloads" /></a>
+  <a href="https://github.com/Aniket-508/vercel-doctor/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/vercel-doctor.svg" alt="license" /></a>
+  <a href="https://github.com/Aniket-508/vercel-doctor/actions/workflows/ci.yml"><img src="https://github.com/Aniket-508/vercel-doctor/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+</p>
+
 Reduce your Vercel bill with one command.
 
 Scans your Next.js codebase for patterns that increase your Vercel bill — long function durations, uncached routes, unoptimized images, expensive cron jobs, and more — then outputs actionable diagnostics.
@@ -169,4 +176,4 @@ node packages/vercel-doctor/dist/cli.js /path/to/your/nextjs-project
 
 ### License
 
-Vercel Doctor is MIT-licensed open-source software.
+[MIT](./LICENSE)
