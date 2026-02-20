@@ -1,11 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import {
+  BYTES_PER_KILOBYTE,
   BYTES_PER_MEGABYTE,
   EDGE_FUNCTION_AWAIT_WARNING_THRESHOLD_COUNT,
   FLUID_COMPUTE_ROUTE_THRESHOLD_COUNT,
+  LARGE_PROJECT_FILE_COUNT_THRESHOLD,
   MAX_STATIC_ASSET_CDN_DIAGNOSTICS_COUNT,
-  PUBLIC_STATIC_ASSET_CDN_WARNING_THRESHOLD_BYTES,
   SEQUENTIAL_DATABASE_AWAIT_WARNING_THRESHOLD_COUNT,
   STATIC_ASSET_CDN_WARNING_THRESHOLD_BYTES,
   STATIC_ASSET_SIZE_DECIMAL_PLACES_COUNT,
@@ -68,6 +69,9 @@ const FORCE_DYNAMIC_EXPORT_PATTERN = /export\s+const\s+dynamic\s*=\s*["']force-d
 const NO_STORE_FETCH_PATTERN = /cache\s*:\s*["']no-store["']/;
 const ZERO_REVALIDATE_PATTERN = /revalidate\s*:\s*0\b/;
 const GET_SERVER_SIDE_PROPS_PATTERN = /export\s+(?:const|async\s+function)\s+getServerSideProps\b/;
+const GET_STATIC_PROPS_PATTERN = /export\s+(?:const|async\s+function)\s+getStaticProps\b/;
+const REVALIDATE_IN_RETURN_PATTERN = /\brevalidate\s*[:=]/;
+const TURBOPACK_CACHE_PATTERN = /\bturbopackFileSystemCacheForBuild\s*:/;
 const APP_ROUTE_GET_HANDLER_PATTERN =
   /export\s+(?:async\s+)?function\s+GET\b|export\s+const\s+GET\b/;
 const PAGES_API_HANDLER_PATTERN =
@@ -82,8 +86,10 @@ const PROMISE_ALL_PATTERN = /Promise\.all\s*\(/;
 const AWAIT_TOKEN_PATTERN = /\bawait\b/g;
 const AWAIT_LINE_PATTERN = /\bawait\b/;
 const NEXT_IMAGE_IMPORT_PATTERN = /from\s+["']next\/image["']/;
-const IMAGE_WITH_UNOPTIMIZED_PATTERN =
-  /<Image\b[^>]*\bunoptimized(?:\s*=\s*(?:\{\s*true\s*\}|["']true["']))?[^>]*>/g;
+const IMAGE_TAG_PATTERN = /<Image\b[\s\S]*?\/>/g;
+const IMAGE_SRC_SVG_PATTERN =
+  /src\s*=\s*(?:["']([^"']*\.svg)["']|\{\s*["']([^"']*\.svg)["']\s*\})/i;
+const IMAGE_HAS_UNOPTIMIZED_PATTERN = /\bunoptimized(?:\s*=\s*(?:\{\s*true\s*\}|["']true["']))?/;
 const NEXT_CONFIG_UNOPTIMIZED_IMAGE_PATTERN =
   /\bimages\s*:\s*\{[\s\S]*?\bunoptimized\s*:\s*true\b[\s\S]*?\}/m;
 const NEXT_IMAGE_REMOTE_PATTERNS_PATTERN = /\bremotePatterns\s*:\s*\[([\s\S]*?)\]/m;
@@ -168,9 +174,6 @@ const collectProjectFilePaths = (rootDirectory: string): string[] => {
 const isStaticAssetPath = (relativeFilePath: string): boolean =>
   STATIC_ASSET_EXTENSIONS.has(path.extname(relativeFilePath).toLowerCase());
 
-const isPublicAssetPath = (relativeFilePath: string): boolean =>
-  relativeFilePath.startsWith("public/");
-
 const isSourceCodePath = (relativeFilePath: string): boolean =>
   SOURCE_CODE_FILE_PATTERN.test(relativeFilePath);
 
@@ -200,8 +203,10 @@ const getLineNumberForCharacterIndex = (fileContent: string, characterIndex: num
   return fileContent.slice(0, characterIndex).split("\n").length;
 };
 
-const formatMegabytes = (sizeBytes: number): string =>
-  `${(sizeBytes / BYTES_PER_MEGABYTE).toFixed(STATIC_ASSET_SIZE_DECIMAL_PLACES_COUNT)}MB`;
+const formatFileSize = (sizeBytes: number): string =>
+  sizeBytes < BYTES_PER_MEGABYTE
+    ? `${(sizeBytes / BYTES_PER_KILOBYTE).toFixed(STATIC_ASSET_SIZE_DECIMAL_PLACES_COUNT)}KB`
+    : `${(sizeBytes / BYTES_PER_MEGABYTE).toFixed(STATIC_ASSET_SIZE_DECIMAL_PLACES_COUNT)}MB`;
 
 const createVercelWarningDiagnostic = (
   filePath: string,
@@ -298,11 +303,7 @@ const collectLargeStaticAssetCandidates = (
       continue;
     }
 
-    const staticAssetWarningThresholdBytes = isPublicAssetPath(relativeFilePath)
-      ? PUBLIC_STATIC_ASSET_CDN_WARNING_THRESHOLD_BYTES
-      : STATIC_ASSET_CDN_WARNING_THRESHOLD_BYTES;
-
-    if (staticAssetSizeBytes < staticAssetWarningThresholdBytes) continue;
+    if (staticAssetSizeBytes < STATIC_ASSET_CDN_WARNING_THRESHOLD_BYTES) continue;
     largeStaticAssetCandidates.push({
       filePath: relativeFilePath,
       sizeBytes: staticAssetSizeBytes,
@@ -362,6 +363,22 @@ const collectSsgDiagnostics = (
         "Page uses `getServerSideProps` — consider static generation to improve cache hit rate and reduce server bandwidth",
         "Switch to `getStaticProps` (and optional ISR) when data can be cached safely.",
         getLineNumberForPattern(fileContent, GET_SERVER_SIDE_PROPS_PATTERN),
+      ),
+    );
+  }
+
+  if (
+    PAGES_ROUTE_FILE_PATTERN.test(relativeFilePath) &&
+    GET_STATIC_PROPS_PATTERN.test(fileContent) &&
+    !REVALIDATE_IN_RETURN_PATTERN.test(fileContent)
+  ) {
+    diagnostics.push(
+      createVercelWarningDiagnostic(
+        relativeFilePath,
+        "vercel-get-static-props-consider-isr",
+        "`getStaticProps` without `revalidate` — all pages build at deploy time, which can slow builds for large sites",
+        "Add `revalidate: 3600` (or similar) to enable ISR — pages generate on-demand and cache, reducing build time significantly.",
+        getLineNumberForPattern(fileContent, GET_STATIC_PROPS_PATTERN),
       ),
     );
   }
@@ -449,6 +466,28 @@ const collectCachingDiagnostics = (
   }
 };
 
+const collectBuildOptimizationDiagnostics = (
+  relativeFilePath: string,
+  fileContent: string,
+  diagnostics: Diagnostic[],
+): void => {
+  if (!NEXT_CONFIG_FILE_PATTERN.test(relativeFilePath)) return;
+
+  const hasExperimental = /\bexperimental\s*:\s*\{/m.test(fileContent);
+  const hasTurbopackCache = TURBOPACK_CACHE_PATTERN.test(fileContent);
+  if (hasExperimental && !hasTurbopackCache) {
+    diagnostics.push(
+      createVercelWarningDiagnostic(
+        relativeFilePath,
+        "vercel-suggest-turbopack-build-cache",
+        "Next.js 16+ supports Turbopack build cache — can reduce build time",
+        "Add `turbopackFileSystemCacheForBuild: true` inside `experimental` in next.config. Requires Next.js 16+.",
+        getLineNumberForPattern(fileContent, /\bexperimental\s*:/),
+      ),
+    );
+  }
+};
+
 const collectImageOptimizationDiagnostics = (
   relativeFilePath: string,
   fileContent: string,
@@ -512,17 +551,26 @@ const collectImageOptimizationDiagnostics = (
 
   if (!NEXT_IMAGE_IMPORT_PATTERN.test(fileContent)) return;
 
-  for (const imageMatch of fileContent.matchAll(IMAGE_WITH_UNOPTIMIZED_PATTERN)) {
-    diagnostics.push(
-      createVercelWarningDiagnostic(
-        relativeFilePath,
-        "vercel-image-unoptimized-prop",
-        "next/image uses the `unoptimized` prop — this bypasses Vercel's image transformation and caching pipeline",
-        "Remove `unoptimized` unless you intentionally offload optimization to another image CDN: https://vercel.com/docs/image-optimization",
-        getLineNumberForCharacterIndex(fileContent, imageMatch.index ?? -1),
-      ),
-    );
-    return;
+  for (const imageMatch of fileContent.matchAll(IMAGE_TAG_PATTERN)) {
+    const tagContent = imageMatch[0];
+    const matchIndex = imageMatch.index ?? -1;
+    const srcSvgMatch = tagContent.match(IMAGE_SRC_SVG_PATTERN);
+    const hasSvgSrc = Boolean(srcSvgMatch?.[1] ?? srcSvgMatch?.[2]);
+    const hasUnoptimized = IMAGE_HAS_UNOPTIMIZED_PATTERN.test(tagContent);
+
+    if (hasSvgSrc && hasUnoptimized) continue;
+
+    if (hasSvgSrc && !hasUnoptimized) {
+      diagnostics.push(
+        createVercelWarningDiagnostic(
+          relativeFilePath,
+          "vercel-image-svg-without-unoptimized",
+          "next/image with SVG src should use the `unoptimized` prop — SVGs are not optimized by the pipeline",
+          "Add unoptimized to the Image component when using SVG sources: https://vercel.com/docs/image-optimization",
+          getLineNumberForCharacterIndex(fileContent, matchIndex),
+        ),
+      );
+    }
   }
 };
 
@@ -648,7 +696,7 @@ export const runVercelChecks = (
       createVercelWarningDiagnostic(
         largeStaticAssetCandidate.filePath,
         "vercel-large-static-asset",
-        `Large static asset (${formatMegabytes(largeStaticAssetCandidate.sizeBytes)}) is served from the app repository — this can consume Vercel bandwidth quickly`,
+        `Large static asset (${formatFileSize(largeStaticAssetCandidate.sizeBytes)}) is served from the app repository — this can consume Vercel bandwidth quickly`,
         "Move large static assets to a CDN/object storage provider (Cloudflare R2, S3, or media CDN) and serve optimized variants.",
       ),
     );
@@ -667,6 +715,7 @@ export const runVercelChecks = (
     collectEdgeDiagnostics(relativeFilePath, fileContent, diagnostics);
     collectCachingDiagnostics(relativeFilePath, fileContent, diagnostics);
     collectImageOptimizationDiagnostics(relativeFilePath, fileContent, diagnostics);
+    collectBuildOptimizationDiagnostics(relativeFilePath, fileContent, diagnostics);
     collectDatabaseAwaitDiagnostics(relativeFilePath, fileContent, diagnostics);
 
     if (isApiRoutePath(relativeFilePath)) {
@@ -678,6 +727,18 @@ export const runVercelChecks = (
   const vercelConfig = readVercelConfig(rootDirectory);
   collectCronDiagnostic(includedPathSet, vercelConfig, diagnostics);
   collectFluidComputeDiagnostic(apiRouteFilePaths.length, apiRouteFilePaths, diagnostics);
+
+  if (projectFilePaths.length >= LARGE_PROJECT_FILE_COUNT_THRESHOLD) {
+    diagnostics.push(
+      createVercelWarningDiagnostic(
+        "package.json",
+        "vercel-suggest-deploy-archive",
+        `Large project (${projectFilePaths.length.toLocaleString()} files) — deployment may hit API rate limits`,
+        "Use `vercel deploy --archive=tgz` in CI to upload a single archive instead of many files. Cuts deployment time ~50% and avoids rate limits.",
+        0,
+      ),
+    );
+  }
 
   return diagnostics;
 };

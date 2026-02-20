@@ -43,7 +43,7 @@ npx -y vercel-doctor@latest . --verbose --diff
 - **Vercel Platform Checks** — Scans for force-dynamic, missing cache policies, no-store fetches, and GET handlers with side effects that prevent ISR.
 
 ### 3. Bandwidth & Image Optimization
-- **Image Optimization** — Detects unoptimized images, missing sizes, and global image optimization disabled.
+- **Image Optimization** — Detects global image optimization disabled, next/image with SVG without unoptimized, missing sizes, and overly broad remote patterns.
 - **Static Assets** — Finds large static files that consume CDN bandwidth.
 
 ## Workflow

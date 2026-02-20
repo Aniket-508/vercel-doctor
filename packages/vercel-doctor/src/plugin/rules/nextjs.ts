@@ -1,7 +1,6 @@
 import {
   EFFECT_HOOK_NAMES,
   MUTATING_ROUTE_SEGMENTS,
-  OG_ROUTE_PATTERN,
   PAGE_OR_LAYOUT_FILE_PATTERN,
   PAGES_DIRECTORY_PATTERN,
   ROUTE_HANDLER_FILE_PATTERN,
@@ -12,29 +11,10 @@ import {
   getEffectCallback,
   hasDirective,
   hasJsxAttribute,
+  hasPrefetchDisabled,
   isHookCall,
 } from "../helpers.js";
 import type { EsTreeNode, Rule, RuleContext } from "../types.js";
-
-export const nextjsNoImgElement: Rule = {
-  create: (context: RuleContext) => {
-    const filename = context.getFilename?.() ?? "";
-    const isOgRoute = OG_ROUTE_PATTERN.test(filename);
-
-    return {
-      JSXOpeningElement(node: EsTreeNode) {
-        if (isOgRoute) return;
-        if (node.name?.type === "JSXIdentifier" && node.name.name === "img") {
-          context.report({
-            node,
-            message:
-              "Use next/image instead of <img> — provides automatic optimization, lazy loading, and responsive srcset",
-          });
-        }
-      },
-    };
-  },
-};
 
 export const nextjsNoClientFetchForServerData: Rule = {
   create: (context: RuleContext) => {
@@ -61,6 +41,43 @@ export const nextjsNoClientFetchForServerData: Rule = {
               "useEffect + fetch in a page/layout — fetch data server-side with a server component instead",
           });
         }
+      },
+    };
+  },
+};
+
+export const nextjsLinkPrefetchDefault: Rule = {
+  create: (context: RuleContext) => {
+    const nextLinkLocalNames = new Set<string>();
+
+    return {
+      ImportDeclaration(node: EsTreeNode) {
+        const source = node.source?.value;
+        if (source !== "next/link") return;
+        for (const specifier of node.specifiers ?? []) {
+          if (specifier.type === "ImportDefaultSpecifier" && specifier.local?.name) {
+            nextLinkLocalNames.add(specifier.local.name);
+          }
+          if (
+            specifier.type === "ImportSpecifier" &&
+            specifier.imported?.type === "Identifier" &&
+            specifier.local?.name
+          ) {
+            nextLinkLocalNames.add(specifier.local.name);
+          }
+        }
+      },
+      JSXOpeningElement(node: EsTreeNode) {
+        const elementName = node.name?.type === "JSXIdentifier" ? node.name.name : null;
+        if (!elementName || !nextLinkLocalNames.has(elementName)) return;
+        const attributes = node.attributes ?? [];
+        if (hasPrefetchDisabled(attributes)) return;
+
+        context.report({
+          node,
+          message:
+            "Link prefetches by default — adds compute. Use prefetch={false} or disable globally, then add prefetch={true} only to critical links",
+        });
       },
     };
   },

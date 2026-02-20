@@ -14,9 +14,9 @@ const esmRequire = createRequire(import.meta.url);
 const PLUGIN_CATEGORY_MAP: Record<string, string> = {};
 
 const RULE_CATEGORY_MAP: Record<string, string> = {
-  "vercel-doctor/nextjs-no-img-element": "Image Optimization",
   "vercel-doctor/nextjs-no-client-fetch-for-server-data": "Invocations",
   "vercel-doctor/nextjs-image-missing-sizes": "Image Optimization",
+  "vercel-doctor/nextjs-link-prefetch-default": "Invocations",
   "vercel-doctor/nextjs-no-side-effect-in-get-handler": "Caching",
 
   "vercel-doctor/server-after-nonblocking": "Function Duration",
@@ -25,10 +25,10 @@ const RULE_CATEGORY_MAP: Record<string, string> = {
 };
 
 const RULE_HELP_MAP: Record<string, string> = {
-  "nextjs-no-img-element":
-    "`import Image from 'next/image'` — provides automatic WebP/AVIF, lazy loading, and responsive srcset",
   "nextjs-no-client-fetch-for-server-data":
     "Remove 'use client' and fetch directly in the Server Component — no API round-trip, secrets stay on server",
+  "nextjs-link-prefetch-default":
+    "Add prefetch={false} to Link, or disable globally in next.config. Add prefetch={true} only to critical links — reduces compute",
   "nextjs-image-missing-sizes":
     'Add sizes for responsive behavior: `sizes="(max-width: 768px) 100vw, 50vw"` matching your layout breakpoints',
   "nextjs-no-side-effect-in-get-handler":

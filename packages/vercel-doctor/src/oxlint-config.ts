@@ -1,9 +1,9 @@
 import type { Framework } from "./types.js";
 
 const NEXTJS_RULES: Record<string, string> = {
-  "vercel-doctor/nextjs-no-img-element": "warn",
   "vercel-doctor/nextjs-no-client-fetch-for-server-data": "warn",
   "vercel-doctor/nextjs-image-missing-sizes": "warn",
+  "vercel-doctor/nextjs-link-prefetch-default": "warn",
   "vercel-doctor/nextjs-no-side-effect-in-get-handler": "error",
 };
 

@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
-import { PUBLIC_STATIC_ASSET_CDN_WARNING_THRESHOLD_BYTES } from "../src/constants.js";
+import { STATIC_ASSET_CDN_WARNING_THRESHOLD_BYTES } from "../src/constants.js";
 import { runVercelChecks } from "../src/utils/run-vercel-checks.js";
 
 const testProjectDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "vercel-doctor-vercel-checks-"));
@@ -35,6 +35,7 @@ writeTestFile(
   "next.config.ts",
   `
 const nextConfig = {
+  experimental: {},
   images: {
     unoptimized: true,
     remotePatterns: [
@@ -51,10 +52,7 @@ export default nextConfig;
 `,
 );
 
-writeTestFile(
-  "public/hero-video.mp4",
-  Buffer.alloc(PUBLIC_STATIC_ASSET_CDN_WARNING_THRESHOLD_BYTES + 1),
-);
+writeTestFile("public/hero-video.mp4", Buffer.alloc(STATIC_ASSET_CDN_WARNING_THRESHOLD_BYTES + 1));
 
 writeTestFile(
   "app/page.tsx",
@@ -81,6 +79,17 @@ export default function GalleryPage() {
 );
 
 writeTestFile(
+  "app/logo/page.tsx",
+  `
+import Image from "next/image";
+
+export default function LogoPage() {
+  return <Image src="/icon.svg" alt="Logo" width={40} height={40} />;
+}
+`,
+);
+
+writeTestFile(
   "pages/dashboard.tsx",
   `
 export async function getServerSideProps() {
@@ -89,6 +98,19 @@ export async function getServerSideProps() {
 
 export default function Dashboard() {
   return <div>dashboard</div>;
+}
+`,
+);
+
+writeTestFile(
+  "pages/blog/[slug].tsx",
+  `
+export async function getStaticProps({ params }) {
+  return { props: { slug: params.slug } };
+}
+
+export default function BlogPost() {
+  return <div>post</div>;
 }
 `,
 );
@@ -167,10 +189,12 @@ describe("runVercelChecks", () => {
     expect(reportedRules).toContain("vercel-consider-bun-runtime");
     expect(reportedRules).toContain("vercel-avoid-platform-cron");
     expect(reportedRules).toContain("vercel-consider-fluid-compute");
-    expect(reportedRules).toContain("vercel-image-unoptimized-prop");
+    expect(reportedRules).toContain("vercel-image-svg-without-unoptimized");
     expect(reportedRules).toContain("vercel-image-global-unoptimized");
     expect(reportedRules).toContain("vercel-image-remote-pattern-too-broad");
     expect(reportedRules).toContain("vercel-sequential-database-await");
+    expect(reportedRules).toContain("vercel-suggest-turbopack-build-cache");
+    expect(reportedRules).toContain("vercel-get-static-props-consider-isr");
   });
 
   it("respects includePaths filtering", () => {

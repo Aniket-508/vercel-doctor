@@ -1,6 +1,5 @@
 ## General Rules
 
-- MUST: Use @antfu/ni. Use `ni` to install, `nr SCRIPT_NAME` to run. `nun` to uninstall.
 - MUST: Use TypeScript interfaces over types.
 - MUST: Keep all types in the global scope.
 - MUST: Use arrow functions over function declarations
@@ -17,6 +16,16 @@
 - MUST: Put all magic numbers in `constants.ts` using `SCREAMING_SNAKE_CASE` with unit suffixes (`_MS`, `_PX`).
 - MUST: Put small, focused utility functions in `utils/` with one utility per file.
 - MUST: Use Boolean over !!.
+
+## Token Efficiency
+
+- Never re-read files you just wrote or edited. You know the contents.
+- Never re-run commands to "verify" unless the outcome was uncertain.
+- Don't echo back large blocks of code or file contents unless asked.
+- Batch related edits into single operations. Don't make 5 edits when 1 handles it.
+- Skip confirmations like "I'll continue..." Lust do it.
+- If a task needs 1 tool call, don't use 3. Plan before acting.
+- Do not summarize what you just did unless the result is ambiguous or you need additional input.
 
 ## Testing
 

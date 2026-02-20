@@ -79,14 +79,17 @@ describe("runOxlint", () => {
     () => basicReactDiagnostics,
   );
 
+  it("does not report nextjs-link-prefetch-default when Link has prefetch={false}", () => {
+    const linkPrefetchDisabledIssues = findDiagnosticsByRule(
+      nextjsDiagnostics,
+      "nextjs-link-prefetch-default",
+    ).filter((innerDiagnostic) => innerDiagnostic.filePath.includes("nav-ok"));
+    expect(linkPrefetchDisabledIssues.length).toBe(0);
+  });
+
   describeRules(
     "billing-focused nextjs rules",
     {
-      "nextjs-no-img-element": {
-        fixture: "app/page.tsx",
-        ruleSource: "rules/nextjs.ts",
-        category: "Image Optimization",
-      },
       "nextjs-no-client-fetch-for-server-data": {
         fixture: "app/layout.tsx",
         ruleSource: "rules/nextjs.ts",
@@ -96,6 +99,11 @@ describe("runOxlint", () => {
         fixture: "app/page.tsx",
         ruleSource: "rules/nextjs.ts",
         category: "Image Optimization",
+      },
+      "nextjs-link-prefetch-default": {
+        fixture: "app/nav.tsx",
+        ruleSource: "rules/nextjs.ts",
+        category: "Invocations",
       },
       "nextjs-no-side-effect-in-get-handler": {
         fixture: "app/logout/route.tsx",

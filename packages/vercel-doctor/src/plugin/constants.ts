@@ -3,7 +3,6 @@ export const SEQUENTIAL_AWAIT_THRESHOLD = 3;
 export const PAGE_OR_LAYOUT_FILE_PATTERN = /\/(page|layout)\.(tsx?|jsx?)$/;
 
 export const TEST_FILE_PATTERN = /\.(?:test|spec|stories)\.[tj]sx?$/;
-export const OG_ROUTE_PATTERN = /\/og\b/i;
 
 export const PAGES_DIRECTORY_PATTERN = /\/pages\//;
 

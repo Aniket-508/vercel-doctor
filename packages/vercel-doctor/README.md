@@ -26,9 +26,11 @@ Vercel Doctor detects your framework and project setup, then runs two analysis p
 1. **Billing lint** — detects patterns that inflate your Vercel invoice:
    - **Function duration**: sequential `await`s, blocking `after()` calls, side effects in GET handlers
    - **Caching**: missing cache policies, `force-dynamic` / `no-store` overrides, SSR where SSG would work
-   - **Image optimization**: unoptimized images, overly broad remote patterns, missing `sizes` prop
+   - **Image optimization**: global image optimization disabled, next/image with SVG without `unoptimized`, overly broad remote patterns, missing `sizes` prop
+   - **Invocations**: Link prefetch default (use `prefetch={false}` or disable globally, then add `prefetch={true}` only to critical links)
    - **Edge functions**: heavy imports, sequential awaits that burn CPU time
    - **Static assets**: large files that should be served from an external CDN
+   - **Build optimization**: Turbopack build cache (Next.js 16+), `getStaticProps` without `revalidate` (consider ISR), large projects → `vercel deploy --archive=tgz`
    - **Platform usage**: Vercel Cron vs. GitHub Actions / Cloudflare Workers, Fluid Compute, Bun runtime
 2. **Dead code** — detects unused files, exports, types, and duplicates that slow cold starts.
 
@@ -83,7 +85,7 @@ Create a `vercel-doctor.config.json` in your project root to customize behavior:
 ```json
 {
   "ignore": {
-    "rules": ["vercel-doctor/nextjs-no-img-element", "knip/exports"],
+    "rules": ["vercel-doctor/nextjs-image-missing-sizes", "knip/exports"],
     "files": ["src/generated/**"]
   }
 }
@@ -95,7 +97,7 @@ You can also use the `"vercelDoctor"` key in your `package.json` instead:
 {
   "vercelDoctor": {
     "ignore": {
-      "rules": ["vercel-doctor/nextjs-no-img-element"]
+      "rules": ["vercel-doctor/nextjs-image-missing-sizes"]
     }
   }
 }

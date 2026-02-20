@@ -80,6 +80,18 @@ const findJsxAttribute = (
 export const hasJsxAttribute = (attributes: EsTreeNode[], attributeName: string): boolean =>
   Boolean(findJsxAttribute(attributes, attributeName));
 
+const isFalseLiteral = (node: EsTreeNode | undefined): boolean =>
+  Boolean(
+    node && (node.type === "BooleanLiteral" || node.type === "Literal") && node.value === false,
+  );
+
+export const hasPrefetchDisabled = (attributes: EsTreeNode[]): boolean => {
+  const prefetchAttr = findJsxAttribute(attributes, "prefetch");
+  if (!prefetchAttr?.value) return false;
+  if (prefetchAttr.value.type !== "JSXExpressionContainer") return false;
+  return isFalseLiteral(prefetchAttr.value.expression);
+};
+
 const isCookiesOrHeadersCall = (node: EsTreeNode, methodName: string): boolean => {
   if (node.type !== "CallExpression" || node.callee?.type !== "MemberExpression") return false;
   const { object, property } = node.callee;
