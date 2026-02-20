@@ -102,7 +102,7 @@ const baseMetadata: Metadata = {
     images: [SITE.OG_IMAGE],
   },
   category: "technology",
-  icons: { icon: "/vercel-doctor-icon.svg" },
+  icons: { icon: "/favicon.svg" },
 };
 
 export { baseMetadata, createMetadata };

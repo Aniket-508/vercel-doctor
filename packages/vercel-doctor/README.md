@@ -1,7 +1,7 @@
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./assets/vercel-doctor-readme-logo-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="./assets/vercel-doctor-readme-logo-light.svg">
-  <img alt="Vercel Doctor" src="./assets/vercel-doctor-readme-logo-light.svg" width="180" height="40">
+  <source media="(prefers-color-scheme: dark)" srcset="https://vercel-doctor.com/vercel-doctor-logo-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://vercel-doctor.com/vercel-doctor-logo-light.svg">
+  <img alt="Vercel Doctor" src="https://vercel-doctor.com/vercel-doctor-logo-light.svg" width="180" height="40">
 </picture>
 
 <p align="left">

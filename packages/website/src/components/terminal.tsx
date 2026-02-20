@@ -333,7 +333,7 @@ const Terminal = () => {
         <FadeIn>
           <Spacer />
           <div className="flex items-center gap-2">
-            <Image src="/favicon.svg" alt="Vercel Doctor" width={24} height={24} />
+            <Image src="/icon-light.svg" alt="Vercel Doctor" width={24} height={24} />
             vercel-doctor
           </div>
           <div className="text-neutral-500">
