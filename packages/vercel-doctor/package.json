@@ -1,6 +1,6 @@
 {
   "name": "vercel-doctor",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Find ways to cut your Vercel bill (Next.js)",
   "keywords": [
     "diagnostics",
