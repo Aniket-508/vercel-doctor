@@ -1,4 +1,4 @@
-import { SCORE_GOOD_THRESHOLD, SCORE_OK_THRESHOLD } from "@/components/landing/constants";
+import { SCORE_GOOD_THRESHOLD, SCORE_OK_THRESHOLD } from "@/constants/score";
 
 const getScoreHexColor = (score: number): string => {
   if (score >= SCORE_GOOD_THRESHOLD) return "#4ade80";

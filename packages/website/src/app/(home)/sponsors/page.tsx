@@ -1,9 +1,11 @@
-import { Heart } from "lucide-react";
+import { HeartHandshakeIcon } from "lucide-react";
 import Image from "next/image";
-import { GridSection } from "@/components/landing/grid-section";
+import { SectionContainer } from "@/components/landing/section-layout";
 import { Footer } from "@/components/landing/footer";
-import { LINK, SPONSORS } from "@/components/landing/constants";
-import type { Sponsor } from "@/components/landing/constants";
+import { LINK } from "@/constants/links";
+import { SPONSORS } from "@/constants/sponsors";
+import type { Sponsor } from "@/constants/sponsors";
+import { Button } from "@/components/ui/button";
 
 const SponsorCard = ({ sponsor }: { sponsor: Sponsor }) => (
   <a
@@ -35,30 +37,27 @@ const EmptyCell = () => (
 );
 
 const SponsorsPage = () => {
-  const activeSponors = SPONSORS.filter(Boolean) as Sponsor[];
+  const activeSponsors = SPONSORS.filter(Boolean) as Sponsor[];
 
   return (
     <>
-      <GridSection>
-        <div className="border-b border-fd-border">
-          <div className="flex flex-col items-center gap-4 px-6 py-16 text-center">
-            <h1 className="text-3xl font-bold text-fd-foreground sm:text-4xl">Sponsors</h1>
-            <p className="max-w-lg text-fd-muted-foreground">
-              Your sponsorship means a lot to open-source projects, including Vercel Doctor.
-            </p>
-            <a
-              href={LINK.SPONSOR}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-fd-border px-5 py-2 text-sm font-medium text-fd-foreground transition-colors hover:bg-fd-muted"
-            >
-              <Heart className="size-4" />
+      <SectionContainer>
+        <div className="flex flex-col border-b border-fd-border items-center px-6 py-16 text-center">
+          <h1 className="text-3xl font-pixel font-bold text-fd-foreground sm:text-4xl mb-2">
+            Sponsors
+          </h1>
+          <p className="text-fd-muted-foreground mb-6">
+            Your sponsorship means a lot to open-source projects, including Vercel Doctor.
+          </p>
+          <Button asChild>
+            <a href={LINK.SPONSOR} target="_blank" rel="noopener noreferrer">
+              <HeartHandshakeIcon />
               Sponsor My Work
             </a>
-          </div>
+          </Button>
         </div>
 
-        {activeSponors.length > 0 && (
+        {activeSponsors.length > 0 && (
           <>
             <div className="border-b border-fd-border px-6 py-3">
               <p className="text-xs font-medium uppercase tracking-widest text-fd-muted-foreground">
@@ -66,7 +65,7 @@ const SponsorsPage = () => {
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
-              {activeSponors.map((sponsor) => (
+              {activeSponsors.map((sponsor) => (
                 <SponsorCard key={sponsor.name} sponsor={sponsor} />
               ))}
               <EmptyCell />
@@ -74,12 +73,12 @@ const SponsorsPage = () => {
           </>
         )}
 
-        {activeSponors.length === 0 && (
+        {activeSponsors.length === 0 && (
           <div className="flex flex-col items-center gap-2 px-6 py-24 text-center text-fd-muted-foreground">
             <p className="text-sm">No sponsors yet. Be the first to support this project!</p>
           </div>
         )}
-      </GridSection>
+      </SectionContainer>
       <Footer />
     </>
   );

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { LINK, SITE } from "@/components/landing/constants";
+import { LINK } from "@/constants/links";
+import { SITE } from "@/constants/site";
 
 interface CreateMetadataOptions {
   title?: string;

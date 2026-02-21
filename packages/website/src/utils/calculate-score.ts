@@ -1,4 +1,4 @@
-import { PERFECT_SCORE } from "@/components/landing/constants";
+import { PERFECT_SCORE } from "@/constants/score";
 import type { DiagnosticInput } from "@/utils/validate-diagnostic";
 
 const ERROR_RULE_PENALTY = 1.5;
@@ -24,7 +24,10 @@ const countUniqueRules = (
     }
   }
 
-  return { errorRuleCount: errorRules.size, warningRuleCount: warningRules.size };
+  return {
+    errorRuleCount: errorRules.size,
+    warningRuleCount: warningRules.size,
+  };
 };
 
 const calculateScore = (diagnostics: DiagnosticInput[]): number => {

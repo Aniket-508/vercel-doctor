@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { COMMAND, PERFECT_SCORE, SITE } from "@/components/landing/constants";
+import { COMMAND } from "@/constants/command";
+import { PERFECT_SCORE } from "@/constants/score";
+import { SITE } from "@/constants/site";
 import getScoreLabel from "@/utils/get-score-label";
 import getScoreColorClass from "@/utils/get-score-color-class";
 import clampScore from "@/utils/clamp-score";
@@ -42,7 +44,9 @@ export const generateMetadata = async ({
     descriptionParts.push(`${warningCount} warning${warningCount === 1 ? "" : "s"}`);
   const description =
     descriptionParts.length > 0
-      ? `${descriptionParts.join(", ")} found. Run vercel-doctor on your codebase to reduce your Vercel bill.`
+      ? `${descriptionParts.join(
+          ", ",
+        )} found. Run vercel-doctor on your codebase to reduce your Vercel bill.`
       : "Run vercel-doctor on your codebase to reduce your Vercel bill.";
 
   const ogSearchParams = new URLSearchParams();
@@ -86,8 +90,12 @@ const SharePage = async ({ searchParams }: { searchParams: Promise<ShareSearchPa
 
   const projectLabel = projectName ? `${projectName} ` : "My Next.js project ";
   const tweetText = `${projectLabel}scored ${score}/${PERFECT_SCORE} (${label}) on Vercel Doctor. Run it on yours:`;
-  const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}`;
-  const linkedinShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
+  const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+    tweetText,
+  )}&url=${encodeURIComponent(shareUrl)}`;
+  const linkedinShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
+    shareUrl,
+  )}`;
 
   return (
     <div className="mx-auto min-h-screen w-full max-w-3xl bg-[#0a0a0a] p-6 pb-32 font-mono text-base leading-relaxed text-neutral-300 sm:p-8 sm:pb-40 sm:text-lg">

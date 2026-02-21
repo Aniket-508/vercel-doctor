@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { source } from "@/lib/source";
-import { SITE } from "@/components/landing/constants";
+import { SITE } from "@/constants/site";
 
 const staticPages = [
   { path: "/", priority: 1.0 },

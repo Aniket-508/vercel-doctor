@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { SITE } from "@/components/landing/constants";
+import { SITE } from "@/constants/site";
 
 const robots = (): MetadataRoute.Robots => ({
   rules: [

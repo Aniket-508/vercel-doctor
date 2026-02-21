@@ -1,45 +1,77 @@
 "use client";
 
 import Image from "next/image";
-import Marquee from "react-fast-marquee";
-import { GridSection } from "./grid-section";
-import { FEATURED_TESTIMONIAL, TESTIMONIALS_ROW_ONE, TESTIMONIALS_ROW_TWO } from "./constants";
-import type { Testimonial } from "./constants";
+import { SectionContainer, SectionFiller, SectionHelper } from "./section-layout";
+import {
+  FEATURED_TESTIMONIAL,
+  TESTIMONIALS_ROW_ONE,
+  TESTIMONIALS_ROW_TWO,
+} from "@/constants/testimonials";
 
-const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => (
-  <a
-    href={testimonial.url}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="flex h-full w-72 shrink-0 flex-col justify-between border-r border-fd-border p-5 transition-colors hover:bg-fd-accent/20"
-  >
-    <p className="text-sm leading-relaxed text-fd-foreground">&ldquo;{testimonial.quote}&rdquo;</p>
-    <div className="mt-4 flex items-center gap-3">
-      <div className="relative size-8 shrink-0 overflow-hidden rounded-full ring-2 ring-fd-border">
-        <Image
-          src={testimonial.authorAvatar}
-          alt={testimonial.authorName}
-          width={32}
-          height={32}
-          className="size-full object-cover"
-        />
-      </div>
-      <div>
-        <p className="text-sm font-medium text-fd-foreground">{testimonial.authorName}</p>
-        <p className="text-xs text-fd-muted-foreground">{testimonial.authorTagline}</p>
-      </div>
+import { Marquee, MarqueeContent, MarqueeFade, MarqueeItem } from "@/components/ui/marquee";
+import {
+  Testimonial,
+  TestimonialAuthor,
+  TestimonialAuthorName,
+  TestimonialAuthorTagline,
+  TestimonialAvatar,
+  TestimonialAvatarImg,
+  TestimonialAvatarRing,
+  TestimonialQuote,
+  TestimonialVerifiedBadge,
+} from "@/components/ui/testimonial";
+
+export function TestimonialsMarquee() {
+  return (
+    <div className="w-full space-y-4 bg-background [&_.rfm-initial-child-container]:items-stretch! [&_.rfm-marquee]:items-stretch!">
+      {[TESTIMONIALS_ROW_ONE, TESTIMONIALS_ROW_TWO].map((list, index) => (
+        <Marquee key={index} className="border-y border-edge">
+          <MarqueeFade side="left" />
+          <MarqueeFade side="right" />
+
+          <MarqueeContent direction={index % 2 === 1 ? "right" : "left"}>
+            {list.map((item) => (
+              <MarqueeItem key={item.url} className="mx-0 h-full w-xs border-r border-edge">
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block h-full transition-[background-color] ease-out hover:bg-accent/20"
+                >
+                  <Testimonial>
+                    <TestimonialQuote>
+                      <p>{item.quote}</p>
+                    </TestimonialQuote>
+
+                    <TestimonialAuthor>
+                      <TestimonialAvatar>
+                        <TestimonialAvatarImg src={item.authorAvatar} />
+                        <TestimonialAvatarRing />
+                      </TestimonialAvatar>
+
+                      <TestimonialAuthorName>
+                        {item.authorName}
+                        <TestimonialVerifiedBadge />
+                      </TestimonialAuthorName>
+
+                      <TestimonialAuthorTagline>{item.authorTagline}</TestimonialAuthorTagline>
+                    </TestimonialAuthor>
+                  </Testimonial>
+                </a>
+              </MarqueeItem>
+            ))}
+          </MarqueeContent>
+        </Marquee>
+      ))}
     </div>
-  </a>
-);
+  );
+}
 
 export const Testimonials = () => (
-  <GridSection>
-    <div className="border-t border-fd-border">
-      <div className="px-6 py-10 md:px-10">
-        <p className="text-xs font-medium uppercase tracking-widest text-fd-muted-foreground">
-          What people are saying
-        </p>
-      </div>
+  <>
+    <SectionFiller />
+    <SectionContainer>
+      <SectionHelper>[WHAT PEOPLE ARE SAYING]</SectionHelper>
 
       <div className="flex flex-col border-t border-fd-border md:flex-row">
         {/* Left: Featured testimonial (40%) */}
@@ -68,23 +100,10 @@ export const Testimonials = () => (
         </div>
 
         {/* Right: Marquee testimonials (60%) */}
-        <div className="flex w-full flex-col md:w-3/5">
-          <div className="border-b border-fd-border">
-            <Marquee gradient={false} speed={30} pauseOnHover>
-              {TESTIMONIALS_ROW_ONE.map((testimonial) => (
-                <TestimonialCard key={testimonial.authorName} testimonial={testimonial} />
-              ))}
-            </Marquee>
-          </div>
-          <div>
-            <Marquee gradient={false} speed={30} direction="right" pauseOnHover>
-              {TESTIMONIALS_ROW_TWO.map((testimonial) => (
-                <TestimonialCard key={testimonial.authorName} testimonial={testimonial} />
-              ))}
-            </Marquee>
-          </div>
+        <div className="flex w-full flex-col justify-center md:w-3/5">
+          <TestimonialsMarquee />
         </div>
       </div>
-    </div>
-  </GridSection>
+    </SectionContainer>
+  </>
 );
