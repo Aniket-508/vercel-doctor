@@ -73,8 +73,8 @@ export const Hero = () => {
 
   return (
     <SectionContainer>
-      <SectionContent className="border-t-0 flex flex-col gap-8 px-4 py-16 md:flex-row md:items-center md:gap-12 md:px-12 md:py-24">
-        <div className="flex flex-col items-start gap-6 md:w-1/2">
+      <SectionContent className="border-t-0 flex flex-col gap-8 px-4 py-8 md:flex-row md:items-center md:gap-12 md:px-12 md:py-24">
+        <div className="flex flex-col items-center gap-6 text-center md:w-1/2 md:items-start md:text-left">
           <SkillsCommand />
 
           <h1 className="text-4xl font-pixel font-bold tracking-tight text-fd-foreground sm:text-5xl md:text-6xl">

@@ -1,4 +1,3 @@
-import { Rss } from "lucide-react";
 import { LINK } from "@/constants/links";
 import { SITE } from "@/constants/site";
 import { XIcon, LlmsIcon } from "@/components/icons";
@@ -9,7 +8,7 @@ export const Footer = () => (
       <p className="text-center sm:text-left">
         Built by{" "}
         <a
-          href={LINK.TWITTER}
+          href={LINK.PORTFOLIO}
           target="_blank"
           rel="noopener noreferrer"
           className="font-medium text-fd-foreground underline underline-offset-4"
@@ -46,13 +45,6 @@ export const Footer = () => (
           aria-label="Twitter"
         >
           <XIcon className="size-4" />
-        </a>
-        <a
-          href={LINK.RSS}
-          className="transition-colors hover:text-fd-foreground"
-          aria-label="RSS Feed"
-        >
-          <Rss className="size-4" />
         </a>
         <a
           href={LINK.LLMS}
