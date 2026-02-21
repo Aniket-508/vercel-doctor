@@ -75,7 +75,7 @@ export const Testimonials = () => (
 
       <SectionContent className="flex flex-col md:flex-row">
         {/* Left: Featured testimonial (40%) */}
-        <div className="flex w-full flex-col justify-center border-b border-fd-border p-8 md:w-2/5 md:border-b-0 md:border-r md:p-12">
+        <div className="flex w-full flex-col justify-center border-fd-border p-8 md:w-2/5 md:border-r md:p-12">
           <div className="mb-6 text-5xl font-serif text-fd-muted-foreground/40">&ldquo;</div>
           <blockquote className="mb-8 text-xl font-medium leading-relaxed text-fd-foreground md:text-2xl">
             {FEATURED_TESTIMONIAL.quote}

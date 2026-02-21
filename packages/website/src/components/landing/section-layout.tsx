@@ -28,10 +28,10 @@ export const SectionHelper = ({ children, className }: React.ComponentProps<"div
   </div>
 );
 
-export const SectionFiller = () => (
+export const SectionFiller = ({ className }: React.ComponentProps<"div">) => (
   <div className="px-4 md:px-12">
-    <div className="mx-auto max-w-(--fd-layout-width) border-t border-x border-fd-border">
+    <SectionContent className={className}>
       <div className="w-full h-24 md:h-28 lg:h-32" />
-    </div>
+    </SectionContent>
   </div>
 );

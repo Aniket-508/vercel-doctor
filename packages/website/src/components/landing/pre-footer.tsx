@@ -9,9 +9,9 @@ import { SectionContainer, SectionContent, SectionFiller, SectionHelper } from "
 
 const useDynamicDate = () => {
   const now = new Date();
-  const month = now.toLocaleString("en-US", { month: "short" });
-  const year = now.getFullYear();
-  return `${month} ${year}`;
+  const month = (now.getMonth() + 1).toString().padStart(2, "0");
+  const year = now.getFullYear().toString().slice(-2);
+  return `${month}/${year}`;
 };
 
 export const PreFooter = () => {
@@ -19,7 +19,7 @@ export const PreFooter = () => {
 
   return (
     <>
-      <SectionFiller />
+      <SectionFiller className="max-md:border-t-0" />
       <SectionContainer>
         <SectionHelper className="border-b">[READY TO SAVE MONEY?]</SectionHelper>
         <SectionContent className="overflow-hidden bg-linear-to-b from-fd-muted/40 to-fd-muted/80 dark:from-fd-muted/20 dark:to-fd-muted/40">
@@ -27,6 +27,7 @@ export const PreFooter = () => {
             <h2 className="text-3xl font-pixel font-bold text-balance tracking-tight text-fd-foreground sm:text-4xl md:text-6xl">
               Better billing <br />
               by {dynamicDate}
+              <span className="animate-[pulse-dot_1s_steps(1)_infinite]">.</span>
             </h2>
 
             <div className="flex items-center gap-4">
