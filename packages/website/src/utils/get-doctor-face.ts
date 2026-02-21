@@ -1,4 +1,4 @@
-import { SCORE_GOOD_THRESHOLD, SCORE_OK_THRESHOLD } from "@/constants";
+import { SCORE_GOOD_THRESHOLD, SCORE_OK_THRESHOLD } from "@/components/landing/constants";
 
 const getDoctorFace = (score: number): [string, string] => {
   if (score >= SCORE_GOOD_THRESHOLD) return ["◠ ◠", " ▽ "];

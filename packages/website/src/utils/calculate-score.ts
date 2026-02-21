@@ -1,4 +1,4 @@
-import { PERFECT_SCORE } from "@/constants";
+import { PERFECT_SCORE } from "@/components/landing/constants";
 import type { DiagnosticInput } from "@/utils/validate-diagnostic";
 
 const ERROR_RULE_PENALTY = 1.5;

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { COMMAND, PERFECT_SCORE, SITE } from "@/constants";
+import { COMMAND, PERFECT_SCORE, SITE } from "@/components/landing/constants";
 import getScoreLabel from "@/utils/get-score-label";
 import getScoreColorClass from "@/utils/get-score-color-class";
 import clampScore from "@/utils/clamp-score";
@@ -7,7 +7,6 @@ import DoctorFace from "@/components/doctor-face";
 import AnimatedScore from "./animated-score";
 import BadgeSnippet from "./badge-snippet";
 
-const SHARE_BASE_URL = `${SITE.URL}/share`;
 const X_ICON_PATH =
   "M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z";
 const LINKEDIN_ICON_PATH =
@@ -20,6 +19,8 @@ interface ShareSearchParams {
   w?: string;
   f?: string;
 }
+
+const SHARE_BASE_URL = `${SITE.URL}/share`;
 
 export const generateMetadata = async ({
   searchParams,
@@ -41,9 +42,7 @@ export const generateMetadata = async ({
     descriptionParts.push(`${warningCount} warning${warningCount === 1 ? "" : "s"}`);
   const description =
     descriptionParts.length > 0
-      ? `${descriptionParts.join(
-          ", ",
-        )} found. Run vercel-doctor on your codebase to reduce your Vercel bill.`
+      ? `${descriptionParts.join(", ")} found. Run vercel-doctor on your codebase to reduce your Vercel bill.`
       : "Run vercel-doctor on your codebase to reduce your Vercel bill.";
 
   const ogSearchParams = new URLSearchParams();
@@ -87,12 +86,8 @@ const SharePage = async ({ searchParams }: { searchParams: Promise<ShareSearchPa
 
   const projectLabel = projectName ? `${projectName} ` : "My Next.js project ";
   const tweetText = `${projectLabel}scored ${score}/${PERFECT_SCORE} (${label}) on Vercel Doctor. Run it on yours:`;
-  const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-    tweetText,
-  )}&url=${encodeURIComponent(shareUrl)}`;
-  const linkedinShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
-    shareUrl,
-  )}`;
+  const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}`;
+  const linkedinShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
 
   return (
     <div className="mx-auto min-h-screen w-full max-w-3xl bg-[#0a0a0a] p-6 pb-32 font-mono text-base leading-relaxed text-neutral-300 sm:p-8 sm:pb-40 sm:text-lg">

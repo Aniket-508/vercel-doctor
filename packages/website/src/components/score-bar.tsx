@@ -1,4 +1,4 @@
-import { PERFECT_SCORE } from "@/constants";
+import { PERFECT_SCORE } from "@/components/landing/constants";
 import getScoreColorClass from "@/utils/get-score-color-class";
 
 interface ScoreBarProps {

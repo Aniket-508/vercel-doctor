@@ -59,6 +59,7 @@
   },
   "devDependencies": {
     "@types/prompts": "^2.4.9",
-    "tsdown": "^0.20.3"
+    "tsdown": "^0.20.3",
+    "vitest": "^4.0.18"
   }
 }

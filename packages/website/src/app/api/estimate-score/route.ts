@@ -1,4 +1,4 @@
-import { API_CORS_HEADERS } from "@/constants";
+import { API_CORS_HEADERS } from "@/components/landing/constants";
 import getScoreLabel from "@/utils/get-score-label";
 import { countUniqueRules, scoreFromRuleCounts } from "@/utils/calculate-score";
 import { isValidDiagnostic } from "@/utils/validate-diagnostic";

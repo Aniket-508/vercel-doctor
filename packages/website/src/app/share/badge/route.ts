@@ -1,4 +1,8 @@
-import { PERFECT_SCORE, SCORE_GOOD_THRESHOLD, SCORE_OK_THRESHOLD } from "@/constants";
+import {
+  PERFECT_SCORE,
+  SCORE_GOOD_THRESHOLD,
+  SCORE_OK_THRESHOLD,
+} from "@/components/landing/constants";
 
 const BADGE_HEIGHT_PX = 20;
 const LABEL_TEXT = "vercel doctor";

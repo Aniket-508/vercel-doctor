@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PERFECT_SCORE } from "@/constants";
+import { PERFECT_SCORE } from "@/components/landing/constants";
 import getScoreColorClass from "@/utils/get-score-color-class";
 import getScoreLabel from "@/utils/get-score-label";
 import easeOutCubic from "@/utils/ease-out-cubic";

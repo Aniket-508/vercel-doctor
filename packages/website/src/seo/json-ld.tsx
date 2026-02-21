@@ -1,4 +1,4 @@
-import { LINK, SITE } from "@/constants";
+import { LINK, SITE } from "@/components/landing/constants";
 
 const WebsiteJsonLd = () => {
   const jsonLd = {
@@ -108,15 +108,13 @@ const FAQJsonLd = () => {
   );
 };
 
-const JsonLdScripts = () => {
-  return (
-    <>
-      <WebsiteJsonLd />
-      <SoftwareSourceCodeJsonLd />
-      <OrganizationJsonLd />
-      <FAQJsonLd />
-    </>
-  );
-};
+const JsonLdScripts = () => (
+  <>
+    <WebsiteJsonLd />
+    <SoftwareSourceCodeJsonLd />
+    <OrganizationJsonLd />
+    <FAQJsonLd />
+  </>
+);
 
 export { JsonLdScripts, WebsiteJsonLd, SoftwareSourceCodeJsonLd, OrganizationJsonLd, FAQJsonLd };
