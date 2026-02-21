@@ -1,0 +1,98 @@
+---
+title: Configuration
+description: Configure Vercel Doctor with a config file to ignore rules, files, and customize behavior.
+icon: Settings
+---
+
+Vercel Doctor works out of the box with zero configuration. When you need to customize behavior, you can add a config file.
+
+## Config file
+
+Create a `vercel-doctor.config.json` in your project root:
+
+```json
+{
+  "ignore": {
+    "rules": ["vercel-doctor/nextjs-link-prefetch-default"],
+    "files": ["src/generated/**"]
+  }
+}
+```
+
+Alternatively, add a `"vercelDoctor"` key to your `package.json`:
+
+```json
+{
+  "vercelDoctor": {
+    "ignore": {
+      "rules": ["knip/exports"],
+      "files": ["src/generated/**"]
+    }
+  }
+}
+```
+
+If both exist, `vercel-doctor.config.json` takes precedence.
+
+## Options
+
+| Key            | Type                | Default | Description                                   |
+| -------------- | ------------------- | ------- | --------------------------------------------- |
+| `ignore.rules` | `string[]`          | `[]`    | Rule IDs to suppress, in `plugin/rule` format |
+| `ignore.files` | `string[]`          | `[]`    | Glob patterns for file paths to skip          |
+| `lint`         | `boolean`           | `true`  | Enable or disable billing lint rules          |
+| `deadCode`     | `boolean`           | `true`  | Enable or disable dead code detection         |
+| `verbose`      | `boolean`           | `false` | Show file paths and line numbers per rule     |
+| `diff`         | `boolean \| string` | `false` | Enable diff mode or pin a base branch         |
+
+## Ignoring rules
+
+Use the `plugin/rule` format for rule IDs:
+
+```json
+{
+  "ignore": {
+    "rules": [
+      "vercel-doctor/nextjs-image-missing-sizes",
+      "vercel-doctor/vercel-large-static-asset",
+      "knip/exports"
+    ]
+  }
+}
+```
+
+See the [Rules](/docs/rules/function-duration) pages for all available rule IDs.
+
+## Ignoring files
+
+Use glob patterns to exclude files from scanning:
+
+```json
+{
+  "ignore": {
+    "files": ["src/generated/**", "**/*.stories.tsx", "scripts/**"]
+  }
+}
+```
+
+## CLI overrides
+
+CLI flags always take precedence over config file values. For example, `--verbose` on the command line overrides `"verbose": false` in the config file.
+
+## Full example
+
+```json
+{
+  "ignore": {
+    "rules": [
+      "vercel-doctor/vercel-consider-bun-runtime",
+      "vercel-doctor/vercel-avoid-platform-cron"
+    ],
+    "files": ["src/generated/**", "e2e/**"]
+  },
+  "lint": true,
+  "deadCode": true,
+  "verbose": false,
+  "diff": "main"
+}
+```

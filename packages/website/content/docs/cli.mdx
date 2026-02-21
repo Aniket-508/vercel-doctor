@@ -1,0 +1,97 @@
+---
+title: CLI Reference
+description: All command-line options and flags for Vercel Doctor.
+icon: Terminal
+---
+
+## Usage
+
+```bash
+npx -y vercel-doctor@latest [directory] [options]
+```
+
+The `directory` argument defaults to `.` (current directory).
+
+## Options
+
+| Flag               | Description                                           |
+| ------------------ | ----------------------------------------------------- |
+| `-v, --version`    | Display the current version                           |
+| `--no-lint`        | Skip billing lint rules                               |
+| `--no-dead-code`   | Skip dead code detection (Knip)                       |
+| `--verbose`        | Show file paths and line numbers per rule             |
+| `--score`          | Output only the numeric score (useful for CI)         |
+| `-y, --yes`        | Skip interactive prompts, scan all workspace projects |
+| `--project <name>` | Select specific workspace project(s), comma-separated |
+| `--diff [base]`    | Scan only files changed vs the base branch            |
+| `--offline`        | Skip anonymous telemetry used for score calculation   |
+
+## Examples
+
+### Scan the current directory
+
+```bash
+npx -y vercel-doctor@latest .
+```
+
+### Scan with verbose output
+
+```bash
+npx -y vercel-doctor@latest . --verbose
+```
+
+Shows affected file paths and line numbers for each diagnostic.
+
+### Scan only changed files
+
+```bash
+npx -y vercel-doctor@latest . --diff
+```
+
+Auto-detects the base branch. You can also pin a specific base:
+
+```bash
+npx -y vercel-doctor@latest . --diff main
+```
+
+### Scan a specific workspace project
+
+```bash
+npx -y vercel-doctor@latest . --project web
+```
+
+For multiple projects:
+
+```bash
+npx -y vercel-doctor@latest . --project web,api
+```
+
+### Skip dead code detection
+
+```bash
+npx -y vercel-doctor@latest . --no-dead-code
+```
+
+### CI usage
+
+```bash
+npx -y vercel-doctor@latest . --yes --score
+```
+
+The `--yes` flag skips interactive prompts. Combined with `--score`, it outputs only the numeric score for use in scripts and pipelines.
+
+## Programmatic API
+
+Vercel Doctor also exports a programmatic API:
+
+```ts
+import { run } from "vercel-doctor/api";
+```
+
+## Oxlint Plugin
+
+The billing lint rules are available as a standalone Oxlint plugin:
+
+```ts
+import plugin from "vercel-doctor/oxlint-plugin";
+```

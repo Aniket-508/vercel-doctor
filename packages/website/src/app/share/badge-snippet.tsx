@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SITE } from "@/constants";
+import { SITE } from "@/constants/site";
 
 const COPY_FEEDBACK_DURATION_MS = 2000;
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PERFECT_SCORE } from "@/constants";
+import { PERFECT_SCORE } from "@/constants/score";
 import getScoreColorClass from "@/utils/get-score-color-class";
 import getScoreLabel from "@/utils/get-score-label";
 import easeOutCubic from "@/utils/ease-out-cubic";
@@ -35,7 +35,7 @@ const AnimatedScore = ({ targetScore }: { targetScore: number }) => {
 
   return (
     <>
-      <div className="mb-2 pl-2">
+      <div className="mb-2 pl-2 font-mono">
         <span className={colorClass}>{animatedScore}</span>
         {` / ${PERFECT_SCORE}  `}
         <span className={colorClass}>{getScoreLabel(animatedScore)}</span>

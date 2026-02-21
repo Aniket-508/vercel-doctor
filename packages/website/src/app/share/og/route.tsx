@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { ImageResponse } from "next/og";
-import { PERFECT_SCORE } from "@/constants";
+import { PERFECT_SCORE } from "@/constants/score";
 import getScoreLabel from "@/utils/get-score-label";
 import getScoreHexColor from "@/utils/get-score-hex-color";
 

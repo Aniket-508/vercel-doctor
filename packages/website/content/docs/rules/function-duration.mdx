@@ -1,0 +1,91 @@
+---
+title: Function Duration
+description: Rules that detect patterns increasing serverless function execution time.
+---
+
+These rules catch patterns that inflate the wall-clock time of your serverless functions. Shorter functions mean lower bills — Vercel charges per GB-second of execution time.
+
+## async-parallel
+
+<Callout type="warn">Warning · `vercel-doctor/async-parallel`</Callout>
+
+Detects 3 or more sequential `await` statements that appear independent — meaning later awaits don't reference variables from earlier ones.
+
+**Why it matters:** Sequential awaits run one after another. If they're independent, running them in parallel with `Promise.all()` can cut function duration significantly.
+
+```ts title="Bad"
+const users = await db.user.findMany();
+const posts = await db.post.findMany();
+const comments = await db.comment.findMany();
+```
+
+```ts title="Good"
+const [users, posts, comments] = await Promise.all([
+  db.user.findMany(),
+  db.post.findMany(),
+  db.comment.findMany(),
+]);
+```
+
+---
+
+## server-after-nonblocking
+
+<Callout type="warn">Warning · `vercel-doctor/server-after-nonblocking`</Callout>
+
+Detects `console.log()`, `console.info()`, `console.warn()`, `analytics.track()`, `analytics.identify()`, or `analytics.page()` calls in server actions (files with `"use server"`).
+
+**Why it matters:** Logging and analytics calls block the response until they complete. Wrapping them in `after()` lets the response finish immediately while the work continues in the background.
+
+```ts title="Bad"
+"use server";
+
+export const updateUser = async (data: FormData) => {
+  await db.user.update({ ... });
+  console.log("User updated");
+  analytics.track("user_updated");
+};
+```
+
+```ts title="Good"
+"use server";
+
+import { after } from "next/server";
+
+export const updateUser = async (data: FormData) => {
+  await db.user.update({ ... });
+  after(() => {
+    console.log("User updated");
+    analytics.track("user_updated");
+  });
+};
+```
+
+---
+
+## vercel-edge-sequential-await
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-edge-sequential-await`</Callout>
+
+Detects edge runtime files with 2 or more sequential `await` calls without `Promise.all`.
+
+**Why it matters:** Edge functions have strict execution time limits. Sequential I/O wastes precious milliseconds that could be parallelized.
+
+```ts title="Bad"
+export const runtime = "edge";
+
+export async function GET() {
+  const user = await getUser();
+  const settings = await getSettings();
+  return Response.json({ user, settings });
+}
+```
+
+```ts title="Good"
+export const runtime = "edge";
+
+export async function GET() {
+  const [user, settings] = await Promise.all([getUser(), getSettings()]);
+  return Response.json({ user, settings });
+}
+```

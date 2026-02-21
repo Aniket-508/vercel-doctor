@@ -1,4 +1,4 @@
-import { SCORE_GOOD_THRESHOLD, SCORE_OK_THRESHOLD } from "@/constants";
+import { SCORE_GOOD_THRESHOLD, SCORE_OK_THRESHOLD } from "@/constants/score";
 
 const getScoreColorClass = (score: number): string => {
   if (score >= SCORE_GOOD_THRESHOLD) return "text-green-400";

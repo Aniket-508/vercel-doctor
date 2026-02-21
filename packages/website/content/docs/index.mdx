@@ -1,0 +1,72 @@
+---
+title: What is Vercel Doctor?
+description: Reduce your Vercel bill by scanning your Next.js codebase for costly patterns.
+icon: CircleQuestionMark
+---
+
+import { Step, Steps } from "fumadocs-ui/components/steps";
+
+Vercel Doctor is a specialized health check tool for Next.js projects deployed on Vercel. It scans your codebase for patterns that inflate your bill — function duration, uncached routes, unoptimized images, and more — then gives you a score out of 100 with actionable fixes.
+
+## Quick Start
+
+<Steps>
+
+<Step>
+### Run on your project
+
+```bash
+npx -y vercel-doctor@latest .
+```
+
+That's it. No install, no config. It scans your codebase and outputs a score with diagnostics.
+
+</Step>
+
+<Step>
+### Fix the issues
+
+Each diagnostic includes a help message explaining what to change and why. Fix the highest-impact rules first — errors before warnings.
+
+</Step>
+
+<Step>
+### Re-run to verify
+
+```bash
+npx -y vercel-doctor@latest . --diff
+```
+
+Use `--diff` on feature branches to scan only the files you changed.
+
+</Step>
+
+</Steps>
+
+## What it checks
+
+Vercel Doctor runs two analysis passes in parallel:
+
+1. **Billing lint** — AST-based and pattern-based rules that detect costly Next.js and Vercel patterns
+2. **Dead code detection** — finds unused files, exports, and types that bloat your bundle and slow cold starts
+
+### Rule categories
+
+| Category                                             | Rules | What it catches                                                                            |
+| ---------------------------------------------------- | ----- | ------------------------------------------------------------------------------------------ |
+| [Function Duration](/docs/rules/function-duration)   | 3     | Sequential awaits, blocking logging, non-parallel I/O                                      |
+| [Caching](/docs/rules/caching)                       | 6     | `force-dynamic`, missing cache policies, `no-store` fetches, side effects in GET handlers  |
+| [Invocations](/docs/rules/invocations)               | 2     | Client-side fetching in pages, aggressive link prefetching                                 |
+| [Image Optimization](/docs/rules/image-optimization) | 4     | Global `unoptimized`, missing `sizes`, broad remote patterns, SVG without `unoptimized`    |
+| [Platform](/docs/rules/platform)                     | 8     | Edge heavy imports, cron jobs, Bun runtime, Fluid Compute, deploy archive, Turbopack cache |
+| [Dead Code](/docs/rules/dead-code)                   | 4     | Unused files, exports, types, and duplicates                                               |
+
+## Features
+
+- **Zero config** — runs out of the box on any Next.js project
+- **Monorepo support** — auto-detects workspaces, lets you pick which projects to scan
+- **Diff mode** — scan only changed files on feature branches
+- **Scoring** — 0–100 score with Great / Needs work / Critical labels
+- **CI-friendly** — non-interactive mode for automated pipelines
+- **Configurable** — ignore rules or files via config file
+- **AI skill** — install as a skill for Claude Code, Cursor, Codex, and more

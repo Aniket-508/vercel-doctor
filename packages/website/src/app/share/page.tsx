@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { COMMAND, PERFECT_SCORE, SITE } from "@/constants";
+import { COMMAND } from "@/constants/command";
+import { PERFECT_SCORE } from "@/constants/score";
+import { SITE } from "@/constants/site";
 import getScoreLabel from "@/utils/get-score-label";
 import getScoreColorClass from "@/utils/get-score-color-class";
 import clampScore from "@/utils/clamp-score";
@@ -7,7 +9,6 @@ import DoctorFace from "@/components/doctor-face";
 import AnimatedScore from "./animated-score";
 import BadgeSnippet from "./badge-snippet";
 
-const SHARE_BASE_URL = `${SITE.URL}/share`;
 const X_ICON_PATH =
   "M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z";
 const LINKEDIN_ICON_PATH =
@@ -20,6 +21,8 @@ interface ShareSearchParams {
   w?: string;
   f?: string;
 }
+
+const SHARE_BASE_URL = `${SITE.URL}/share`;
 
 export const generateMetadata = async ({
   searchParams,
