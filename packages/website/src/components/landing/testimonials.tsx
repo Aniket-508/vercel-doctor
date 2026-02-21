@@ -43,18 +43,22 @@ export function TestimonialsMarquee() {
                       <p>{item.quote}</p>
                     </TestimonialQuote>
 
-                    <TestimonialAuthor>
+                    <TestimonialAuthor className={!item.authorTagline ? "grid-rows-1" : undefined}>
                       <TestimonialAvatar>
                         <TestimonialAvatarImg src={item.authorAvatar} />
                         <TestimonialAvatarRing />
                       </TestimonialAvatar>
 
-                      <TestimonialAuthorName>
+                      <TestimonialAuthorName
+                        className={!item.authorTagline ? "flex items-center" : undefined}
+                      >
                         {item.authorName}
-                        <TestimonialVerifiedBadge />
+                        {item.authorTagline && <TestimonialVerifiedBadge />}
                       </TestimonialAuthorName>
 
-                      <TestimonialAuthorTagline>{item.authorTagline}</TestimonialAuthorTagline>
+                      {item.authorTagline && (
+                        <TestimonialAuthorTagline>{item.authorTagline}</TestimonialAuthorTagline>
+                      )}
                     </TestimonialAuthor>
                   </Testimonial>
                 </a>
@@ -95,11 +99,17 @@ export const Testimonials = () => (
                 className="size-full object-cover"
               />
             </div>
-            <div>
+            <div
+              className={
+                FEATURED_TESTIMONIAL.authorTagline ? undefined : "flex flex-col justify-center"
+              }
+            >
               <p className="font-medium text-fd-foreground">{FEATURED_TESTIMONIAL.authorName}</p>
-              <p className="text-sm text-fd-muted-foreground">
-                {FEATURED_TESTIMONIAL.authorTagline}
-              </p>
+              {FEATURED_TESTIMONIAL.authorTagline && (
+                <p className="text-sm text-fd-muted-foreground">
+                  {FEATURED_TESTIMONIAL.authorTagline}
+                </p>
+              )}
             </div>
           </div>
         </a>

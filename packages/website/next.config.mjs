@@ -7,10 +7,8 @@ const config = {
   reactStrictMode: true,
   images: {
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "unavatar.io",
-      },
+      { protocol: "https", hostname: "unavatar.io" },
+      { protocol: "https", hostname: "api.dicebear.com" },
     ],
   },
   async rewrites() {
