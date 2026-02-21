@@ -1,0 +1,61 @@
+---
+title: Invocations
+description: Rules that detect patterns causing unnecessary serverless function invocations.
+---
+
+These rules catch patterns that trigger extra serverless function invocations, increasing your Vercel bill through additional compute cycles.
+
+## nextjs-no-client-fetch-for-server-data
+
+<Callout type="warn">Warning · `vercel-doctor/nextjs-no-client-fetch-for-server-data`</Callout>
+
+Detects `useEffect` + `fetch` patterns in page or layout files. This pattern turns what could be a single server render into two round-trips: one to render the page and another API call from the client.
+
+**Why it matters:** Each client-side fetch triggers a separate serverless function invocation. Fetching data server-side in a Server Component eliminates the API round-trip entirely.
+
+```tsx title="Bad"
+"use client";
+
+import { useEffect, useState } from "react";
+
+export default function Page() {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    fetch("/api/data")
+      .then((res) => res.json())
+      .then(setData);
+  }, []);
+
+  return <div>{data?.title}</div>;
+}
+```
+
+```tsx title="Good"
+export default async function Page() {
+  const data = await fetchData();
+  return <div>{data.title}</div>;
+}
+```
+
+---
+
+## nextjs-link-prefetch-default
+
+<Callout type="warn">Warning · `vercel-doctor/nextjs-link-prefetch-default`</Callout>
+
+Detects `<Link>` components without `prefetch={false}`. By default, Next.js prefetches every visible link, which can trigger a large number of serverless function invocations on pages with many links.
+
+**Why it matters:** Each prefetch is a server request. On pages with dozens of links, this creates a burst of invocations when the page loads. Disable prefetch globally and add it back only to critical navigation links.
+
+```tsx title="Bad"
+<Link href="/dashboard">Dashboard</Link>
+<Link href="/settings">Settings</Link>
+<Link href="/profile">Profile</Link>
+```
+
+```tsx title="Good"
+<Link href="/dashboard" prefetch={false}>Dashboard</Link>
+<Link href="/settings" prefetch={false}>Settings</Link>
+<Link href="/profile" prefetch={true}>Profile</Link>
+```

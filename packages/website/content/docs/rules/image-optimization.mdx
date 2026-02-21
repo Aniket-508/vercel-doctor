@@ -1,0 +1,96 @@
+---
+title: Image Optimization
+description: Rules that detect patterns causing unnecessary image optimization costs.
+---
+
+These rules identify misconfigurations in Next.js image handling that increase Vercel Image Optimization usage or serve unoptimized images.
+
+## vercel-image-global-unoptimized
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-image-global-unoptimized`</Callout>
+
+Detects `images.unoptimized: true` in `next.config`.
+
+**Why it matters:** This disables Vercel Image Optimization globally. All images are served as-is, without resizing, format conversion, or compression — increasing bandwidth costs and hurting performance.
+
+```js title="Bad"
+// next.config.js
+module.exports = {
+  images: {
+    unoptimized: true,
+  },
+};
+```
+
+```js title="Good"
+// next.config.js
+module.exports = {
+  images: {
+    remotePatterns: [{ hostname: "cdn.example.com" }],
+  },
+};
+```
+
+---
+
+## nextjs-image-missing-sizes
+
+<Callout type="warn">Warning · `vercel-doctor/nextjs-image-missing-sizes`</Callout>
+
+Detects `<Image>` components with `fill` but no `sizes` attribute.
+
+**Why it matters:** Without `sizes`, the browser downloads the largest available image regardless of viewport width. This wastes bandwidth and increases Image Optimization usage.
+
+```tsx title="Bad"
+<Image src="/hero.jpg" alt="Hero" fill />
+```
+
+```tsx title="Good"
+<Image src="/hero.jpg" alt="Hero" fill sizes="(max-width: 768px) 100vw, 50vw" />
+```
+
+---
+
+## vercel-image-remote-pattern-too-broad
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-image-remote-pattern-too-broad`</Callout>
+
+Detects `images.remotePatterns` entries with overly broad `pathname` patterns (`/**` or missing entirely).
+
+**Why it matters:** Unrestricted remote image paths allow any URL on the hostname to be optimized through your account, potentially driving unexpected optimization usage from user-generated content or third-party embeds.
+
+```js title="Bad"
+// next.config.js
+module.exports = {
+  images: {
+    remotePatterns: [{ hostname: "cdn.example.com", pathname: "/**" }],
+  },
+};
+```
+
+```js title="Good"
+// next.config.js
+module.exports = {
+  images: {
+    remotePatterns: [{ hostname: "cdn.example.com", pathname: "/avatars/**" }],
+  },
+};
+```
+
+---
+
+## vercel-image-svg-without-unoptimized
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-image-svg-without-unoptimized`</Callout>
+
+Detects `<Image>` components with an SVG `src` that don't have the `unoptimized` prop.
+
+**Why it matters:** SVGs are vector graphics and don't benefit from the Image Optimization pipeline. Running them through it wastes optimization quota without any benefit.
+
+```tsx title="Bad"
+<Image src="/logo.svg" alt="Logo" width={100} height={40} />
+```
+
+```tsx title="Good"
+<Image src="/logo.svg" alt="Logo" width={100} height={40} unoptimized />
+```

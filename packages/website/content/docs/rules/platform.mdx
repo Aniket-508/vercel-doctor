@@ -1,0 +1,117 @@
+---
+title: Platform
+description: Rules specific to Vercel platform configuration and deployment optimization.
+---
+
+These rules detect platform-level configuration issues and suggest optimizations for Vercel deployments.
+
+## vercel-edge-heavy-import
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-edge-heavy-import`</Callout>
+
+Detects edge runtime files importing heavy or Node-centric dependencies like `node:fs`, `node:crypto`, `sharp`, or `@aws-sdk/*`.
+
+**Why it matters:** Edge functions have strict size and execution limits. Heavy Node.js dependencies increase cold start time and may fail at runtime.
+
+**Fix:** Move heavy logic to Node.js runtime functions or background jobs, and keep edge handlers lightweight.
+
+---
+
+## vercel-sequential-database-await
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-sequential-database-await`</Callout>
+
+Detects API routes with 3 or more sequential Prisma or database calls without `Promise.all`.
+
+**Why it matters:** Each sequential database call adds latency to the function execution. Parallelizing independent queries reduces total duration and cost.
+
+```ts title="Bad"
+const users = await prisma.user.findMany();
+const posts = await prisma.post.findMany();
+const tags = await prisma.tag.findMany();
+```
+
+```ts title="Good"
+const [users, posts, tags] = await Promise.all([
+  prisma.user.findMany(),
+  prisma.post.findMany(),
+  prisma.tag.findMany(),
+]);
+```
+
+---
+
+## vercel-large-static-asset
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-large-static-asset`</Callout>
+
+Detects static assets (images, fonts, videos, PDFs) of 4 KB or larger served from your app repository.
+
+**Why it matters:** Large static files served from your Vercel deployment consume bandwidth on every request. Moving them to a dedicated CDN or object storage (Cloudflare R2, S3) reduces bandwidth costs.
+
+Reports up to 20 files, sorted by size (largest first).
+
+---
+
+## vercel-consider-bun-runtime
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-consider-bun-runtime`</Callout>
+
+Detects projects not configured for the Bun runtime (no `packageManager: "bun@..."` in `package.json` and no `bun.lock` file).
+
+**Why it matters:** Bun runtime can reduce install and build overhead on Vercel compared to Node.js.
+
+**Fix:** Review [Bun runtime guidance](https://vercel.com/docs/functions/runtimes/bun) and switch if your project is compatible.
+
+---
+
+## vercel-avoid-platform-cron
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-avoid-platform-cron`</Callout>
+
+Detects `crons` configured in `vercel.json`.
+
+**Why it matters:** Vercel cron jobs run as serverless functions, billed per execution. Scheduled workloads with predictable patterns can often run cheaper using GitHub Actions or Cloudflare Workers Cron Triggers.
+
+---
+
+## vercel-consider-fluid-compute
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-consider-fluid-compute`</Callout>
+
+Detects projects with 3 or more API/server routes.
+
+**Why it matters:** Fluid Compute improves concurrency and reduces execution overhead for workloads with variable latency or bursty traffic. It's worth evaluating for projects with multiple server routes.
+
+---
+
+## vercel-suggest-turbopack-build-cache
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-suggest-turbopack-build-cache`</Callout>
+
+Detects `next.config` files with `experimental` settings but without `turbopackFileSystemCacheForBuild`.
+
+**Why it matters:** Next.js 16+ supports Turbopack build cache, which can significantly reduce build times.
+
+```js title="Good"
+// next.config.js
+module.exports = {
+  experimental: {
+    turbopackFileSystemCacheForBuild: true,
+  },
+};
+```
+
+---
+
+## vercel-suggest-deploy-archive
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-suggest-deploy-archive`</Callout>
+
+Detects projects with 5,000 or more files.
+
+**Why it matters:** Large projects can hit API rate limits during deployment. Using archive mode uploads a single tarball instead of individual files, cutting deployment time by roughly 50%.
+
+```bash
+vercel deploy --archive=tgz
+```
