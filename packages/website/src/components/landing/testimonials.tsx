@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { SectionContainer, SectionFiller, SectionHelper } from "./section-layout";
+import { SectionContainer, SectionContent, SectionFiller, SectionHelper } from "./section-layout";
 import {
   FEATURED_TESTIMONIAL,
   TESTIMONIALS_ROW_ONE,
@@ -73,7 +73,7 @@ export const Testimonials = () => (
     <SectionContainer>
       <SectionHelper>[WHAT PEOPLE ARE SAYING]</SectionHelper>
 
-      <div className="flex flex-col border-t border-fd-border md:flex-row">
+      <SectionContent className="flex flex-col md:flex-row">
         {/* Left: Featured testimonial (40%) */}
         <div className="flex w-full flex-col justify-center border-b border-fd-border p-8 md:w-2/5 md:border-b-0 md:border-r md:p-12">
           <div className="mb-6 text-5xl font-serif text-fd-muted-foreground/40">&ldquo;</div>
@@ -103,7 +103,7 @@ export const Testimonials = () => (
         <div className="flex w-full flex-col justify-center md:w-3/5">
           <TestimonialsMarquee />
         </div>
-      </div>
+      </SectionContent>
     </SectionContainer>
   </>
 );

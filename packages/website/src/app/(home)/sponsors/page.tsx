@@ -1,6 +1,6 @@
 import { HeartHandshakeIcon } from "lucide-react";
 import Image from "next/image";
-import { SectionContainer } from "@/components/landing/section-layout";
+import { SectionContainer, SectionContent } from "@/components/landing/section-layout";
 import { Footer } from "@/components/landing/footer";
 import { LINK } from "@/constants/links";
 import { SPONSORS } from "@/constants/sponsors";
@@ -41,43 +41,45 @@ const SponsorsPage = () => {
 
   return (
     <>
-      <SectionContainer>
-        <div className="flex flex-col border-b border-fd-border items-center px-6 py-16 text-center">
-          <h1 className="text-3xl font-pixel font-bold text-fd-foreground sm:text-4xl mb-2">
-            Sponsors
-          </h1>
-          <p className="text-fd-muted-foreground mb-6">
-            Your sponsorship means a lot to open-source projects, including Vercel Doctor.
-          </p>
-          <Button asChild>
-            <a href={LINK.SPONSOR} target="_blank" rel="noopener noreferrer">
-              <HeartHandshakeIcon />
-              Sponsor My Work
-            </a>
-          </Button>
-        </div>
-
-        {activeSponsors.length > 0 && (
-          <>
-            <div className="border-b border-fd-border px-6 py-3">
-              <p className="text-xs font-medium uppercase tracking-widest text-fd-muted-foreground">
-                Organization Sponsors
-              </p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
-              {activeSponsors.map((sponsor) => (
-                <SponsorCard key={sponsor.name} sponsor={sponsor} />
-              ))}
-              <EmptyCell />
-            </div>
-          </>
-        )}
-
-        {activeSponsors.length === 0 && (
-          <div className="flex flex-col items-center gap-2 px-6 py-24 text-center text-fd-muted-foreground">
-            <p className="text-sm">No sponsors yet. Be the first to support this project!</p>
+      <SectionContainer className="flex-1 flex flex-col">
+        <SectionContent className="w-full flex-1">
+          <div className="flex flex-col border-b border-fd-border items-center px-6 py-16 text-center">
+            <h1 className="text-3xl font-pixel font-bold text-fd-foreground sm:text-4xl mb-2">
+              Sponsors
+            </h1>
+            <p className="text-fd-muted-foreground mb-6">
+              Your sponsorship means a lot to open-source projects, including Vercel Doctor.
+            </p>
+            <Button asChild>
+              <a href={LINK.SPONSOR} target="_blank" rel="noopener noreferrer">
+                <HeartHandshakeIcon />
+                Sponsor My Work
+              </a>
+            </Button>
           </div>
-        )}
+
+          {activeSponsors.length > 0 && (
+            <>
+              <div className="border-b border-fd-border px-6 py-3">
+                <p className="text-xs font-medium uppercase tracking-widest text-fd-muted-foreground">
+                  Organization Sponsors
+                </p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
+                {activeSponsors.map((sponsor) => (
+                  <SponsorCard key={sponsor.name} sponsor={sponsor} />
+                ))}
+                <EmptyCell />
+              </div>
+            </>
+          )}
+
+          {activeSponsors.length === 0 && (
+            <div className="flex flex-col items-center gap-2 px-6 py-24 text-center text-fd-muted-foreground">
+              <p className="text-sm">No sponsors yet. Be the first to support this project!</p>
+            </div>
+          )}
+        </SectionContent>
       </SectionContainer>
       <Footer />
     </>

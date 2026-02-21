@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Plus } from "lucide-react";
-import { SectionContainer } from "./section-layout";
+import { SectionContainer, SectionContent } from "./section-layout";
 import { LINK } from "@/constants/links";
 import { SPONSORS } from "@/constants/sponsors";
 import type { Sponsor } from "@/constants/sponsors";
@@ -57,26 +57,28 @@ export const Sponsors = () => {
 
   return (
     <SectionContainer>
-      <div className="px-6 py-10 md:px-10">
-        <h2 className="text-2xl font-bold text-fd-foreground">Supported by the Best</h2>
-        <p className="mt-2 text-sm text-fd-muted-foreground">
-          Your sponsorship means a lot to open-source projects, including Vercel Doctor.
-        </p>
-        <a
-          href={LINK.SPONSOR}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-4 inline-block text-sm font-medium text-fd-foreground underline underline-offset-4 transition-colors hover:text-fd-muted-foreground"
-        >
-          Sponsor My Work
-        </a>
-      </div>
+      <SectionContent>
+        <div className="px-6 py-10 md:px-10">
+          <h2 className="text-2xl font-bold text-fd-foreground">Supported by the Best</h2>
+          <p className="mt-2 text-sm text-fd-muted-foreground">
+            Your sponsorship means a lot to open-source projects, including Vercel Doctor.
+          </p>
+          <a
+            href={LINK.SPONSOR}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-block text-sm font-medium text-fd-foreground underline underline-offset-4 transition-colors hover:text-fd-muted-foreground"
+          >
+            Sponsor My Work
+          </a>
+        </div>
 
-      <div className="grid grid-cols-2 border-t border-fd-border sm:grid-cols-3 md:grid-cols-4">
-        {sponsorSlots.map((sponsor, index) => (
-          <SponsorCell key={index} sponsor={sponsor} isLastCell={index === GRID_SIZE - 1} />
-        ))}
-      </div>
+        <div className="grid grid-cols-2 border-t border-fd-border sm:grid-cols-3 md:grid-cols-4">
+          {sponsorSlots.map((sponsor, index) => (
+            <SponsorCell key={index} sponsor={sponsor} isLastCell={index === GRID_SIZE - 1} />
+          ))}
+        </div>
+      </SectionContent>
     </SectionContainer>
   );
 };

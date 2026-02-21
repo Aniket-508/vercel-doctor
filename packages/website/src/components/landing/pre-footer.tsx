@@ -5,7 +5,7 @@ import Link from "next/link";
 import { LINK } from "@/constants/links";
 import { Button } from "@/components/ui/button";
 import { GithubIcon } from "@/components/icons";
-import { SectionContainer, SectionFiller, SectionHelper } from "./section-layout";
+import { SectionContainer, SectionContent, SectionFiller, SectionHelper } from "./section-layout";
 
 const useDynamicDate = () => {
   const now = new Date();
@@ -22,7 +22,7 @@ export const PreFooter = () => {
       <SectionFiller />
       <SectionContainer>
         <SectionHelper className="border-b">[READY TO SAVE MONEY?]</SectionHelper>
-        <div className="overflow-hidden bg-linear-to-b from-fd-muted/40 to-fd-muted/80 dark:from-fd-muted/20 dark:to-fd-muted/40">
+        <SectionContent className="overflow-hidden bg-linear-to-b from-fd-muted/40 to-fd-muted/80 dark:from-fd-muted/20 dark:to-fd-muted/40">
           <div className="mx-auto flex max-w-3xl flex-col items-center gap-8 px-6 py-24 text-center md:py-32">
             <h2 className="text-3xl font-pixel font-bold text-balance tracking-tight text-fd-foreground sm:text-4xl md:text-6xl">
               Better billing <br />
@@ -44,7 +44,7 @@ export const PreFooter = () => {
               </Button>
             </div>
           </div>
-        </div>
+        </SectionContent>
       </SectionContainer>
     </>
   );

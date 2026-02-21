@@ -5,7 +5,7 @@ import { XIcon, LlmsIcon } from "@/components/icons";
 
 export const Footer = () => (
   <footer className="border-t border-fd-border mt-auto">
-    <div className="mx-auto flex max-w-fd-container flex-col items-center justify-between gap-4 px-3 md:px-12 py-6 text-sm text-fd-muted-foreground sm:flex-row">
+    <div className="mx-auto flex max-w-fd-container flex-col items-center justify-between gap-4 px-4 md:px-12 py-6 text-sm text-fd-muted-foreground sm:flex-row">
       <p className="text-center sm:text-left">
         Built by{" "}
         <a
