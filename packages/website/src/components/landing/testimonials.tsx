@@ -75,7 +75,12 @@ export const Testimonials = () => (
 
       <SectionContent className="flex flex-col md:flex-row">
         {/* Left: Featured testimonial (40%) */}
-        <div className="flex w-full flex-col justify-center border-fd-border p-8 md:w-2/5 md:border-r md:p-12">
+        <a
+          href={FEATURED_TESTIMONIAL.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex w-full flex-col justify-center border-fd-border p-8 transition-[background-color] ease-out hover:bg-accent/20 md:w-2/5 md:border-r md:p-12"
+        >
           <div className="mb-6 text-5xl font-serif text-fd-muted-foreground/40">&ldquo;</div>
           <blockquote className="mb-8 text-xl font-medium leading-relaxed text-fd-foreground md:text-2xl">
             {FEATURED_TESTIMONIAL.quote}
@@ -97,7 +102,7 @@ export const Testimonials = () => (
               </p>
             </div>
           </div>
-        </div>
+        </a>
 
         {/* Right: Marquee testimonials (60%) */}
         <div className="flex w-full flex-col justify-center md:w-3/5">

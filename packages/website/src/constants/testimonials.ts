@@ -7,23 +7,23 @@ export interface Testimonial {
 }
 
 export const FEATURED_TESTIMONIAL: Testimonial = {
-  authorAvatar: "https://unavatar.io/x/rauchg",
-  authorName: "Guillermo Rauch",
-  authorTagline: "CEO @Vercel",
-  url: "https://x.com/rauchg",
-  quote: "This is exactly the kind of tooling the ecosystem needs. Love the approach.",
+  authorAvatar: "https://unavatar.io/x/cramforce",
+  authorName: "Malte Ubl",
+  authorTagline: "CTO @Vercel",
+  url: "https://x.com/cramforce/status/2024624151064088902",
+  quote: "I love it. In fact, you can now connect it to real world usage data.",
 };
 
 export const TESTIMONIALS_ROW_ONE: Testimonial[] = [
   {
-    authorAvatar: "https://unavatar.io/x/steventey",
-    authorName: "Steven Tey",
-    authorTagline: "Founder @Dub.co",
+    authorAvatar: "https://unavatar.io/x/grimcodes",
+    authorName: "grim",
+    authorTagline: "",
     url: "https://x.com/steventey",
     quote: "whoa, this is really dope. Every Next.js team should run this.",
   },
   {
-    authorAvatar: "https://unavatar.io/x/kapehe_ok",
+    authorAvatar: "https://unavatar.io/x/naelodev",
     authorName: "Kap",
     authorTagline: "Head of DevRel @Vercel",
     url: "https://x.com/kapehe_ok",
