@@ -24,8 +24,8 @@ const buildAlternates = (lang: string, path: string): string =>
       `      <xhtml:link rel="alternate" hreflang="${alternateLang}" href="${buildUrl(alternateLang, path)}" />`,
   ).join("\n");
 
-export const GET = (_request: Request, { params }: { params: { lang: string } }) => {
-  const { lang } = params;
+export const GET = async (_request: Request, { params }: { params: Promise<{ lang: string }> }) => {
+  const { lang } = await params;
 
   if (!LANGUAGES.includes(lang as Language)) {
     return new Response("Not Found", { status: 404 });
