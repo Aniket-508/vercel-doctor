@@ -1,35 +1,45 @@
-import Link from "next/link";
-import { Home, Compass } from "lucide-react";
-import { LINK } from "@/constants/links";
+"use client";
+
+import { useParams } from "next/navigation";
+import { getTranslation, getLocalizedPath } from "@/translations";
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
+import { EmptyContent } from "@/components/ui/empty";
 import { Button } from "@/components/ui/button";
-import { getTranslation } from "@/translations";
+import Link from "next/link";
+import { BookOpenIcon, HomeIcon } from "lucide-react";
 
 const NotFoundPage = () => {
-  const translation = getTranslation("en");
+  const { lang } = useParams<{ lang: string }>();
+  const translation = getTranslation(lang);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-8 px-4 text-center">
-      <p className="text-8xl font-black tracking-tight text-fd-foreground sm:text-9xl">
-        {translation.notFound.heading}
-      </p>
-      <p className="max-w-md text-lg text-fd-muted-foreground">
-        {translation.notFound.description}
-      </p>
-      <div className="flex flex-wrap items-center justify-center gap-3">
-        <Button asChild variant="default" size="lg" className="gap-2">
-          <Link href="/">
-            <Home className="size-4" />
-            {translation.notFound.goHome}
-          </Link>
-        </Button>
-        <Button asChild variant="outline" size="lg" className="gap-2">
-          <Link href={LINK.FUMADOCS_NOT_FOUND_DOCS} target="_blank" rel="noopener noreferrer">
-            <Compass className="size-4" />
-            {translation.notFound.explore}
-          </Link>
-        </Button>
-      </div>
-    </div>
+    <Empty>
+      <EmptyHeader>
+        <EmptyTitle className="font-black font-mono text-8xl">
+          {translation.notFound.heading}
+        </EmptyTitle>
+        <EmptyDescription className="text-nowrap">
+          {translation.notFound.description}
+        </EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        <div className="flex gap-2">
+          <Button asChild>
+            <Link href="/">
+              <HomeIcon />
+              {translation.notFound.goHome}
+            </Link>
+          </Button>
+
+          <Button variant="outline" asChild>
+            <Link href={getLocalizedPath(lang, "/docs")}>
+              <BookOpenIcon />
+              {translation.notFound.explore}
+            </Link>
+          </Button>
+        </div>
+      </EmptyContent>
+    </Empty>
   );
 };
 

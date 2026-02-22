@@ -7,5 +7,4 @@ export const LINK = {
   SPONSOR: "https://github.com/sponsors/Aniket-508",
   DEMO_VIDEO: "https://yffrvzi8zwbljfuj.public.blob.vercel-storage.com/vercel-doctor-demo.mp4",
   LLMS: "/llms.txt",
-  FUMADOCS_NOT_FOUND_DOCS: "https://fumadocs.dev/docs/manual-installation/next",
 } as const;
