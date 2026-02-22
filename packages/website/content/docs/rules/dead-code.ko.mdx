@@ -1,0 +1,52 @@
+---
+title: 데드 코드
+description: 코드베이스에서 미사용 파일, 내보내기, 타입을 감지하는 규칙.
+---
+
+데드 코드 감지는 [Knip](https://knip.dev)으로 동작합니다. 미사용 코드는 번들을 비대하게 만들고, 콜드 스타트를 느리게 하고, 배포 크기를 늘려 Vercel 비용을 증가시킵니다.
+
+설정 파일에서 `"deadCode": false`를 사용하거나 `--no-dead-code`로 데드 코드 감지를 완전히 비활성화할 수 있습니다.
+
+## knip/files
+
+<Callout type="warn">Warning · `knip/files`</Callout>
+
+프로젝트의 다른 파일에서 import하지 않는 파일을 감지합니다.
+
+**이유:** 미사용 파일도 배포되고 빌드 시 파싱됩니다. 모듈 그래프에 추가되어 콜드 스타트 시간을 늘립니다.
+
+**해결:** 파일을 삭제하거나, 의도적으로 독립 실행형이면 Knip 설정의 entry 패턴에 추가하세요.
+
+---
+
+## knip/exports
+
+<Callout type="warn">Warning · `knip/exports`</Callout>
+
+어디에서도 import되지 않는 내보낸 심볼(함수, 변수, 클래스)을 감지합니다.
+
+**이유:** 미사용 내보내기는 번들에 데드 코드를 추가합니다. 트리 쉐이킹이 항상 제거하지는 못하며, 특히 서버 측 코드에서 그렇습니다.
+
+**해결:** `export` 키워드를 제거하거나, 더 이상 필요 없으면 심볼을 삭제하세요.
+
+---
+
+## knip/types
+
+<Callout type="warn">Warning · `knip/types`</Callout>
+
+어디에서도 참조되지 않는 내보낸 TypeScript 타입과 인터페이스를 감지합니다.
+
+**해결:** 미사용 타입 내보내기를 제거하세요.
+
+---
+
+## knip/duplicates
+
+<Callout type="warn">Warning · `knip/duplicates`</Callout>
+
+여러 파일에서 동일한 심볼이 내보내지는 경우를 감지합니다.
+
+**이유:** 중복 내보내기는 모호함을 만들고 잘못된 파일에서 import하여 필요한 것보다 더 많은 코드를 끌어올 수 있습니다.
+
+**해결:** 중복을 단일 내보내기 위치로 통합하세요.

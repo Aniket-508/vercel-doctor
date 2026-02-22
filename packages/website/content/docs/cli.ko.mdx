@@ -1,0 +1,97 @@
+---
+title: CLI 참조
+description: Vercel Doctor의 모든 명령줄 옵션과 플래그.
+icon: Terminal
+---
+
+## 사용법
+
+```bash
+npx -y vercel-doctor@latest [directory] [options]
+```
+
+`directory` 인자는 기본값이 `.`(현재 디렉터리)입니다.
+
+## 옵션
+
+| Flag               | 설명                                                      |
+| ------------------ | --------------------------------------------------------- |
+| `-v, --version`    | 현재 버전 표시                                            |
+| `--no-lint`        | 빌링 린트 규칙 건너뛰기                                   |
+| `--no-dead-code`   | 데드 코드 감지(Knip) 건너뛰기                             |
+| `--verbose`        | 규칙별 파일 경로 및 줄 번호 표시                          |
+| `--score`          | 숫자 점수만 출력(CI에 유용)                               |
+| `-y, --yes`        | 대화형 프롬프트 건너뛰기, 모든 워크스페이스 프로젝트 스캔 |
+| `--project <name>` | 특정 워크스페이스 프로젝트 선택(쉼표로 구분)              |
+| `--diff [base]`    | 기준 브랜치와 비교해 변경된 파일만 스캔                   |
+| `--offline`        | 점수 계산에 사용되는 익명 원격 분석 건너뛰기              |
+
+## 예시
+
+### 현재 디렉터리 스캔
+
+```bash
+npx -y vercel-doctor@latest .
+```
+
+### 상세 출력으로 스캔
+
+```bash
+npx -y vercel-doctor@latest . --verbose
+```
+
+각 진단에 영향을 받는 파일 경로와 줄 번호를 표시합니다.
+
+### 변경된 파일만 스캔
+
+```bash
+npx -y vercel-doctor@latest . --diff
+```
+
+기준 브랜치를 자동 감지합니다. 특정 기준을 지정할 수도 있습니다:
+
+```bash
+npx -y vercel-doctor@latest . --diff main
+```
+
+### 특정 워크스페이스 프로젝트 스캔
+
+```bash
+npx -y vercel-doctor@latest . --project web
+```
+
+여러 프로젝트의 경우:
+
+```bash
+npx -y vercel-doctor@latest . --project web,api
+```
+
+### 데드 코드 감지 건너뛰기
+
+```bash
+npx -y vercel-doctor@latest . --no-dead-code
+```
+
+### CI 사용
+
+```bash
+npx -y vercel-doctor@latest . --yes --score
+```
+
+`--yes` 플래그로 대화형 프롬프트를 건너뜁니다. `--score`와 함께 사용하면 스크립트와 파이프라인에 사용할 숫자 점수만 출력합니다.
+
+## 프로그래밍 API
+
+Vercel Doctor는 프로그래밍 API도 내보냅니다:
+
+```ts
+import { run } from "vercel-doctor/api";
+```
+
+## Oxlint 플러그인
+
+빌링 린트 규칙은 독립 실행형 Oxlint 플러그인으로 사용할 수 있습니다:
+
+```ts
+import plugin from "vercel-doctor/oxlint-plugin";
+```

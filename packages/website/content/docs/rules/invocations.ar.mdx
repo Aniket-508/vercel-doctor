@@ -1,0 +1,61 @@
+---
+title: التكرارات
+description: قواعد تكشف الأنماط التي تسبّب استدعاءات دوال سيرفرلس غير ضرورية.
+---
+
+تكشف هذه القواعد الأنماط التي تُفعّل استدعاءات دوال سيرفرلس إضافية، مما يزيد فاتورة Vercel عبر دورات حوسبة إضافية.
+
+## nextjs-no-client-fetch-for-server-data
+
+<Callout type="warn">Warning · `vercel-doctor/nextjs-no-client-fetch-for-server-data`</Callout>
+
+يكشف أنماط `useEffect` + `fetch` في ملفات الصفحات أو التخطيط. هذا النمط يحوّل ما يمكن أن يكون عرض خادم واحد إلى رحلتين ذهاباً وإياباً: واحدة لعرض الصفحة وأخرى لاستدعاء API من العميل.
+
+**لماذا يهم:** كل جلب من جانب العميل يُفعّل استدعاء دالة سيرفرلس منفصل. جلب البيانات من جانب الخادم في مكوّن Server يلغي رحلة API بالكامل.
+
+```tsx title="Bad"
+"use client";
+
+import { useEffect, useState } from "react";
+
+export default function Page() {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    fetch("/api/data")
+      .then((res) => res.json())
+      .then(setData);
+  }, []);
+
+  return <div>{data?.title}</div>;
+}
+```
+
+```tsx title="Good"
+export default async function Page() {
+  const data = await fetchData();
+  return <div>{data.title}</div>;
+}
+```
+
+---
+
+## nextjs-link-prefetch-default
+
+<Callout type="warn">Warning · `vercel-doctor/nextjs-link-prefetch-default`</Callout>
+
+يكشف مكوّنات `<Link>` دون `prefetch={false}`. افتراضياً، Next.js يُحمّل مسبقاً كل رابط مرئي، مما يمكن أن يُفعّل عدداً كبيراً من استدعاءات دوال السيرفرلس في الصفحات التي تحتوي روابط كثيرة.
+
+**لماذا يهم:** كل prefetch طلب خادم. في الصفحات ذات عشرات الروابط، يُنشئ هذا انفجاراً من الاستدعاءات عند تحميل الصفحة. عطّل prefetch عالمياً وأعد إضافته فقط للروابط الحرجة للتنقل.
+
+```tsx title="Bad"
+<Link href="/dashboard">Dashboard</Link>
+<Link href="/settings">Settings</Link>
+<Link href="/profile">Profile</Link>
+```
+
+```tsx title="Good"
+<Link href="/dashboard" prefetch={false}>Dashboard</Link>
+<Link href="/settings" prefetch={false}>Settings</Link>
+<Link href="/profile" prefetch={true}>Profile</Link>
+```

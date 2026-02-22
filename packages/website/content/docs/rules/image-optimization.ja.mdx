@@ -1,0 +1,96 @@
+---
+title: Image Optimization
+description: 不要な画像最適化コストを引き起こすパターンを検出するルール。
+---
+
+これらのルールは、Next.jsの画像処理の設定ミスにより、Vercel Image Optimization の使用量が増えたり、最適化されていない画像が配信されるケースを特定します。
+
+## vercel-image-global-unoptimized
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-image-global-unoptimized`</Callout>
+
+`next.config` 内の `images.unoptimized: true` を検出します。
+
+**Why it matters:** これにより Vercel Image Optimization がグローバルで無効化されます。リサイズ、フォーマット変換、圧縮なしでそのまま配信され、帯域幅コストが増え、パフォーマンスも低下します。
+
+```js title="Bad"
+// next.config.js
+module.exports = {
+  images: {
+    unoptimized: true,
+  },
+};
+```
+
+```js title="Good"
+// next.config.js
+module.exports = {
+  images: {
+    remotePatterns: [{ hostname: "cdn.example.com" }],
+  },
+};
+```
+
+---
+
+## nextjs-image-missing-sizes
+
+<Callout type="warn">Warning · `vercel-doctor/nextjs-image-missing-sizes`</Callout>
+
+`fill` を持つ `<Image>` コンポーネントで `sizes` 属性がないものを検出します。
+
+**Why it matters:** `sizes` がないと、ブラウザはビューポート幅に関係なく最大サイズの画像をダウンロードします。帯域幅の無駄と Image Optimization の使用量増加につながります。
+
+```tsx title="Bad"
+<Image src="/hero.jpg" alt="Hero" fill />
+```
+
+```tsx title="Good"
+<Image src="/hero.jpg" alt="Hero" fill sizes="(max-width: 768px) 100vw, 50vw" />
+```
+
+---
+
+## vercel-image-remote-pattern-too-broad
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-image-remote-pattern-too-broad`</Callout>
+
+`images.remotePatterns` で `pathname` パターンが広すぎるエントリ（`/**` または未指定）を検出します。
+
+**Why it matters:** 制限のないリモート画像パスは、そのホスト名上の任意のURLをアカウント経由で最適化可能にし、ユーザー生成コンテンツやサードパーティ埋め込みによる予期しない最適化使用を招く可能性があります。
+
+```js title="Bad"
+// next.config.js
+module.exports = {
+  images: {
+    remotePatterns: [{ hostname: "cdn.example.com", pathname: "/**" }],
+  },
+};
+```
+
+```js title="Good"
+// next.config.js
+module.exports = {
+  images: {
+    remotePatterns: [{ hostname: "cdn.example.com", pathname: "/avatars/**" }],
+  },
+};
+```
+
+---
+
+## vercel-image-svg-without-unoptimized
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-image-svg-without-unoptimized`</Callout>
+
+SVGの `src` を持つ `<Image>` コンポーネントで `unoptimized` プロップがないものを検出します。
+
+**Why it matters:** SVGはベクターグラフィックであり、Image Optimization パイプラインの恩恵を受けません。パイプラインを通すと最適化クォータを消費するだけで効果がありません。
+
+```tsx title="Bad"
+<Image src="/logo.svg" alt="Logo" width={100} height={40} />
+```
+
+```tsx title="Good"
+<Image src="/logo.svg" alt="Logo" width={100} height={40} unoptimized />
+```

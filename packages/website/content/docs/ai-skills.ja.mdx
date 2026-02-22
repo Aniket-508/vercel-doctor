@@ -1,0 +1,43 @@
+---
+title: AI Skills
+description: AIコーディングアシスタント向けにVercel Doctorをskillとしてインストールする。
+---
+
+Vercel DoctorはAIコーディングアシスタント向けのskillとしてインストールできます。インストール後、AIアシスタントはNext.jsプロジェクトに変更を加えた後にVercel Doctorの実行を自動的に提案します。
+
+## 1行インストール
+
+```bash
+npx skills add vercel-doctor
+```
+
+または curl でインストール：
+
+```bash
+curl -fsSL https://vercel-doctor.com/install-skill.sh | bash
+```
+
+## 対応ツール
+
+インストーラーは対応ツールを自動検出してインストールします：
+
+| Tool        | Skill location                                 |
+| ----------- | ---------------------------------------------- |
+| Claude Code | `~/.claude/skills/vercel-doctor/`              |
+| Amp Code    | `~/.config/amp/skills/vercel-doctor/`          |
+| Cursor      | `~/.cursor/skills/vercel-doctor/`              |
+| OpenCode    | `~/.config/opencode/skills/vercel-doctor/`     |
+| Windsurf    | `~/.codeium/windsurf/memories/global_rules.md` |
+| Antigravity | `~/.gemini/antigravity/skills/vercel-doctor/`  |
+| Gemini CLI  | `~/.gemini/skills/vercel-doctor/`              |
+| Codex       | `~/.codex/skills/vercel-doctor/`               |
+
+インストーラーはプロジェクトの `.agents/` ディレクトリにも skill を追加し、プロジェクトレベルのコンテキストで利用できます。
+
+## skillの機能
+
+有効化すると、AIアシスタントは：
+
+1. Vercel Doctorの概要とスキャン対象を理解します
+2. 変更後に `npx -y vercel-doctor@latest . --verbose --diff` の実行を提案します
+3. 関数実行時間とinvocationsを削減する問題の修正を優先します

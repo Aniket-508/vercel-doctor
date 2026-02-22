@@ -1,0 +1,97 @@
+---
+title: Referência da CLI
+description: Todas as opções e flags de linha de comando do Vercel Doctor.
+icon: Terminal
+---
+
+## Uso
+
+```bash
+npx -y vercel-doctor@latest [directory] [options]
+```
+
+O argumento `directory` tem como padrão `.` (diretório atual).
+
+## Opções
+
+| Flag               | Description                                           |
+| ------------------ | ----------------------------------------------------- |
+| `-v, --version`    | Display the current version                           |
+| `--no-lint`        | Skip billing lint rules                               |
+| `--no-dead-code`   | Skip dead code detection (Knip)                       |
+| `--verbose`        | Show file paths and line numbers per rule             |
+| `--score`          | Output only the numeric score (useful for CI)         |
+| `-y, --yes`        | Skip interactive prompts, scan all workspace projects |
+| `--project <name>` | Select specific workspace project(s), comma-separated |
+| `--diff [base]`    | Scan only files changed vs the base branch            |
+| `--offline`        | Skip anonymous telemetry used for score calculation   |
+
+## Exemplos
+
+### Escanear o diretório atual
+
+```bash
+npx -y vercel-doctor@latest .
+```
+
+### Escanear com saída detalhada
+
+```bash
+npx -y vercel-doctor@latest . --verbose
+```
+
+Mostra caminhos de arquivos afetados e números de linha para cada diagnóstico.
+
+### Escanear apenas arquivos alterados
+
+```bash
+npx -y vercel-doctor@latest . --diff
+```
+
+Detecta automaticamente o branch base. Você também pode fixar uma base específica:
+
+```bash
+npx -y vercel-doctor@latest . --diff main
+```
+
+### Escanear um projeto específico do workspace
+
+```bash
+npx -y vercel-doctor@latest . --project web
+```
+
+Para múltiplos projetos:
+
+```bash
+npx -y vercel-doctor@latest . --project web,api
+```
+
+### Pular detecção de código morto
+
+```bash
+npx -y vercel-doctor@latest . --no-dead-code
+```
+
+### Uso em CI
+
+```bash
+npx -y vercel-doctor@latest . --yes --score
+```
+
+A flag `--yes` pula prompts interativos. Combinada com `--score`, retorna apenas a pontuação numérica para uso em scripts e pipelines.
+
+## API programática
+
+O Vercel Doctor também exporta uma API programática:
+
+```ts
+import { run } from "vercel-doctor/api";
+```
+
+## Plugin Oxlint
+
+As regras de billing lint estão disponíveis como plugin Oxlint independente:
+
+```ts
+import plugin from "vercel-doctor/oxlint-plugin";
+```

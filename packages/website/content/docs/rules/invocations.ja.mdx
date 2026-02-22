@@ -1,0 +1,61 @@
+---
+title: Invocations
+description: 不要なserverless関数呼び出しを引き起こすパターンを検出するルール。
+---
+
+これらのルールは、追加の serverless 関数 invocation を引き起こし、コンピュートサイクルの増加を通じて Vercel の請求額を増やすパターンを検出します。
+
+## nextjs-no-client-fetch-for-server-data
+
+<Callout type="warn">Warning · `vercel-doctor/nextjs-no-client-fetch-for-server-data`</Callout>
+
+ページまたはレイアウトファイル内の `useEffect` + `fetch` パターンを検出します。このパターンは、本来1回のサーバーレンダリングで済むものを、ページレンダリングとクライアントからのAPI呼び出しの2往復に分けてしまいます。
+
+**Why it matters:** 各クライアントサイド fetch は別の serverless 関数 invocation を発生させます。Server Component でサーバーサイドにデータを取得すれば、API往復そのものを不要にできます。
+
+```tsx title="Bad"
+"use client";
+
+import { useEffect, useState } from "react";
+
+export default function Page() {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    fetch("/api/data")
+      .then((res) => res.json())
+      .then(setData);
+  }, []);
+
+  return <div>{data?.title}</div>;
+}
+```
+
+```tsx title="Good"
+export default async function Page() {
+  const data = await fetchData();
+  return <div>{data.title}</div>;
+}
+```
+
+---
+
+## nextjs-link-prefetch-default
+
+<Callout type="warn">Warning · `vercel-doctor/nextjs-link-prefetch-default`</Callout>
+
+`prefetch={false}` の指定がない `<Link>` コンポーネントを検出します。Next.js はデフォルトで表示されているリンクをすべて prefetch し、リンクが多いページでは大量の serverless 関数 invocation を発生させます。
+
+**Why it matters:** prefetch 1回につき1リクエストが発生します。リンクが多数のページでは、読み込み時に invocation が一気に発生します。グローバルで prefetch を無効化し、重要なナビゲーションリンクにのみ有効化してください。
+
+```tsx title="Bad"
+<Link href="/dashboard">Dashboard</Link>
+<Link href="/settings">Settings</Link>
+<Link href="/profile">Profile</Link>
+```
+
+```tsx title="Good"
+<Link href="/dashboard" prefetch={false}>Dashboard</Link>
+<Link href="/settings" prefetch={false}>Settings</Link>
+<Link href="/profile" prefetch={true}>Profile</Link>
+```

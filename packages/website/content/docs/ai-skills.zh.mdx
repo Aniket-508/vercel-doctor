@@ -1,0 +1,43 @@
+---
+title: AI 技能
+description: 将 Vercel Doctor 安装为 AI 编程助手的技能。
+---
+
+Vercel Doctor 可安装为 AI 编程助手的技能。安装后，AI 助手在修改 Next.js 项目后会自动建议运行 Vercel Doctor。
+
+## 一行安装
+
+```bash
+npx skills add vercel-doctor
+```
+
+或通过 curl 安装：
+
+```bash
+curl -fsSL https://vercel-doctor.com/install-skill.sh | bash
+```
+
+## 支持的工具
+
+安装脚本会自动检测并为系统中所有支持的工具安装：
+
+| Tool        | Skill location                                 |
+| ----------- | ---------------------------------------------- |
+| Claude Code | `~/.claude/skills/vercel-doctor/`              |
+| Amp Code    | `~/.config/amp/skills/vercel-doctor/`          |
+| Cursor      | `~/.cursor/skills/vercel-doctor/`              |
+| OpenCode    | `~/.config/opencode/skills/vercel-doctor/`     |
+| Windsurf    | `~/.codeium/windsurf/memories/global_rules.md` |
+| Antigravity | `~/.gemini/antigravity/skills/vercel-doctor/`  |
+| Gemini CLI  | `~/.gemini/skills/vercel-doctor/`              |
+| Codex       | `~/.codex/skills/vercel-doctor/`               |
+
+安装脚本还会将技能添加到项目的 `.agents/` 目录，用于项目级上下文。
+
+## 技能作用
+
+激活后，AI 助手会：
+
+1. 了解 Vercel Doctor 及其检查内容
+2. 在修改后建议运行 `npx -y vercel-doctor@latest . --verbose --diff`
+3. 优先修复会减少函数执行时间和调用次数的问题

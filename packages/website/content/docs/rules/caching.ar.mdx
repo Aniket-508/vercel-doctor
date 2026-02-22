@@ -1,0 +1,130 @@
+---
+title: التخزين المؤقت
+description: قواعد تكشف الأنماط التي تمنع التخزين المؤقت الفعّال على Vercel.
+---
+
+تكشف هذه القواعد الأنماط التي تتجاوز تخزين CDN و ISR المؤقت لـ Vercel، وتفرض عرضاً جانب الخادم غير ضروري وزيادة تكاليف الحوسبة.
+
+## nextjs-no-side-effect-in-get-handler
+
+<Callout type="error">Error · `vercel-doctor/nextjs-no-side-effect-in-get-handler`</Callout>
+
+يكشف معالجات مسارات GET التي تحتوي آثاراً جانبية (تعديل cookies أو headers أو استدعاءات قاعدة البيانات) أو في أجزاء مسارات متغيرة مثل `/logout`، `/signout`، `/delete`، إلخ.
+
+**لماذا يهم:** طلبات GET يمكن تفعيلها عبر prefetch وهي عرضة لـ CSRF. الآثار الجانبية في معالجات GET تمنع التخزين المؤقت أيضاً.
+
+```ts title="Bad"
+// app/api/logout/route.ts
+export async function GET() {
+  cookies().delete("session");
+  return Response.json({ ok: true });
+}
+```
+
+```ts title="Good"
+// app/api/logout/route.ts
+export async function POST() {
+  cookies().delete("session");
+  return Response.json({ ok: true });
+}
+```
+
+أجزاء المسارات المتغيرة المُكتشفة: `logout`, `log-out`, `signout`, `sign-out`, `unsubscribe`, `delete`, `remove`, `revoke`, `cancel`, `deactivate`.
+
+---
+
+## vercel-no-force-dynamic
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-no-force-dynamic`</Callout>
+
+يكشف الصفحات ذات `export const dynamic = "force-dynamic"`.
+
+**لماذا يهم:** `force-dynamic` يفرض عرضاً جانب الخادم في كل طلب، متجاوزاً تماماً تخزين الصفحة الكاملة مؤقتاً.
+
+```ts title="Bad"
+export const dynamic = "force-dynamic";
+
+export default function Page() { ... }
+```
+
+```ts title="Good"
+export const revalidate = 3600;
+
+export default function Page() { ... }
+```
+
+---
+
+## vercel-no-no-store-fetch
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-no-no-store-fetch`</Callout>
+
+يكشف استدعاءات fetch مع `cache: "no-store"` أو `revalidate: 0`.
+
+**لماذا يهم:** هذه الخيارات تعطّل التخزين المؤقت بالكامل، مما يزيد العرض الترددي غير المخزّن مؤقتاً وتكاليف الحوسبة في كل طلب.
+
+```ts title="Bad"
+const data = await fetch(url, { cache: "no-store" });
+```
+
+```ts title="Good"
+const data = await fetch(url, {
+  next: { revalidate: 3600 },
+});
+```
+
+---
+
+## vercel-missing-cache-policy
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-missing-cache-policy`</Callout>
+
+يكشف معالجات مسارات GET دون أي إعداد تخزين مؤقت صريح — لا رؤوس `Cache-Control`، ولا تصدير `revalidate`، ولا تصدير `dynamic`.
+
+**لماذا يهم:** بدون سياسة تخزين مؤقت صريحة، قد تفوت الاستجابات فرص تخزين CDN مؤقتاً، مسبّبة ضربات أصل متكررة.
+
+```ts title="Bad"
+export async function GET() {
+  const data = await fetchData();
+  return Response.json(data);
+}
+```
+
+```ts title="Good"
+export const revalidate = 3600;
+
+export async function GET() {
+  const data = await fetchData();
+  return Response.json(data);
+}
+```
+
+---
+
+## vercel-prefer-get-static-props
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-prefer-get-static-props`</Callout>
+
+يكشف مسارات Pages Router التي تستخدم `getServerSideProps`.
+
+**لماذا يهم:** `getServerSideProps` يعمل في كل طلب. التحوّل إلى `getStaticProps` (مع ISR اختياري) يخزّن الصفحات مؤقتاً عند CDN ويقلّل حوسبة الخادم.
+
+---
+
+## vercel-get-static-props-consider-isr
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-get-static-props-consider-isr`</Callout>
+
+يكشف `getStaticProps` دون قيمة إرجاع `revalidate`.
+
+**لماذا يهم:** بدون `revalidate`، تُبنى جميع الصفحات عند وقت النشر. للمواقع الكبيرة هذا يُبطئ البناء بشكل كبير. يولّد ISR الصفحات عند الطلب ويخزّنها مؤقتاً.
+
+```ts title="Good"
+export async function getStaticProps() {
+  const data = await fetchData();
+  return {
+    props: { data },
+    revalidate: 3600,
+  };
+}
+```

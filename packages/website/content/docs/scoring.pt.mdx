@@ -1,0 +1,72 @@
+---
+title: Pontuação
+description: Como o Vercel Doctor calcula a pontuação de saúde do seu projeto.
+icon: Gauge
+---
+
+Cada scan produz uma pontuação de 0 a 100. A pontuação reflete quantas regras únicas seu projeto aciona, ponderadas por severidade.
+
+## Cálculo
+
+```
+score = max(0, round(100 - penalties))
+```
+
+Onde os descontos são:
+
+| Severity | Penalty per unique rule |
+| -------- | ----------------------- |
+| Error    | 1.5 points              |
+| Warning  | 0.75 points             |
+
+A pontuação é baseada em **regras únicas acionadas**, não na contagem total de diagnósticos. Se a mesma regra disparar em 10 arquivos, conta apenas uma vez.
+
+## Labels
+
+| Score  | Label      |
+| ------ | ---------- |
+| 75–100 | Great      |
+| 50–74  | Needs work |
+| 0–49   | Critical   |
+
+## Exemplo
+
+Um projeto com 2 regras de erro e 8 de aviso:
+
+```
+penalty = (2 × 1.5) + (8 × 0.75) = 3 + 6 = 9
+score = max(0, round(100 - 9)) = 91 → Great
+```
+
+## Compartilhar sua pontuação
+
+Após executar o Vercel Doctor, sua pontuação fica disponível em uma página compartilhável com botões de compartilhamento social e um badge incorporável.
+
+### Badge
+
+Adicione um badge ao seu `README.md`:
+
+```markdown
+[![Vercel Doctor](https://www.vercel-doctor.com/share/badge?s=91)](https://www.vercel-doctor.com/share?s=91)
+```
+
+### API
+
+Você também pode calcular pontuações programaticamente:
+
+```bash
+curl -X POST https://www.vercel-doctor.com/api/score \
+  -H "Content-Type: application/json" \
+  -d '{"diagnostics": [...]}'
+```
+
+Retorna:
+
+```json
+{
+  "score": 91,
+  "label": "Great"
+}
+```
+
+O endpoint `/api/estimate-score` estima qual seria sua pontuação após corrigir os problemas, usando taxas estimadas de correção de 85% para erros e 80% para avisos.

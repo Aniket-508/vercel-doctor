@@ -1,0 +1,61 @@
+---
+title: 호출
+description: 불필요한 서버리스 함수 호출을 유발하는 패턴을 감지하는 규칙.
+---
+
+이 규칙들은 추가 컴퓨팅 주기로 Vercel 청구액을 늘리는 추가 서버리스 함수 호출을 트리거하는 패턴을 포착합니다.
+
+## nextjs-no-client-fetch-for-server-data
+
+<Callout type="warn">Warning · `vercel-doctor/nextjs-no-client-fetch-for-server-data`</Callout>
+
+페이지 또는 레이아웃 파일에서 `useEffect` + `fetch` 패턴을 감지합니다. 이 패턴은 단일 서버 렌더로 가능한 것을 두 번의 왕복으로 바꿉니다: 페이지 렌더링 한 번, 클라이언트의 API 호출 한 번.
+
+**이유:** 각 클라이언트 측 fetch는 별도의 서버리스 함수 호출을 트리거합니다. Server Component에서 서버 측으로 데이터를 가져오면 API 왕복이 완전히 제거됩니다.
+
+```tsx title="Bad"
+"use client";
+
+import { useEffect, useState } from "react";
+
+export default function Page() {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    fetch("/api/data")
+      .then((res) => res.json())
+      .then(setData);
+  }, []);
+
+  return <div>{data?.title}</div>;
+}
+```
+
+```tsx title="Good"
+export default async function Page() {
+  const data = await fetchData();
+  return <div>{data.title}</div>;
+}
+```
+
+---
+
+## nextjs-link-prefetch-default
+
+<Callout type="warn">Warning · `vercel-doctor/nextjs-link-prefetch-default`</Callout>
+
+`prefetch={false}`가 없는 `<Link>` 컴포넌트를 감지합니다. 기본적으로 Next.js는 보이는 모든 링크를 프리페치하여 링크가 많은 페이지에서 대량의 서버리스 함수 호출을 트리거합니다.
+
+**이유:** 각 프리페치는 서버 요청입니다. 수십 개의 링크가 있는 페이지에서는 페이지 로드 시 호출이 급증합니다. 전역적으로 프리페치를 비활성화하고 핵심 네비게이션 링크에만 다시 추가하세요.
+
+```tsx title="Bad"
+<Link href="/dashboard">Dashboard</Link>
+<Link href="/settings">Settings</Link>
+<Link href="/profile">Profile</Link>
+```
+
+```tsx title="Good"
+<Link href="/dashboard" prefetch={false}>Dashboard</Link>
+<Link href="/settings" prefetch={false}>Settings</Link>
+<Link href="/profile" prefetch={true}>Profile</Link>
+```

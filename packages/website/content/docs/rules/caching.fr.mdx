@@ -1,0 +1,130 @@
+---
+title: Caching
+description: Règles qui détectent les motifs empêchant une mise en cache efficace sur Vercel.
+---
+
+Ces règles identifient les motifs qui contournent la mise en cache CDN et ISR de Vercel, forçant un rendu côté serveur inutile et augmentant les coûts de calcul.
+
+## nextjs-no-side-effect-in-get-handler
+
+<Callout type="error">Error · `vercel-doctor/nextjs-no-side-effect-in-get-handler`</Callout>
+
+Détecte les handlers de route GET contenant des side effects (modification de cookies, headers ou appels base de données) ou situés sur des segments de route mutants comme `/logout`, `/signout`, `/delete`, etc.
+
+**Why it matters:** Les requêtes GET peuvent être déclenchées par le prefetching et sont vulnérables aux attaques CSRF. Les side effects dans les handlers GET empêchent aussi la mise en cache.
+
+```ts title="Bad"
+// app/api/logout/route.ts
+export async function GET() {
+  cookies().delete("session");
+  return Response.json({ ok: true });
+}
+```
+
+```ts title="Good"
+// app/api/logout/route.ts
+export async function POST() {
+  cookies().delete("session");
+  return Response.json({ ok: true });
+}
+```
+
+Segments de route mutants détectés : `logout`, `log-out`, `signout`, `sign-out`, `unsubscribe`, `delete`, `remove`, `revoke`, `cancel`, `deactivate`.
+
+---
+
+## vercel-no-force-dynamic
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-no-force-dynamic`</Callout>
+
+Détecte les pages avec `export const dynamic = "force-dynamic"`.
+
+**Why it matters:** `force-dynamic` force le rendu côté serveur à chaque requête, contournant complètement la mise en cache full-page.
+
+```ts title="Bad"
+export const dynamic = "force-dynamic";
+
+export default function Page() { ... }
+```
+
+```ts title="Good"
+export const revalidate = 3600;
+
+export default function Page() { ... }
+```
+
+---
+
+## vercel-no-no-store-fetch
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-no-no-store-fetch`</Callout>
+
+Détecte les appels fetch avec `cache: "no-store"` ou `revalidate: 0`.
+
+**Why it matters:** Ces options désactivent complètement la mise en cache, augmentant la bande passante non mise en cache et les coûts de calcul à chaque requête.
+
+```ts title="Bad"
+const data = await fetch(url, { cache: "no-store" });
+```
+
+```ts title="Good"
+const data = await fetch(url, {
+  next: { revalidate: 3600 },
+});
+```
+
+---
+
+## vercel-missing-cache-policy
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-missing-cache-policy`</Callout>
+
+Détecte les handlers de route GET sans aucune config de cache explicite — pas de headers `Cache-Control`, pas d'export `revalidate`, pas d'export `dynamic`.
+
+**Why it matters:** Sans politique de cache explicite, les réponses peuvent manquer des opportunités de mise en cache CDN, provoquant des accès répétés à l'origin.
+
+```ts title="Bad"
+export async function GET() {
+  const data = await fetchData();
+  return Response.json(data);
+}
+```
+
+```ts title="Good"
+export const revalidate = 3600;
+
+export async function GET() {
+  const data = await fetchData();
+  return Response.json(data);
+}
+```
+
+---
+
+## vercel-prefer-get-static-props
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-prefer-get-static-props`</Callout>
+
+Détecte les routes Pages Router utilisant `getServerSideProps`.
+
+**Why it matters:** `getServerSideProps` s'exécute à chaque requête. Passer à `getStaticProps` (avec ISR optionnel) met les pages en cache au CDN et réduit le calcul serveur.
+
+---
+
+## vercel-get-static-props-consider-isr
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-get-static-props-consider-isr`</Callout>
+
+Détecte `getStaticProps` sans valeur de retour `revalidate`.
+
+**Why it matters:** Sans `revalidate`, toutes les pages sont construites au moment du déploiement. Pour les sites volumineux, cela ralentit considérablement les builds. L'ISR génère les pages à la demande et les met en cache.
+
+```ts title="Good"
+export async function getStaticProps() {
+  const data = await fetchData();
+  return {
+    props: { data },
+    revalidate: 3600,
+  };
+}
+```

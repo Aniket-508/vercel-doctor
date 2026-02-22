@@ -1,0 +1,72 @@
+---
+title: 什么是 Vercel Doctor？
+description: 通过扫描 Next.js 代码库中的高成本模式，降低 Vercel 账单。
+icon: CircleQuestionMark
+---
+
+import { Step, Steps } from "fumadocs-ui/components/steps";
+
+Vercel Doctor 是专为部署在 Vercel 上的 Next.js 项目设计的健康检查工具。它会扫描你的代码库中可能增加账单的模式——函数执行时长、未缓存路由、未优化图片等——并给出 0–100 的健康分和可执行的修复建议。
+
+## 快速开始
+
+<Steps>
+
+<Step>
+### 在项目中运行
+
+```bash
+npx -y vercel-doctor@latest .
+```
+
+就这么简单。无需安装，无需配置。工具会扫描代码库并输出分数和诊断信息。
+
+</Step>
+
+<Step>
+### 修复问题
+
+每个诊断都包含说明要改什么以及为什么的提示信息。优先修复影响最大的规则——先处理错误，再处理警告。
+
+</Step>
+
+<Step>
+### 重新运行以验证
+
+```bash
+npx -y vercel-doctor@latest . --diff
+```
+
+在功能分支上使用 `--diff` 可仅扫描你修改过的文件。
+
+</Step>
+
+</Steps>
+
+## 检查内容
+
+Vercel Doctor 并行执行两轮分析：
+
+1. **账单检查** — 基于 AST 和模式的规则，检测 Next.js 和 Vercel 的高成本用法
+2. **死代码检测** — 查找未使用的文件、导出和类型，这些会拖大 bundle 并延长冷启动
+
+### 规则分类
+
+| 分类                                                 | Rules | 检测内容                                                                                   |
+| ---------------------------------------------------- | ----- | ------------------------------------------------------------------------------------------ |
+| [Function Duration](/docs/rules/function-duration)   | 3     | Sequential awaits, blocking logging, non-parallel I/O                                      |
+| [Caching](/docs/rules/caching)                       | 6     | `force-dynamic`, missing cache policies, `no-store` fetches, side effects in GET handlers  |
+| [Invocations](/docs/rules/invocations)               | 2     | Client-side fetching in pages, aggressive link prefetching                                 |
+| [Image Optimization](/docs/rules/image-optimization) | 4     | Global `unoptimized`, missing `sizes`, broad remote patterns, SVG without `unoptimized`    |
+| [Platform](/docs/rules/platform)                     | 8     | Edge heavy imports, cron jobs, Bun runtime, Fluid Compute, deploy archive, Turbopack cache |
+| [Dead Code](/docs/rules/dead-code)                   | 4     | Unused files, exports, types, and duplicates                                               |
+
+## 功能特点
+
+- **零配置** — 开箱即用，适用于任意 Next.js 项目
+- **Monorepo 支持** — 自动识别工作区，可选择要扫描的项目
+- **Diff 模式** — 在功能分支上仅扫描变更文件
+- **评分** — 0–100 分，带 Great / Needs work / Critical 标签
+- **CI 友好** — 非交互模式，适合自动化流水线
+- **可配置** — 通过配置文件忽略规则或文件
+- **AI 技能** — 可安装为 Claude Code、Cursor、Codex 等工具的 skill

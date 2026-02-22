@@ -1,0 +1,14 @@
+{
+  "title": "ドキュメント",
+  "pages": [
+    "---はじめに---",
+    "index",
+    "cli",
+    "configuration",
+    "scoring",
+    "---ルール---",
+    "...rules",
+    "---連携---",
+    "ai-skills"
+  ]
+}

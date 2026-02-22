@@ -1,0 +1,72 @@
+---
+title: स्कोरिंग
+description: Vercel Doctor आपके प्रोजेक्ट के health score की गणना कैसे करता है।
+icon: Gauge
+---
+
+प्रत्येक स्कैन 0 से 100 तक का स्कोर उत्पन्न करता है। स्कोर reflect करता है कि severity से weighted आपके प्रोजेक्ट ने कितने unique rules trigger किए।
+
+## गणना
+
+```
+score = max(0, round(100 - penalties))
+```
+
+जहाँ penalties हैं:
+
+| Severity | प्रति unique rule penalty |
+| -------- | ------------------------- |
+| Error    | 1.5 अंक                   |
+| Warning  | 0.75 अंक                  |
+
+स्कोर **triggered unique rules** पर आधारित है, diagnostics की कुल संख्या पर नहीं। अगर एक ही rule 10 फाइलों पर fire होती है, तो केवल एक बार गिना जाता है।
+
+## Labels
+
+| Score  | Label      |
+| ------ | ---------- |
+| 75–100 | Great      |
+| 50–74  | Needs work |
+| 0–49   | Critical   |
+
+## उदाहरण
+
+2 error rules और 8 warning rules वाले प्रोजेक्ट के लिए:
+
+```
+penalty = (2 × 1.5) + (8 × 0.75) = 3 + 6 = 9
+score = max(0, round(100 - 9)) = 91 → Great
+```
+
+## अपना स्कोर शेयर करें
+
+Vercel Doctor चलाने के बाद, आपका स्कोर social sharing buttons और embeddable badge वाले shareable पेज पर उपलब्ध है।
+
+### Badge
+
+अपने `README.md` में badge जोड़ें:
+
+```markdown
+[![Vercel Doctor](https://www.vercel-doctor.com/share/badge?s=91)](https://www.vercel-doctor.com/share?s=91)
+```
+
+### API
+
+आप programmatically भी स्कोर की गणना कर सकते हैं:
+
+```bash
+curl -X POST https://www.vercel-doctor.com/api/score \
+  -H "Content-Type: application/json" \
+  -d '{"diagnostics": [...]}'
+```
+
+रिटर्न करता है:
+
+```json
+{
+  "score": 91,
+  "label": "Great"
+}
+```
+
+`/api/estimate-score` एंडपॉइंट अनुमान लगाता है कि issues ठीक करने के बाद आपका स्कोर क्या होगा, errors के लिए 85% और warnings के लिए 80% की estimated fix rates का उपयोग करके।

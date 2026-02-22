@@ -1,0 +1,61 @@
+---
+title: 调用次数
+description: 检测会导致不必要 serverless 函数调用的规则。
+---
+
+这些规则会捕获会触发额外 serverless 函数调用、从而增加 Vercel 账单的做法。
+
+## nextjs-no-client-fetch-for-server-data
+
+<Callout type="warn">Warning · `vercel-doctor/nextjs-no-client-fetch-for-server-data`</Callout>
+
+检测页面或 layout 文件中的 `useEffect` + `fetch` 模式。该模式会把本可一次服务端渲染拆成两次：一次渲染页面，一次客户端 API 调用。
+
+**为何重要：** 每次客户端 fetch 都会触发单独的 serverless 函数调用。在 Server Component 中服务端拉取数据可完全避免 API 往返。
+
+```tsx title="Bad"
+"use client";
+
+import { useEffect, useState } from "react";
+
+export default function Page() {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    fetch("/api/data")
+      .then((res) => res.json())
+      .then(setData);
+  }, []);
+
+  return <div>{data?.title}</div>;
+}
+```
+
+```tsx title="Good"
+export default async function Page() {
+  const data = await fetchData();
+  return <div>{data.title}</div>;
+}
+```
+
+---
+
+## nextjs-link-prefetch-default
+
+<Callout type="warn">Warning · `vercel-doctor/nextjs-link-prefetch-default`</Callout>
+
+检测未设置 `prefetch={false}` 的 `<Link>` 组件。默认 Next.js 会预取所有可见链接，在链接较多的页面上会产生大量 serverless 调用。
+
+**为何重要：** 每次预取都是一次服务请求。有几十个链接的页面加载时会产生大量调用。建议全局关闭 prefetch，仅对关键导航链接启用。
+
+```tsx title="Bad"
+<Link href="/dashboard">Dashboard</Link>
+<Link href="/settings">Settings</Link>
+<Link href="/profile">Profile</Link>
+```
+
+```tsx title="Good"
+<Link href="/dashboard" prefetch={false}>Dashboard</Link>
+<Link href="/settings" prefetch={false}>Settings</Link>
+<Link href="/profile" prefetch={true}>Profile</Link>
+```

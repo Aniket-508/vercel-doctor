@@ -1,0 +1,98 @@
+---
+title: 설정
+description: 규칙, 파일 무시 및 동작 사용자 정의를 위한 설정 파일로 Vercel Doctor 구성.
+icon: Settings
+---
+
+Vercel Doctor는 설정 없이 바로 사용할 수 있습니다. 동작을 사용자 정의해야 할 때는 설정 파일을 추가할 수 있습니다.
+
+## 설정 파일
+
+프로젝트 루트에 `vercel-doctor.config.json`을 생성하세요:
+
+```json
+{
+  "ignore": {
+    "rules": ["vercel-doctor/nextjs-link-prefetch-default"],
+    "files": ["src/generated/**"]
+  }
+}
+```
+
+또는 `package.json`에 `"vercelDoctor"` 키를 추가하세요:
+
+```json
+{
+  "vercelDoctor": {
+    "ignore": {
+      "rules": ["knip/exports"],
+      "files": ["src/generated/**"]
+    }
+  }
+}
+```
+
+둘 다 있으면 `vercel-doctor.config.json`이 우선합니다.
+
+## 옵션
+
+| Key            | Type                | Default | 설명                                  |
+| -------------- | ------------------- | ------- | ------------------------------------- |
+| `ignore.rules` | `string[]`          | `[]`    | `plugin/rule` 형식으로 억제할 규칙 ID |
+| `ignore.files` | `string[]`          | `[]`    | 건너뛸 파일 경로의 Glob 패턴          |
+| `lint`         | `boolean`           | `true`  | 빌링 린트 규칙 활성/비활성            |
+| `deadCode`     | `boolean`           | `true`  | 데드 코드 감지 활성/비활성            |
+| `verbose`      | `boolean`           | `false` | 규칙별 파일 경로 및 줄 번호 표시      |
+| `diff`         | `boolean \| string` | `false` | Diff 모드 활성 또는 기준 브랜치 고정  |
+
+## 규칙 무시
+
+규칙 ID에는 `plugin/rule` 형식을 사용하세요:
+
+```json
+{
+  "ignore": {
+    "rules": [
+      "vercel-doctor/nextjs-image-missing-sizes",
+      "vercel-doctor/vercel-large-static-asset",
+      "knip/exports"
+    ]
+  }
+}
+```
+
+사용 가능한 모든 규칙 ID는 [Rules](/docs/rules/function-duration) 페이지를 참조하세요.
+
+## 파일 무시
+
+스캔에서 제외할 파일에 Glob 패턴을 사용하세요:
+
+```json
+{
+  "ignore": {
+    "files": ["src/generated/**", "**/*.stories.tsx", "scripts/**"]
+  }
+}
+```
+
+## CLI 우선순위
+
+CLI 플래그는 항상 설정 파일 값보다 우선합니다. 예: 명령줄의 `--verbose`가 설정 파일의 `"verbose": false`를 덮어씁니다.
+
+## 전체 예시
+
+```json
+{
+  "ignore": {
+    "rules": [
+      "vercel-doctor/vercel-consider-bun-runtime",
+      "vercel-doctor/vercel-avoid-platform-cron"
+    ],
+    "files": ["src/generated/**", "e2e/**"]
+  },
+  "lint": true,
+  "deadCode": true,
+  "verbose": false,
+  "diff": "main"
+}
+```

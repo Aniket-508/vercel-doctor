@@ -1,0 +1,130 @@
+---
+title: Caching
+description: Vercel पर effective caching को रोकने वाले patterns का पता लगाने वाले rules।
+---
+
+ये rules उन patterns को identify करते हैं जो Vercel की CDN और ISR caching को bypass करते हैं, unnecessary server-side rendering force करते हैं और compute costs बढ़ाते हैं।
+
+## nextjs-no-side-effect-in-get-handler
+
+<Callout type="error">Error · `vercel-doctor/nextjs-no-side-effect-in-get-handler`</Callout>
+
+GET route handlers का पता लगाता है जिनमें side effects होते हैं (cookies, headers या database calls mutate करना) या mutating route segments पर होते हैं जैसे `/logout`, `/signout`, `/delete`, आदि।
+
+**Why it matters:** GET requests prefetching द्वारा trigger हो सकती हैं और CSRF के प्रति vulnerable हैं। GET handlers में side effects caching को भी prevent करते हैं।
+
+```ts title="Bad"
+// app/api/logout/route.ts
+export async function GET() {
+  cookies().delete("session");
+  return Response.json({ ok: true });
+}
+```
+
+```ts title="Good"
+// app/api/logout/route.ts
+export async function POST() {
+  cookies().delete("session");
+  return Response.json({ ok: true });
+}
+```
+
+पकड़े गए mutating route segments: `logout`, `log-out`, `signout`, `sign-out`, `unsubscribe`, `delete`, `remove`, `revoke`, `cancel`, `deactivate`.
+
+---
+
+## vercel-no-force-dynamic
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-no-force-dynamic`</Callout>
+
+`export const dynamic = "force-dynamic"` वाली pages का पता लगाता है।
+
+**Why it matters:** `force-dynamic` हर request पर server-side rendering को force करता है, full-page caching को पूरी तरह bypass करते हुए।
+
+```ts title="Bad"
+export const dynamic = "force-dynamic";
+
+export default function Page() { ... }
+```
+
+```ts title="Good"
+export const revalidate = 3600;
+
+export default function Page() { ... }
+```
+
+---
+
+## vercel-no-no-store-fetch
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-no-no-store-fetch`</Callout>
+
+`cache: "no-store"` या `revalidate: 0` वाले fetch calls का पता लगाता है।
+
+**Why it matters:** ये options caching को पूरी तरह disable करते हैं, हर request पर uncached bandwidth और compute costs बढ़ाते हुए।
+
+```ts title="Bad"
+const data = await fetch(url, { cache: "no-store" });
+```
+
+```ts title="Good"
+const data = await fetch(url, {
+  next: { revalidate: 3600 },
+});
+```
+
+---
+
+## vercel-missing-cache-policy
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-missing-cache-policy`</Callout>
+
+किसी भी explicit cache configuration के बिना GET route handlers का पता लगाता है — न तो `Cache-Control` headers, न `revalidate` export, न `dynamic` export।
+
+**Why it matters:** Explicit cache policy के बिना, responses CDN caching opportunities को miss कर सकती हैं, repeated origin hits का कारण बनती हैं।
+
+```ts title="Bad"
+export async function GET() {
+  const data = await fetchData();
+  return Response.json(data);
+}
+```
+
+```ts title="Good"
+export const revalidate = 3600;
+
+export async function GET() {
+  const data = await fetchData();
+  return Response.json(data);
+}
+```
+
+---
+
+## vercel-prefer-get-static-props
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-prefer-get-static-props`</Callout>
+
+`getServerSideProps` उपयोग करने वाले Pages Router routes का पता लगाता है।
+
+**Why it matters:** `getServerSideProps` हर request पर चलता है। `getStaticProps` (optional ISR के साथ) पर switch करने से pages CDN पर cache होती हैं और server compute कम होता है।
+
+---
+
+## vercel-get-static-props-consider-isr
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-get-static-props-consider-isr`</Callout>
+
+`revalidate` return value के बिना `getStaticProps` का पता लगाता है।
+
+**Why it matters:** `revalidate` के बिना, सभी pages deploy time पर build होती हैं। बड़ी sites के लिए यह builds को dramatically slow करता है। ISR pages को on-demand generate करता है और उन्हें cache करता है।
+
+```ts title="Good"
+export async function getStaticProps() {
+  const data = await fetchData();
+  return {
+    props: { data },
+    revalidate: 3600,
+  };
+}
+```

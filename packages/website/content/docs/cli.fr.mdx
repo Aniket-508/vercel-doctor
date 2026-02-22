@@ -1,0 +1,97 @@
+---
+title: Référence CLI
+description: Toutes les options et drapeaux en ligne de commande pour Vercel Doctor.
+icon: Terminal
+---
+
+## Utilisation
+
+```bash
+npx -y vercel-doctor@latest [directory] [options]
+```
+
+L'argument `directory` vaut par défaut `.` (répertoire courant).
+
+## Options
+
+| Flag               | Description                                           |
+| ------------------ | ----------------------------------------------------- |
+| `-v, --version`    | Display the current version                           |
+| `--no-lint`        | Skip billing lint rules                               |
+| `--no-dead-code`   | Skip dead code detection (Knip)                       |
+| `--verbose`        | Show file paths and line numbers per rule             |
+| `--score`          | Output only the numeric score (useful for CI)         |
+| `-y, --yes`        | Skip interactive prompts, scan all workspace projects |
+| `--project <name>` | Select specific workspace project(s), comma-separated |
+| `--diff [base]`    | Scan only files changed vs the base branch            |
+| `--offline`        | Skip anonymous telemetry used for score calculation   |
+
+## Exemples
+
+### Analyser le répertoire courant
+
+```bash
+npx -y vercel-doctor@latest .
+```
+
+### Analyser avec sortie verbeuse
+
+```bash
+npx -y vercel-doctor@latest . --verbose
+```
+
+Affiche les chemins de fichiers et numéros de ligne pour chaque diagnostic.
+
+### Analyser uniquement les fichiers modifiés
+
+```bash
+npx -y vercel-doctor@latest . --diff
+```
+
+Détecte automatiquement la branche de base. Vous pouvez aussi fixer une base spécifique :
+
+```bash
+npx -y vercel-doctor@latest . --diff main
+```
+
+### Analyser un projet workspace spécifique
+
+```bash
+npx -y vercel-doctor@latest . --project web
+```
+
+Pour plusieurs projets :
+
+```bash
+npx -y vercel-doctor@latest . --project web,api
+```
+
+### Ignorer la détection de dead code
+
+```bash
+npx -y vercel-doctor@latest . --no-dead-code
+```
+
+### Utilisation en CI
+
+```bash
+npx -y vercel-doctor@latest . --yes --score
+```
+
+Le drapeau `--yes` évite les invites interactives. Combiné à `--score`, il n'affiche que le score numérique pour usage dans les scripts et pipelines.
+
+## API programmatique
+
+Vercel Doctor exporte aussi une API programmatique :
+
+```ts
+import { run } from "vercel-doctor/api";
+```
+
+## Plugin Oxlint
+
+Les règles de billing lint sont disponibles en tant que plugin Oxlint standalone :
+
+```ts
+import plugin from "vercel-doctor/oxlint-plugin";
+```

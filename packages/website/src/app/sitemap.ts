@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { source } from "@/lib/source";
 import { SITE } from "@/constants/site";
+import { LANGUAGES } from "@/lib/i18n";
 
 const staticPages = [
   { path: "/", priority: 1.0 },
@@ -12,12 +13,14 @@ const staticPages = [
 const sitemap = (): MetadataRoute.Sitemap => {
   const today = new Date().toISOString().split("T")[0];
 
-  const staticEntries: MetadataRoute.Sitemap = staticPages.map(({ path, priority }) => ({
-    url: `${SITE.URL}${path}`,
-    lastModified: today,
-    changeFrequency: "weekly",
-    priority,
-  }));
+  const staticEntries: MetadataRoute.Sitemap = staticPages.flatMap(({ path, priority }) =>
+    LANGUAGES.map((lang) => ({
+      url: `${SITE.URL}${lang === "en" ? "" : `/${lang}`}${path}`,
+      lastModified: today,
+      changeFrequency: "weekly" as const,
+      priority,
+    })),
+  );
 
   const docPages = source.getPages();
   const docEntries: MetadataRoute.Sitemap = docPages.map((page) => ({

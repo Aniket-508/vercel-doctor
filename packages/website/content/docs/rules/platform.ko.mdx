@@ -1,0 +1,117 @@
+---
+title: 플랫폼
+description: Vercel 플랫폼 설정 및 배포 최적화 관련 규칙.
+---
+
+이 규칙들은 Vercel 배포의 플랫폼 수준 설정 문제를 감지하고 최적화를 제안합니다.
+
+## vercel-edge-heavy-import
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-edge-heavy-import`</Callout>
+
+`node:fs`, `node:crypto`, `sharp`, `@aws-sdk/*` 등 무거운 또는 Node 중심 의존성을 import하는 Edge 런타임 파일을 감지합니다.
+
+**이유:** Edge 함수에는 엄격한 크기와 실행 제한이 있습니다. 무거운 Node.js 의존성은 콜드 스타트 시간을 늘리고 런타임에 실패할 수 있습니다.
+
+**해결:** 무거운 로직을 Node.js 런타임 함수 또는 백그라운드 작업으로 옮기고, Edge 핸들러는 가볍게 유지하세요.
+
+---
+
+## vercel-sequential-database-await
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-sequential-database-await`</Callout>
+
+`Promise.all` 없이 Prisma 또는 데이터베이스 호출이 3회 이상 순차적으로 있는 API 라우트를 감지합니다.
+
+**이유:** 각 순차적 데이터베이스 호출은 함수 실행에 지연을 추가합니다. 독립적인 쿼리를 병렬화하면 총 실행 시간과 비용이 줄어듭니다.
+
+```ts title="Bad"
+const users = await prisma.user.findMany();
+const posts = await prisma.post.findMany();
+const tags = await prisma.tag.findMany();
+```
+
+```ts title="Good"
+const [users, posts, tags] = await Promise.all([
+  prisma.user.findMany(),
+  prisma.post.findMany(),
+  prisma.tag.findMany(),
+]);
+```
+
+---
+
+## vercel-large-static-asset
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-large-static-asset`</Callout>
+
+앱 저장소에서 제공되는 4KB 이상의 정적 자산(이미지, 폰트, 비디오, PDF)을 감지합니다.
+
+**이유:** Vercel 배포에서 제공되는 큰 정적 파일은 매 요청마다 대역폭을 소비합니다. 전용 CDN 또는 객체 저장소(Cloudflare R2, S3)로 옮기면 대역폭 비용이 줄어듭니다.
+
+최대 20개 파일까지 보고하며, 크기 순(큰 것부터)으로 정렬됩니다.
+
+---
+
+## vercel-consider-bun-runtime
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-consider-bun-runtime`</Callout>
+
+Bun 런타임을 위해 구성되지 않은 프로젝트를 감지합니다(`package.json`에 `packageManager: "bun@..."` 없음, `bun.lock` 파일 없음).
+
+**이유:** Bun 런타임은 Node.js 대비 Vercel에서 설치 및 빌드 오버헤드를 줄일 수 있습니다.
+
+**해결:** [Bun 런타임 가이드](https://vercel.com/docs/functions/runtimes/bun)를 검토하고, 프로젝트가 호환되면 전환하세요.
+
+---
+
+## vercel-avoid-platform-cron
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-avoid-platform-cron`</Callout>
+
+`vercel.json`에 구성된 `crons`를 감지합니다.
+
+**이유:** Vercel cron 작업은 서버리스 함수로 실행되며 실행당 청구됩니다. 예측 가능한 패턴의 예약 작업은 GitHub Actions나 Cloudflare Workers Cron Triggers를 사용하면 더 저렴할 수 있습니다.
+
+---
+
+## vercel-consider-fluid-compute
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-consider-fluid-compute`</Callout>
+
+API/서버 라우트가 3개 이상인 프로젝트를 감지합니다.
+
+**이유:** Fluid Compute는 가변 지연 시간이나 버스트 트래픽이 있는 워크로드에 대해 동시성을 개선하고 실행 오버헤드를 줄입니다. 여러 서버 라우트가 있는 프로젝트에서는 검토할 가치가 있습니다.
+
+---
+
+## vercel-suggest-turbopack-build-cache
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-suggest-turbopack-build-cache`</Callout>
+
+`experimental` 설정은 있지만 `turbopackFileSystemCacheForBuild`가 없는 `next.config` 파일을 감지합니다.
+
+**이유:** Next.js 16+는 Turbopack 빌드 캐시를 지원하며, 빌드 시간을 크게 줄일 수 있습니다.
+
+```js title="Good"
+// next.config.js
+module.exports = {
+  experimental: {
+    turbopackFileSystemCacheForBuild: true,
+  },
+};
+```
+
+---
+
+## vercel-suggest-deploy-archive
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-suggest-deploy-archive`</Callout>
+
+5,000개 이상의 파일이 있는 프로젝트를 감지합니다.
+
+**이유:** 대규모 프로젝트는 배포 중 API 속도 제한에 걸릴 수 있습니다. 아카이브 모드를 사용하면 개별 파일 대신 단일 tarball을 업로드하여 배포 시간을 대략 50% 줄일 수 있습니다.
+
+```bash
+vercel deploy --archive=tgz
+```

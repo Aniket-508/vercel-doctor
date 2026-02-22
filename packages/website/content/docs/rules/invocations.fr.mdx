@@ -1,0 +1,61 @@
+---
+title: Invocations
+description: Règles qui détectent les motifs provoquant des invocations de fonctions serverless inutiles.
+---
+
+Ces règles repèrent les motifs qui déclenchent des invocations de fonctions serverless supplémentaires, augmentant votre facture Vercel par des cycles de calcul additionnels.
+
+## nextjs-no-client-fetch-for-server-data
+
+<Callout type="warn">Warning · `vercel-doctor/nextjs-no-client-fetch-for-server-data`</Callout>
+
+Détecte les motifs `useEffect` + `fetch` dans les fichiers page ou layout. Ce motif transforme ce qui pourrait être un seul rendu serveur en deux allers-retours : un pour rendre la page et un autre appel API depuis le client.
+
+**Why it matters:** Chaque fetch côté client déclenche une invocation de fonction serverless distincte. Récupérer les données côté serveur dans un Server Component élimine entièrement l'aller-retour API.
+
+```tsx title="Bad"
+"use client";
+
+import { useEffect, useState } from "react";
+
+export default function Page() {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    fetch("/api/data")
+      .then((res) => res.json())
+      .then(setData);
+  }, []);
+
+  return <div>{data?.title}</div>;
+}
+```
+
+```tsx title="Good"
+export default async function Page() {
+  const data = await fetchData();
+  return <div>{data.title}</div>;
+}
+```
+
+---
+
+## nextjs-link-prefetch-default
+
+<Callout type="warn">Warning · `vercel-doctor/nextjs-link-prefetch-default`</Callout>
+
+Détecte les composants `<Link>` sans `prefetch={false}`. Par défaut, Next.js précharge chaque lien visible, ce qui peut déclencher un grand nombre d'invocations de fonctions serverless sur les pages avec beaucoup de liens.
+
+**Why it matters:** Chaque prefetch est une requête serveur. Sur les pages avec des dizaines de liens, cela crée une rafale d'invocations au chargement. Désactivez le prefetch globalement et réactivez-le uniquement sur les liens de navigation critiques.
+
+```tsx title="Bad"
+<Link href="/dashboard">Dashboard</Link>
+<Link href="/settings">Settings</Link>
+<Link href="/profile">Profile</Link>
+```
+
+```tsx title="Good"
+<Link href="/dashboard" prefetch={false}>Dashboard</Link>
+<Link href="/settings" prefetch={false}>Settings</Link>
+<Link href="/profile" prefetch={true}>Profile</Link>
+```

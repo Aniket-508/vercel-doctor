@@ -1,0 +1,14 @@
+{
+  "title": "दस्तावेज़ीकरण",
+  "pages": [
+    "---परिचय---",
+    "index",
+    "cli",
+    "configuration",
+    "scoring",
+    "---नियम---",
+    "...rules",
+    "---एकीकरण---",
+    "ai-skills"
+  ]
+}

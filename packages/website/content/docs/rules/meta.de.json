@@ -1,0 +1,11 @@
+{
+  "title": "Regeln",
+  "pages": [
+    "function-duration",
+    "caching",
+    "invocations",
+    "image-optimization",
+    "platform",
+    "dead-code"
+  ]
+}

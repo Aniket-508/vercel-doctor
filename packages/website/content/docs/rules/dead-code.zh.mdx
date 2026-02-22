@@ -1,0 +1,52 @@
+---
+title: 死代码
+description: 检测代码库中未使用的文件、导出和类型的规则。
+---
+
+死代码检测由 [Knip](https://knip.dev) 提供支持。未使用的代码会增大 bundle、拖慢冷启动、增加部署体积，进而推高 Vercel 成本。
+
+可通过 `--no-dead-code` 或在配置中设置 `"deadCode": false` 完全关闭死代码检测。
+
+## knip/files
+
+<Callout type="warn">Warning · `knip/files`</Callout>
+
+检测项目中未被任何其他文件导入的文件。
+
+**为何重要：** 未使用的文件仍会被部署并在构建时解析，增加模块图规模从而延长冷启动时间。
+
+**修复：** 删除该文件；若为故意 standalone，可在 Knip 配置的 entry 中声明。
+
+---
+
+## knip/exports
+
+<Callout type="warn">Warning · `knip/exports`</Callout>
+
+检测从未被任何地方导入的导出符号（函数、变量、类）。
+
+**为何重要：** 未使用的导出生成了死代码。Tree-shaking 未必能去除，尤其在服务端代码中。
+
+**修复：** 移除 `export` 关键字，或删除不再需要的符号。
+
+---
+
+## knip/types
+
+<Callout type="warn">Warning · `knip/types`</Callout>
+
+检测从未被引用的导出 TypeScript 类型和接口。
+
+**修复：** 删除未使用的类型导出。
+
+---
+
+## knip/duplicates
+
+<Callout type="warn">Warning · `knip/duplicates`</Callout>
+
+检测同一符号在多个文件中重复导出。
+
+**为何重要：** 重复导出带来歧义，易导致从错误文件导入、拉入多余代码。
+
+**修复：** 将重复导出统一到一个导出位置。

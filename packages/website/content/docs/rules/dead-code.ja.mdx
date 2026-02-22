@@ -1,0 +1,52 @@
+---
+title: Dead Code
+description: コードベース内の未使用ファイル、エクスポート、型を検出するルール。
+---
+
+Dead code検出は[Knip](https://knip.dev)で動作しています。未使用コードはバンドルを肥大化させ、コールドスタートを遅くし、デプロイサイズを増やします。これらはすべてVercelのコスト上昇につながります。
+
+`--no-dead-code` または設定ファイルの `"deadCode": false` で、dead code検出を完全に無効化できます。
+
+## knip/files
+
+<Callout type="warn">Warning · `knip/files`</Callout>
+
+プロジェクト内のいずれのファイルからもインポートされていないファイルを検出します。
+
+**Why it matters:** 未使用ファイルもデプロイされ、ビルド時にパースされます。モジュールグラフに追加することでコールドスタート時間を増やします。
+
+**Fix:** ファイルを削除するか、意図的にスタンドアロンの場合は、Knip設定の entry パターンに追加してください。
+
+---
+
+## knip/exports
+
+<Callout type="warn">Warning · `knip/exports`</Callout>
+
+どこからもインポートされないエクスポートされたシンボル（関数、変数、クラス）を検出します。
+
+**Why it matters:** 未使用エクスポートはバンドルに dead code を追加します。特にサーバーサイドコードでは、tree-shakingが必ずしも除去してくれません。
+
+**Fix:** `export` キーワードを削除するか、不要なシンボルを削除してください。
+
+---
+
+## knip/types
+
+<Callout type="warn">Warning · `knip/types`</Callout>
+
+参照されないエクスポートされたTypeScriptの型とインターフェースを検出します。
+
+**Fix:** 未使用の型エクスポートを削除してください。
+
+---
+
+## knip/duplicates
+
+<Callout type="warn">Warning · `knip/duplicates`</Callout>
+
+複数ファイルから同じシンボルがエクスポートされていることを検出します。
+
+**Why it matters:** 重複エクスポートは曖昧さを生み、間違ったファイルからインポートしたり、必要な以上のコードを取り込む原因になります。
+
+**Fix:** 重複を1つのエクスポート元に集約してください。

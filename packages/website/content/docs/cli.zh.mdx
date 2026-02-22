@@ -1,0 +1,97 @@
+---
+title: CLI 参考
+description: Vercel Doctor 的全部命令行选项与参数。
+icon: Terminal
+---
+
+## 用法
+
+```bash
+npx -y vercel-doctor@latest [directory] [options]
+```
+
+`directory` 参数默认为 `.`（当前目录）。
+
+## 选项
+
+| Flag               | Description                                           |
+| ------------------ | ----------------------------------------------------- |
+| `-v, --version`    | Display the current version                           |
+| `--no-lint`        | Skip billing lint rules                               |
+| `--no-dead-code`   | Skip dead code detection (Knip)                       |
+| `--verbose`        | Show file paths and line numbers per rule             |
+| `--score`          | Output only the numeric score (useful for CI)         |
+| `-y, --yes`        | Skip interactive prompts, scan all workspace projects |
+| `--project <name>` | Select specific workspace project(s), comma-separated |
+| `--diff [base]`    | Scan only files changed vs the base branch            |
+| `--offline`        | Skip anonymous telemetry used for score calculation   |
+
+## 示例
+
+### 扫描当前目录
+
+```bash
+npx -y vercel-doctor@latest .
+```
+
+### 使用详细输出扫描
+
+```bash
+npx -y vercel-doctor@latest . --verbose
+```
+
+显示每个诊断对应的文件路径和行号。
+
+### 仅扫描变更文件
+
+```bash
+npx -y vercel-doctor@latest . --diff
+```
+
+自动检测基准分支。也可指定基准：
+
+```bash
+npx -y vercel-doctor@latest . --diff main
+```
+
+### 扫描指定工作区项目
+
+```bash
+npx -y vercel-doctor@latest . --project web
+```
+
+多个项目：
+
+```bash
+npx -y vercel-doctor@latest . --project web,api
+```
+
+### 跳过死代码检测
+
+```bash
+npx -y vercel-doctor@latest . --no-dead-code
+```
+
+### CI 使用
+
+```bash
+npx -y vercel-doctor@latest . --yes --score
+```
+
+`--yes` 跳过交互式提示。与 `--score` 一起使用时，仅输出数字分数，便于在脚本和流水线中使用。
+
+## 编程 API
+
+Vercel Doctor 也导出编程 API：
+
+```ts
+import { run } from "vercel-doctor/api";
+```
+
+## Oxlint 插件
+
+账单检查规则可单独作为 Oxlint 插件使用：
+
+```ts
+import plugin from "vercel-doctor/oxlint-plugin";
+```

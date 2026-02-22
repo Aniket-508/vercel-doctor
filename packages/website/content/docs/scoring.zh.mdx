@@ -1,0 +1,72 @@
+---
+title: 评分
+description: Vercel Doctor 如何计算项目健康分。
+icon: Gauge
+---
+
+每次扫描都会生成 0–100 的分数。分数反映项目触发了多少条唯一的规则，并按严重程度加权。
+
+## 计算方式
+
+```
+score = max(0, round(100 - penalties))
+```
+
+其中 penalties 为：
+
+| Severity | Penalty per unique rule |
+| -------- | ----------------------- |
+| Error    | 1.5 points              |
+| Warning  | 0.75 points             |
+
+分数基于**触发的唯一规则数**，不是诊断总数。若同一条规则在 10 个文件中触发，只计一次。
+
+## 标签
+
+| Score  | Label      |
+| ------ | ---------- |
+| 75–100 | Great      |
+| 50–74  | Needs work |
+| 0–49   | Critical   |
+
+## 示例
+
+一个项目触发了 2 条错误规则和 8 条警告规则：
+
+```
+penalty = (2 × 1.5) + (8 × 0.75) = 3 + 6 = 9
+score = max(0, round(100 - 9)) = 91 → Great
+```
+
+## 分享你的分数
+
+运行 Vercel Doctor 后，分数会显示在可分享页面中，并提供社交分享按钮和可嵌入徽章。
+
+### 徽章
+
+在 `README.md` 中添加徽章：
+
+```markdown
+[![Vercel Doctor](https://www.vercel-doctor.com/share/badge?s=91)](https://www.vercel-doctor.com/share?s=91)
+```
+
+### API
+
+也可以编程计算分数：
+
+```bash
+curl -X POST https://www.vercel-doctor.com/api/score \
+  -H "Content-Type: application/json" \
+  -d '{"diagnostics": [...]}'
+```
+
+返回示例：
+
+```json
+{
+  "score": 91,
+  "label": "Great"
+}
+```
+
+`/api/estimate-score` 接口会估算修复问题后的分数，采用错误 85%、警告 80% 的预估修复率。

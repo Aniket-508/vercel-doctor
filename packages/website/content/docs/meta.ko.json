@@ -1,0 +1,14 @@
+{
+  "title": "문서",
+  "pages": [
+    "---소개---",
+    "index",
+    "cli",
+    "configuration",
+    "scoring",
+    "---규칙---",
+    "...rules",
+    "---통합---",
+    "ai-skills"
+  ]
+}

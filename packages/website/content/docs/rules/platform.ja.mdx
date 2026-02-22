@@ -1,0 +1,117 @@
+---
+title: Platform
+description: Vercelプラットフォームの設定とデプロイ最適化に特化したルール。
+---
+
+これらのルールは、プラットフォームレベルの設定問題を検出し、Vercel デプロイの最適化を提案します。
+
+## vercel-edge-heavy-import
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-edge-heavy-import`</Callout>
+
+edge runtime のファイルが、`node:fs`、`node:crypto`、`sharp`、`@aws-sdk/*` などの重いまたは Node 中心の依存をインポートしていることを検出します。
+
+**Why it matters:** edge 関数はサイズと実行の制限が厳格です。重い Node.js 依存はコールドスタート時間を増やし、実行時に失敗する可能性があります。
+
+**Fix:** 重いロジックは Node.js runtime 関数やバックグラウンドジョブに移動し、edge ハンドラは軽量に保ってください。
+
+---
+
+## vercel-sequential-database-await
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-sequential-database-await`</Callout>
+
+`Promise.all` を使わずに3つ以上の直列な Prisma または DB 呼び出しがある API ルートを検出します。
+
+**Why it matters:** 各直列 DB 呼び出しは関数実行のレイテンシを増やします。独立したクエリを並列化すると、合計実行時間とコストを削減できます。
+
+```ts title="Bad"
+const users = await prisma.user.findMany();
+const posts = await prisma.post.findMany();
+const tags = await prisma.tag.findMany();
+```
+
+```ts title="Good"
+const [users, posts, tags] = await Promise.all([
+  prisma.user.findMany(),
+  prisma.post.findMany(),
+  prisma.tag.findMany(),
+]);
+```
+
+---
+
+## vercel-large-static-asset
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-large-static-asset`</Callout>
+
+4KB以上の静的アセット（画像、フォント、動画、PDF）がアプリリポジトリから配信されていることを検出します。
+
+**Why it matters:** Vercel デプロイから配信される大きな静的ファイルは、リクエストごとに帯域幅を消費します。専用の CDN やオブジェクトストレージ（Cloudflare R2、S3）に移すと帯域幅コストを削減できます。
+
+最大20ファイルまで報告され、サイズ順（大きい順）で表示されます。
+
+---
+
+## vercel-consider-bun-runtime
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-consider-bun-runtime`</Callout>
+
+Bun runtime 向けに設定されていないプロジェクト（`package.json` に `packageManager: "bun@..."` がなく、`bun.lock` もない）を検出します。
+
+**Why it matters:** Bun runtime は Node.js と比べて Vercel 上のインストールとビルドのオーバーヘッドを削減できます。
+
+**Fix:** [Bun runtime guidance](https://vercel.com/docs/functions/runtimes/bun) を確認し、プロジェクトが互換性があれば切り替えてください。
+
+---
+
+## vercel-avoid-platform-cron
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-avoid-platform-cron`</Callout>
+
+`vercel.json` で設定された `crons` を検出します。
+
+**Why it matters:** Vercel の cron job は serverless 関数として実行され、実行ごとに課金されます。パターンが predictable なスケジュールワークロードは、GitHub Actions や Cloudflare Workers Cron Triggers の方が安く運用できることが多いです。
+
+---
+
+## vercel-consider-fluid-compute
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-consider-fluid-compute`</Callout>
+
+3つ以上の API/server ルートを持つプロジェクトを検出します。
+
+**Why it matters:** Fluid Compute はレイテンシが変動したり bursty なトラフィックの負荷で、並行性を向上し、実行オーバーヘッドを削減します。複数のサーバールートがあるプロジェクトでは検討の価値があります。
+
+---
+
+## vercel-suggest-turbopack-build-cache
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-suggest-turbopack-build-cache`</Callout>
+
+`experimental` 設定があり、`turbopackFileSystemCacheForBuild` がない `next.config` ファイルを検出します。
+
+**Why it matters:** Next.js 16+ は Turbopack ビルドキャッシュに対応しており、ビルド時間を大幅に短縮できます。
+
+```js title="Good"
+// next.config.js
+module.exports = {
+  experimental: {
+    turbopackFileSystemCacheForBuild: true,
+  },
+};
+```
+
+---
+
+## vercel-suggest-deploy-archive
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-suggest-deploy-archive`</Callout>
+
+5,000ファイル以上のプロジェクトを検出します。
+
+**Why it matters:** 大規模プロジェクトはデプロイ時に API レート制限に達することがあります。archive モードを使うと、個別ファイルではなく単一の tarball をアップロードし、デプロイ時間を概ね50%短縮できます。
+
+```bash
+vercel deploy --archive=tgz
+```

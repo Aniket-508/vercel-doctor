@@ -1,0 +1,72 @@
+---
+title: Bewertung
+description: So berechnet Vercel Doctor den Gesundheits-Score deines Projekts.
+icon: Gauge
+---
+
+Jeder Scan erzeugt eine Bewertung von 0 bis 100. Der Score spiegelt wider, wie viele eindeutige Regeln dein Projekt auslöst, gewichtet nach Schweregrad.
+
+## Berechnung
+
+```
+score = max(0, round(100 - penalties))
+```
+
+Wobei die Abzüge:
+
+| Severity | Penalty per unique rule |
+| -------- | ----------------------- |
+| Error    | 1.5 points              |
+| Warning  | 0.75 points             |
+
+Der Score basiert auf **eindeutig ausgelösten Regeln**, nicht auf der Gesamtzahl der Diagnosen. Wenn dieselbe Regel bei 10 Dateien greift, zählt sie nur einmal.
+
+## Labels
+
+| Score  | Label      |
+| ------ | ---------- |
+| 75–100 | Great      |
+| 50–74  | Needs work |
+| 0–49   | Critical   |
+
+## Beispiel
+
+Ein Projekt mit 2 Error-Regeln und 8 Warning-Regeln:
+
+```
+penalty = (2 × 1.5) + (8 × 0.75) = 3 + 6 = 9
+score = max(0, round(100 - 9)) = 91 → Great
+```
+
+## Score teilen
+
+Nach der Ausführung von Vercel Doctor ist dein Score auf einer teilbaren Seite mit Social-Share-Buttons und einem einbettbaren Badge verfügbar.
+
+### Badge
+
+Füge ein Badge zu deiner `README.md` hinzu:
+
+```markdown
+[![Vercel Doctor](https://www.vercel-doctor.com/share/badge?s=91)](https://www.vercel-doctor.com/share?s=91)
+```
+
+### API
+
+Du kannst Scores auch programmatisch berechnen:
+
+```bash
+curl -X POST https://www.vercel-doctor.com/api/score \
+  -H "Content-Type: application/json" \
+  -d '{"diagnostics": [...]}'
+```
+
+Antwort:
+
+```json
+{
+  "score": 91,
+  "label": "Great"
+}
+```
+
+Der Endpunkt `/api/estimate-score` schätzt, welcher Score sich nach der Behebung der Probleme ergeben würde, unter Verwendung geschätzter Behebungsraten von 85 % für Errors und 80 % für Warnings.

@@ -1,0 +1,52 @@
+---
+title: Código muerto
+description: Reglas que detectan archivos, exportaciones y tipos no usados en tu código.
+---
+
+La detección de código muerto está impulsada por [Knip](https://knip.dev). El código no usado infla tu bundle, ralentiza los cold starts y aumenta el tamaño de despliegue — todo lo cual se traduce en mayores costos de Vercel.
+
+Puedes desactivar completamente la detección de código muerto con `--no-dead-code` o `"deadCode": false` en tu archivo de configuración.
+
+## knip/files
+
+<Callout type="warn">Warning · `knip/files`</Callout>
+
+Detecta archivos que no son importados por ningún otro archivo del proyecto.
+
+**Por qué importa:** Los archivos no usados aún se despliegan y se analizan durante las compilaciones. Aumentan el tiempo de cold start al añadir al grafo de módulos.
+
+**Corrección:** Elimina el archivo, o si es intencionalmente independiente, añádelo a los patrones de entrada de tu configuración de Knip.
+
+---
+
+## knip/exports
+
+<Callout type="warn">Warning · `knip/exports`</Callout>
+
+Detecta símbolos exportados (funciones, variables, clases) que nunca se importan en ningún lugar.
+
+**Por qué importa:** Las exportaciones no usadas añaden código muerto a tu bundle. El tree-shaking no siempre las elimina, especialmente en código del lado del servidor.
+
+**Corrección:** Elimina la palabra clave `export`, o borra el símbolo si ya no se necesita.
+
+---
+
+## knip/types
+
+<Callout type="warn">Warning · `knip/types`</Callout>
+
+Detecta tipos e interfaces de TypeScript exportados que nunca se referencian.
+
+**Corrección:** Elimina las exportaciones de tipos no usadas.
+
+---
+
+## knip/duplicates
+
+<Callout type="warn">Warning · `knip/duplicates`</Callout>
+
+Detecta el mismo símbolo exportado desde múltiples archivos.
+
+**Por qué importa:** Las exportaciones duplicadas crean ambigüedad y pueden llevar a importar desde el archivo incorrecto, trayendo más código del necesario.
+
+**Corrección:** Consolida los duplicados en una única ubicación de exportación.

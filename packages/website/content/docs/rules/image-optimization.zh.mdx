@@ -1,0 +1,96 @@
+---
+title: 图片优化
+description: 检测会导致不必要图片优化成本的规则。
+---
+
+这些规则用于发现 Next.js 图片配置中会增加 Vercel Image Optimization 使用量或提供未优化图片的问题。
+
+## vercel-image-global-unoptimized
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-image-global-unoptimized`</Callout>
+
+检测 `next.config` 中的 `images.unoptimized: true`。
+
+**为何重要：** 这会全局关闭 Vercel Image Optimization。所有图片原样提供，无缩放、格式转换或压缩，会增加带宽成本并影响性能。
+
+```js title="Bad"
+// next.config.js
+module.exports = {
+  images: {
+    unoptimized: true,
+  },
+};
+```
+
+```js title="Good"
+// next.config.js
+module.exports = {
+  images: {
+    remotePatterns: [{ hostname: "cdn.example.com" }],
+  },
+};
+```
+
+---
+
+## nextjs-image-missing-sizes
+
+<Callout type="warn">Warning · `vercel-doctor/nextjs-image-missing-sizes`</Callout>
+
+检测使用 `fill` 但缺少 `sizes` 属性的 `<Image>` 组件。
+
+**为何重要：** 没有 `sizes` 时，浏览器会按最大可用尺寸下载图片，忽视视口宽度，浪费带宽并增加 Image Optimization 用量。
+
+```tsx title="Bad"
+<Image src="/hero.jpg" alt="Hero" fill />
+```
+
+```tsx title="Good"
+<Image src="/hero.jpg" alt="Hero" fill sizes="(max-width: 768px) 100vw, 50vw" />
+```
+
+---
+
+## vercel-image-remote-pattern-too-broad
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-image-remote-pattern-too-broad`</Callout>
+
+检测 `images.remotePatterns` 中 `pathname` 过宽的配置（`/**` 或未指定）。
+
+**为何重要：** 过于宽泛的远程图片路径允许 hostname 下任意 URL 通过你的账号优化，可能导致用户生成内容或第三方嵌入产生意外优化消耗。
+
+```js title="Bad"
+// next.config.js
+module.exports = {
+  images: {
+    remotePatterns: [{ hostname: "cdn.example.com", pathname: "/**" }],
+  },
+};
+```
+
+```js title="Good"
+// next.config.js
+module.exports = {
+  images: {
+    remotePatterns: [{ hostname: "cdn.example.com", pathname: "/avatars/**" }],
+  },
+};
+```
+
+---
+
+## vercel-image-svg-without-unoptimized
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-image-svg-without-unoptimized`</Callout>
+
+检测 `src` 为 SVG 但未设置 `unoptimized` 的 `<Image>` 组件。
+
+**为何重要：** SVG 为矢量图，不会从 Image Optimization 获益，经过该流程只会消耗优化配额而没有任何好处。
+
+```tsx title="Bad"
+<Image src="/logo.svg" alt="Logo" width={100} height={40} />
+```
+
+```tsx title="Good"
+<Image src="/logo.svg" alt="Logo" width={100} height={40} unoptimized />
+```

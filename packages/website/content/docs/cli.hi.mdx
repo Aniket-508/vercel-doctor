@@ -1,0 +1,97 @@
+---
+title: CLI Reference
+description: Vercel Doctor के लिए सभी command-line options और flags।
+icon: Terminal
+---
+
+## Usage
+
+```bash
+npx -y vercel-doctor@latest [directory] [options]
+```
+
+`directory` argument का default `.` (current directory) है।
+
+## Options
+
+| Flag               | विवरण                                                                      |
+| ------------------ | -------------------------------------------------------------------------- |
+| `-v, --version`    | Current version प्रदर्शित करें                                             |
+| `--no-lint`        | Billing lint rules skip करें                                               |
+| `--no-dead-code`   | Dead code detection (Knip) skip करें                                       |
+| `--verbose`        | प्रति rule file paths और line numbers दिखाएं                               |
+| `--score`          | केवल numeric score output करें (CI के लिए उपयोगी)                          |
+| `-y, --yes`        | Interactive prompts skip करें, सभी workspace projects स्कैन करें           |
+| `--project <name>` | Specific workspace project(s) चुनें, comma-separated                       |
+| `--diff [base]`    | Base branch के मुकाबले केवल changed files स्कैन करें                       |
+| `--offline`        | Score calculation के लिए उपयोग किए जाने वाले anonymous telemetry skip करें |
+
+## Examples
+
+### Current directory स्कैन करें
+
+```bash
+npx -y vercel-doctor@latest .
+```
+
+### Verbose output के साथ स्कैन करें
+
+```bash
+npx -y vercel-doctor@latest . --verbose
+```
+
+प्रत्येक diagnostic के लिए affected file paths और line numbers दिखाता है।
+
+### केवल changed files स्कैन करें
+
+```bash
+npx -y vercel-doctor@latest . --diff
+```
+
+Base branch को auto-detect करता है। आप specific base भी pin कर सकते हैं:
+
+```bash
+npx -y vercel-doctor@latest . --diff main
+```
+
+### Specific workspace project स्कैन करें
+
+```bash
+npx -y vercel-doctor@latest . --project web
+```
+
+कई projects के लिए:
+
+```bash
+npx -y vercel-doctor@latest . --project web,api
+```
+
+### Dead code detection skip करें
+
+```bash
+npx -y vercel-doctor@latest . --no-dead-code
+```
+
+### CI usage
+
+```bash
+npx -y vercel-doctor@latest . --yes --score
+```
+
+`--yes` flag interactive prompts को skip करता है। `--score` के साथ combined, यह scripts और pipelines में उपयोग के लिए केवल numeric score output करता है।
+
+## Programmatic API
+
+Vercel Doctor एक programmatic API भी export करता है:
+
+```ts
+import { run } from "vercel-doctor/api";
+```
+
+## Oxlint Plugin
+
+Billing lint rules एक standalone Oxlint plugin के रूप में उपलब्ध हैं:
+
+```ts
+import plugin from "vercel-doctor/oxlint-plugin";
+```

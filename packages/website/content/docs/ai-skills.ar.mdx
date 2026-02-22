@@ -1,0 +1,43 @@
+---
+title: مهارات AI
+description: تثبيت Vercel Doctor كمهارة لمساعدي الترميز بالذكاء الاصطناعي.
+---
+
+يمكن تثبيت Vercel Doctor كمهارة لمساعدي الترميز بالذكاء الاصطناعي. بمجرد التثبيت، سيُقترح مساعد الذكاء الاصطناعي تلقائياً تشغيل Vercel Doctor بعد إجراء تغييرات على مشاريع Next.js.
+
+## تثبيت بسطر واحد
+
+```bash
+npx skills add vercel-doctor
+```
+
+أو التثبيت عبر curl:
+
+```bash
+curl -fsSL https://vercel-doctor.com/install-skill.sh | bash
+```
+
+## الأدوات المدعومة
+
+يكتشف المثبّت تلقائياً ويُثبّت لكل الأدوات المدعومة على نظامك:
+
+| Tool        | موقع المهارة                                   |
+| ----------- | ---------------------------------------------- |
+| Claude Code | `~/.claude/skills/vercel-doctor/`              |
+| Amp Code    | `~/.config/amp/skills/vercel-doctor/`          |
+| Cursor      | `~/.cursor/skills/vercel-doctor/`              |
+| OpenCode    | `~/.config/opencode/skills/vercel-doctor/`     |
+| Windsurf    | `~/.codeium/windsurf/memories/global_rules.md` |
+| Antigravity | `~/.gemini/antigravity/skills/vercel-doctor/`  |
+| Gemini CLI  | `~/.gemini/skills/vercel-doctor/`              |
+| Codex       | `~/.codex/skills/vercel-doctor/`               |
+
+يضيف المثبّت المهارة أيضاً إلى مجلد `.agents/` في مشروعك للسياق على مستوى المشروع.
+
+## ما تفعله المهارة
+
+عند التفعيل، سيقوم مساعد الذكاء الاصطناعي بـ:
+
+1. معرفة Vercel Doctor وما يفحصه
+2. اقتراح تشغيل `npx -y vercel-doctor@latest . --verbose --diff` بعد التغييرات
+3. التركيز أولاً على إصلاح المشكلات التي تقلل وقت تنفيذ الدوال والتكرارات

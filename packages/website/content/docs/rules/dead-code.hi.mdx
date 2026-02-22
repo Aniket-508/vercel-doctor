@@ -1,0 +1,52 @@
+---
+title: Dead Code
+description: आपके codebase में unused files, exports और types का पता लगाने वाले rules।
+---
+
+Dead code detection [Knip](https://knip.dev) द्वारा संचालित है। Unused code आपके bundle को बढ़ाता है, cold starts को धीमा करता है और deployment size बढ़ाता है — जो सभी higher Vercel costs में translate होते हैं।
+
+आप config file में `"deadCode": false` या `--no-dead-code` के साथ dead code detection को पूरी तरह से disable कर सकते हैं।
+
+## knip/files
+
+<Callout type="warn">Warning · `knip/files`</Callout>
+
+प्रोजेक्ट में किसी अन्य file द्वारा import नहीं किए गए files का पता लगाता है।
+
+**Why it matters:** Unused files फिर भी deploy होते हैं और builds के दौरान parse किए जाते हैं। वे module graph में जोड़कर cold start time बढ़ाते हैं।
+
+**Fix:** फाइल को delete करें, या अगर यह intentionally standalone है, तो इसे अपने Knip config के entry patterns में जोड़ें।
+
+---
+
+## knip/exports
+
+<Callout type="warn">Warning · `knip/exports`</Callout>
+
+कहीं भी import नहीं किए गए exported symbols (functions, variables, classes) का पता लगाता है।
+
+**Why it matters:** Unused exports आपके bundle में dead code जोड़ते हैं। Tree-shaking हमेशा उन्हें eliminate नहीं करता, खासकर server-side code में।
+
+**Fix:** `export` keyword हटाएं, या अगर अब जरूरत नहीं है तो symbol delete करें।
+
+---
+
+## knip/types
+
+<Callout type="warn">Warning · `knip/types`</Callout>
+
+कभी reference नहीं किए गए exported TypeScript types और interfaces का पता लगाता है।
+
+**Fix:** Unused type exports हटाएं।
+
+---
+
+## knip/duplicates
+
+<Callout type="warn">Warning · `knip/duplicates`</Callout>
+
+कई files से same symbol export होने का पता लगाता है।
+
+**Why it matters:** Duplicate exports ambiguity बनाते हैं और गलत file से import करने का कारण बन सकते हैं, जरूरत से ज्यादा code खींच रहा है।
+
+**Fix:** Duplicates को single export location में consolidate करें।

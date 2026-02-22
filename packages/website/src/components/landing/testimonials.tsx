@@ -20,6 +20,11 @@ import {
   TestimonialQuote,
   TestimonialVerifiedBadge,
 } from "@/components/ui/testimonial";
+import type { Translation } from "@/translations";
+
+interface TestimonialsProps {
+  translation: Translation;
+}
 
 export function TestimonialsMarquee() {
   return (
@@ -71,14 +76,13 @@ export function TestimonialsMarquee() {
   );
 }
 
-export const Testimonials = () => (
+export const Testimonials = ({ translation }: TestimonialsProps) => (
   <>
     <SectionFiller />
     <SectionContainer>
-      <SectionHelper>[WHAT PEOPLE ARE SAYING]</SectionHelper>
+      <SectionHelper>{translation.testimonials.sectionLabel}</SectionHelper>
 
       <SectionContent className="flex flex-col md:flex-row">
-        {/* Left: Featured testimonial (40%) */}
         <a
           href={FEATURED_TESTIMONIAL.url}
           target="_blank"
@@ -114,7 +118,6 @@ export const Testimonials = () => (
           </div>
         </a>
 
-        {/* Right: Marquee testimonials (60%) */}
         <div className="flex w-full flex-col justify-center md:w-3/5">
           <TestimonialsMarquee />
         </div>

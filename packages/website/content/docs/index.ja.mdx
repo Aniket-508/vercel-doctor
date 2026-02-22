@@ -1,0 +1,72 @@
+---
+title: Vercel Doctorとは？
+description: コストの高いパターンをスキャンして、Next.jsコードベースを分析し、Vercelの請求額を削減します。
+icon: CircleQuestionMark
+---
+
+import { Step, Steps } from "fumadocs-ui/components/steps";
+
+Vercel Doctorは、VercelにデプロイされたNext.jsプロジェクト向けの専用ヘルスチェックツールです。関数の実行時間、未キャッシュのルート、最適化されていない画像など、請求額を膨らませるパターンをコードベース内でスキャンし、100点満点のスコアと実行可能な修正案を提供します。
+
+## クイックスタート
+
+<Steps>
+
+<Step>
+### プロジェクトで実行する
+
+```bash
+npx -y vercel-doctor@latest .
+```
+
+これだけです。インストール不要、設定不要。コードベースをスキャンし、スコアと診断結果を出力します。
+
+</Step>
+
+<Step>
+### 問題を修正する
+
+各診断には、何をどう変更するか、その理由を説明するヘルプメッセージが含まれています。まず影響の大きいルールから修正し、警告より先にエラーを対処してください。
+
+</Step>
+
+<Step>
+### 再実行して確認する
+
+```bash
+npx -y vercel-doctor@latest . --diff
+```
+
+`--diff` オプションで、feature ブランチの変更ファイルのみをスキャンできます。
+
+</Step>
+
+</Steps>
+
+## 検出項目
+
+Vercel Doctorは並列で2つの解析パスを実行します：
+
+1. **Billing lint** — ASTベースおよびパターンベースのルールで、コストの高いNext.jsおよびVercelのパターンを検出
+2. **Dead code detection** — バンドルを肥大化させ、コールドスタートを遅くする未使用のファイル、エクスポート、型を検出
+
+### ルールカテゴリ
+
+| Category                                             | Rules | What it catches                                                                            |
+| ---------------------------------------------------- | ----- | ------------------------------------------------------------------------------------------ |
+| [Function Duration](/docs/rules/function-duration)   | 3     | Sequential awaits, blocking logging, non-parallel I/O                                      |
+| [Caching](/docs/rules/caching)                       | 6     | `force-dynamic`, missing cache policies, `no-store` fetches, side effects in GET handlers  |
+| [Invocations](/docs/rules/invocations)               | 2     | Client-side fetching in pages, aggressive link prefetching                                 |
+| [Image Optimization](/docs/rules/image-optimization) | 4     | Global `unoptimized`, missing `sizes`, broad remote patterns, SVG without `unoptimized`    |
+| [Platform](/docs/rules/platform)                     | 8     | Edge heavy imports, cron jobs, Bun runtime, Fluid Compute, deploy archive, Turbopack cache |
+| [Dead Code](/docs/rules/dead-code)                   | 4     | Unused files, exports, types, and duplicates                                               |
+
+## 機能
+
+- **ゼロコンフィグ** — どのNext.jsプロジェクトでもすぐに実行可能
+- **Monorepo対応** — ワークスペースを自動検出し、スキャン対象のプロジェクトを選択可能
+- **Diffモード** — feature ブランチの変更ファイルのみをスキャン
+- **スコアリング** — 0〜100のスコアと Great / Needs work / Critical のラベル
+- **CI対応** — 自動化パイプライン向けの非インタラクティブモード
+- **設定可能** — 設定ファイルでルールやファイルを無視可能
+- **AI Skill** — Claude Code、Cursor、Codex などに skill としてインストール可能

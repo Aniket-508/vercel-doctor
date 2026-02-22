@@ -1,0 +1,91 @@
+---
+title: 函数执行时长
+description: 检测会增加 serverless 函数执行时间的规则。
+---
+
+这些规则会捕获延长 serverless 函数实际执行时间的用法。执行时间越短，账单越低——Vercel 按 GB·秒计费。
+
+## async-parallel
+
+<Callout type="warn">Warning · `vercel-doctor/async-parallel`</Callout>
+
+检测 3 个或以上看似独立的顺序 `await` 调用——即后续 await 不依赖前面 await 产生的变量。
+
+**为何重要：** 顺序 await 会一个接一个执行。若彼此独立，用 `Promise.all()` 并行可显著缩短函数执行时间。
+
+```ts title="Bad"
+const users = await db.user.findMany();
+const posts = await db.post.findMany();
+const comments = await db.comment.findMany();
+```
+
+```ts title="Good"
+const [users, posts, comments] = await Promise.all([
+  db.user.findMany(),
+  db.post.findMany(),
+  db.comment.findMany(),
+]);
+```
+
+---
+
+## server-after-nonblocking
+
+<Callout type="warn">Warning · `vercel-doctor/server-after-nonblocking`</Callout>
+
+检测 server action 文件（含 `"use server"`）中的 `console.log()`、`console.info()`、`console.warn()`、`analytics.track()`、`analytics.identify()` 或 `analytics.page()` 调用。
+
+**为何重要：** 日志和分析调用会阻塞响应直到完成。用 `after()` 包装后，可在后台继续执行，响应可立即返回。
+
+```ts title="Bad"
+"use server";
+
+export const updateUser = async (data: FormData) => {
+  await db.user.update({ ... });
+  console.log("User updated");
+  analytics.track("user_updated");
+};
+```
+
+```ts title="Good"
+"use server";
+
+import { after } from "next/server";
+
+export const updateUser = async (data: FormData) => {
+  await db.user.update({ ... });
+  after(() => {
+    console.log("User updated");
+    analytics.track("user_updated");
+  });
+};
+```
+
+---
+
+## vercel-edge-sequential-await
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-edge-sequential-await`</Callout>
+
+检测 edge runtime 文件中 2 个或以上顺序 `await` 且未使用 `Promise.all` 的情况。
+
+**为何重要：** Edge 函数有严格的执行时间限制，顺序 I/O 会浪费本可并行的宝贵时间。
+
+```ts title="Bad"
+export const runtime = "edge";
+
+export async function GET() {
+  const user = await getUser();
+  const settings = await getSettings();
+  return Response.json({ user, settings });
+}
+```
+
+```ts title="Good"
+export const runtime = "edge";
+
+export async function GET() {
+  const [user, settings] = await Promise.all([getUser(), getSettings()]);
+  return Response.json({ user, settings });
+}
+```

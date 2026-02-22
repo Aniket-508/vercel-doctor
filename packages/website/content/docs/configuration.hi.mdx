@@ -1,0 +1,98 @@
+---
+title: कॉन्फ़िगरेशन
+description: rules, files को ignore करने और behavior customize करने के लिए config file के साथ Vercel Doctor कॉन्फ़िगर करें।
+icon: Settings
+---
+
+Vercel Doctor zero configuration के साथ बॉक्स से बाहर काम करता है। जब behavior को customize करने की जरूरत हो, तो आप config file जोड़ सकते हैं।
+
+## Config file
+
+अपने प्रोजेक्ट root में `vercel-doctor.config.json` बनाएं:
+
+```json
+{
+  "ignore": {
+    "rules": ["vercel-doctor/nextjs-link-prefetch-default"],
+    "files": ["src/generated/**"]
+  }
+}
+```
+
+वैकल्पिक रूप से, अपने `package.json` में `"vercelDoctor"` key जोड़ें:
+
+```json
+{
+  "vercelDoctor": {
+    "ignore": {
+      "rules": ["knip/exports"],
+      "files": ["src/generated/**"]
+    }
+  }
+}
+```
+
+अगर दोनों मौजूद हैं, तो `vercel-doctor.config.json` को प्राथमिकता मिलती है।
+
+## Options
+
+| Key            | Type                | Default | विवरण                                                   |
+| -------------- | ------------------- | ------- | ------------------------------------------------------- |
+| `ignore.rules` | `string[]`          | `[]`    | Suppress करने के लिए rule IDs, `plugin/rule` format में |
+| `ignore.files` | `string[]`          | `[]`    | Skip करने के लिए file paths के Glob patterns            |
+| `lint`         | `boolean`           | `true`  | Billing lint rules enable या disable करें               |
+| `deadCode`     | `boolean`           | `true`  | Dead code detection enable या disable करें              |
+| `verbose`      | `boolean`           | `false` | प्रति rule file paths और line numbers दिखाएं            |
+| `diff`         | `boolean \| string` | `false` | Diff mode enable करें या base branch pin करें           |
+
+## Rules ignore करना
+
+Rule IDs के लिए `plugin/rule` format उपयोग करें:
+
+```json
+{
+  "ignore": {
+    "rules": [
+      "vercel-doctor/nextjs-image-missing-sizes",
+      "vercel-doctor/vercel-large-static-asset",
+      "knip/exports"
+    ]
+  }
+}
+```
+
+सभी available rule IDs के लिए [Rules](/docs/rules/function-duration) पेज देखें।
+
+## Files ignore करना
+
+स्कैनिंग से exclude करने के लिए Glob patterns उपयोग करें:
+
+```json
+{
+  "ignore": {
+    "files": ["src/generated/**", "**/*.stories.tsx", "scripts/**"]
+  }
+}
+```
+
+## CLI overrides
+
+CLI flags हमेशा config file values पर प्राथमिकता लेते हैं। उदाहरण के लिए, command line पर `--verbose` config file में `"verbose": false` को override करता है।
+
+## पूर्ण उदाहरण
+
+```json
+{
+  "ignore": {
+    "rules": [
+      "vercel-doctor/vercel-consider-bun-runtime",
+      "vercel-doctor/vercel-avoid-platform-cron"
+    ],
+    "files": ["src/generated/**", "e2e/**"]
+  },
+  "lint": true,
+  "deadCode": true,
+  "verbose": false,
+  "diff": "main"
+}
+```

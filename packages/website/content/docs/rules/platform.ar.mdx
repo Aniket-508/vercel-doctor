@@ -1,0 +1,117 @@
+---
+title: المنصة
+description: قواعد خاصة بتكوين منصة Vercel وتحسين النشر.
+---
+
+تكشف هذه القواعد مشكلات التكوين على مستوى المنصة وتُقترح تحسينات لنشرات Vercel.
+
+## vercel-edge-heavy-import
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-edge-heavy-import`</Callout>
+
+يكشف ملفات Edge runtime التي تستورد تبعيات ثقيلة أو مركزية على Node مثل `node:fs`، `node:crypto`، `sharp`، أو `@aws-sdk/*`.
+
+**لماذا يهم:** دوال Edge لديها حدود صارمة للحجم والتنفيذ. التبعيات الثقيلة لـ Node.js تزيد وقت بدء التشغيل البارد وقد تفشل في وقت التشغيل.
+
+**الإصلاح:** انقل المنطق الثقيل إلى دوال runtime Node.js أو أعمال خلفية، وابق معالجات Edge خفيفة.
+
+---
+
+## vercel-sequential-database-await
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-sequential-database-await`</Callout>
+
+يكشف مسارات API مع 3 أو أكثر من استدعاءات Prisma أو قاعدة البيانات المتتابعة دون `Promise.all`.
+
+**لماذا يهم:** كل استدعاء قاعدة بيانات متتابع يضيف زمن انتقال إلى تنفيذ الدالة. توازي الاستعلامات المستقلة يقلّل المدة الإجمالية والتكلفة.
+
+```ts title="Bad"
+const users = await prisma.user.findMany();
+const posts = await prisma.post.findMany();
+const tags = await prisma.tag.findMany();
+```
+
+```ts title="Good"
+const [users, posts, tags] = await Promise.all([
+  prisma.user.findMany(),
+  prisma.post.findMany(),
+  prisma.tag.findMany(),
+]);
+```
+
+---
+
+## vercel-large-static-asset
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-large-static-asset`</Callout>
+
+يكشف الأصول الثابتة (صور، خطوط، فيديوهات، PDFs) بحجم 4 KB أو أكثر تُخدم من مستودع تطبيقك.
+
+**لماذا يهم:** الملفات الثابتة الكبيرة المُخدمة من نشر Vercel تستهلك العرض الترددي في كل طلب. نقلها إلى CDN مخصص أو تخزين كائنات (Cloudflare R2، S3) يقلّل تكاليف العرض الترددي.
+
+يُبلّغ عن ما يصل إلى 20 ملفاً، مرتبة حسب الحجم (الأكبر أولاً).
+
+---
+
+## vercel-consider-bun-runtime
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-consider-bun-runtime`</Callout>
+
+يكشف المشاريع غير المكوّنة لـ runtime Bun (لا `packageManager: "bun@..."` في `package.json` ولا ملف `bun.lock`).
+
+**لماذا يهم:** runtime Bun يمكنه تقليل عبء التثبيت والبناء على Vercel مقارنة بـ Node.js.
+
+**الإصلاح:** راجع [إرشادات runtime Bun](https://vercel.com/docs/functions/runtimes/bun) وانتقل إن كان مشروعك متوافقاً.
+
+---
+
+## vercel-avoid-platform-cron
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-avoid-platform-cron`</Callout>
+
+يكشف `crons` المكوّنة في `vercel.json`.
+
+**لماذا يهم:** وظائف cron لـ Vercel تعمل كدوال سيرفرلس، تُفوتر لكل تنفيذ. أعباء العمل المجدولة بأنماط متوقعة غالباً يمكن تشغيلها بشكل أرخص باستخدام GitHub Actions أو Cloudflare Workers Cron Triggers.
+
+---
+
+## vercel-consider-fluid-compute
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-consider-fluid-compute`</Callout>
+
+يكشف المشاريع ذات 3 أو أكثر من مسارات API/الخادم.
+
+**لماذا يهم:** Fluid Compute يحسّن التزامن ويقلّل عبء التنفيذ لأعباء العمل ذات زمن انتقال متغير أو حركة متفجرة. يستحق التقييم للمشاريع ذات عدة مسارات خادم.
+
+---
+
+## vercel-suggest-turbopack-build-cache
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-suggest-turbopack-build-cache`</Callout>
+
+يكشف ملفات `next.config` ذات إعدادات `experimental` لكن دون `turbopackFileSystemCacheForBuild`.
+
+**لماذا يهم:** Next.js 16+ يدعم cache بناء Turbopack، الذي يمكن أن يقلّل أوقات البناء بشكل كبير.
+
+```js title="Good"
+// next.config.js
+module.exports = {
+  experimental: {
+    turbopackFileSystemCacheForBuild: true,
+  },
+};
+```
+
+---
+
+## vercel-suggest-deploy-archive
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-suggest-deploy-archive`</Callout>
+
+يكشف المشاريع ذات 5,000 ملف أو أكثر.
+
+**لماذا يهم:** المشاريع الكبيرة قد تصطدم بحدود معدل API أثناء النشر. استخدام وضع الأرشيف يرفع tarball واحداً بدلاً من ملفات فردية، مخفّضاً وقت النشر بنحو 50%.
+
+```bash
+vercel deploy --archive=tgz
+```

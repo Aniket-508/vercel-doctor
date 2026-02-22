@@ -1,0 +1,91 @@
+---
+title: مدة التنفيذ
+description: قواعد تكشف الأنماط التي تزيد وقت تنفيذ دوال السيرفرلس.
+---
+
+تكشف هذه القواعد الأنماط التي تزيد الوقت الفعلي لتنفيذ دوالك السيرفرلس. دوال أقصر تعني فواتير أقل — Vercel يتقاضى حسب GB-ثانية من وقت التنفيذ.
+
+## async-parallel
+
+<Callout type="warn">Warning · `vercel-doctor/async-parallel`</Callout>
+
+يكشف 3 أو أكثر من عبارات `await` متتابعة تبدو مستقلة — أي أن awaits اللاحقة لا تشير إلى متغيرات من السابقة.
+
+**لماذا يهم:** awaits المتتابعة تُنفّذ واحدة تلو الأخرى. إن كانت مستقلة، تشغيلها بالتوازي بـ `Promise.all()` يقلّل مدة التنفيذ بشكل كبير.
+
+```ts title="Bad"
+const users = await db.user.findMany();
+const posts = await db.post.findMany();
+const comments = await db.comment.findMany();
+```
+
+```ts title="Good"
+const [users, posts, comments] = await Promise.all([
+  db.user.findMany(),
+  db.post.findMany(),
+  db.comment.findMany(),
+]);
+```
+
+---
+
+## server-after-nonblocking
+
+<Callout type="warn">Warning · `vercel-doctor/server-after-nonblocking`</Callout>
+
+يكشف استدعاءات `console.log()`، `console.info()`، `console.warn()`، `analytics.track()`، `analytics.identify()`، أو `analytics.page()` في إجراءات الخادم (ملفات تحتوي `"use server"`).
+
+**لماذا يهم:** استدعاءات التسجيل والتحليلات تحجب الاستجابة حتى تكتمل. لفّها بـ `after()` يسمح بانتهاء الاستجابة فوراً بينما يستمر العمل في الخلفية.
+
+```ts title="Bad"
+"use server";
+
+export const updateUser = async (data: FormData) => {
+  await db.user.update({ ... });
+  console.log("User updated");
+  analytics.track("user_updated");
+};
+```
+
+```ts title="Good"
+"use server";
+
+import { after } from "next/server";
+
+export const updateUser = async (data: FormData) => {
+  await db.user.update({ ... });
+  after(() => {
+    console.log("User updated");
+    analytics.track("user_updated");
+  });
+};
+```
+
+---
+
+## vercel-edge-sequential-await
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-edge-sequential-await`</Callout>
+
+يكشف ملفات Edge runtime مع استدعاءين أو أكثر من `await` متتابعة دون `Promise.all`.
+
+**لماذا يهم:** دوال Edge لديها حدود تنفيذ صارمة. I/O المتتابع يهدر ملي ثوانٍ ثمينة كان يمكن توازيها.
+
+```ts title="Bad"
+export const runtime = "edge";
+
+export async function GET() {
+  const user = await getUser();
+  const settings = await getSettings();
+  return Response.json({ user, settings });
+}
+```
+
+```ts title="Good"
+export const runtime = "edge";
+
+export async function GET() {
+  const [user, settings] = await Promise.all([getUser(), getSettings()]);
+  return Response.json({ user, settings });
+}
+```

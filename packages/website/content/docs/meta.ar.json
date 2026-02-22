@@ -1,0 +1,14 @@
+{
+  "title": "التوثيق",
+  "pages": [
+    "---مقدمة---",
+    "index",
+    "cli",
+    "configuration",
+    "scoring",
+    "---القواعد---",
+    "...rules",
+    "---التكاملات---",
+    "ai-skills"
+  ]
+}

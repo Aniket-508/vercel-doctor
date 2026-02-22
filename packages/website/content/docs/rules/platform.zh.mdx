@@ -1,0 +1,117 @@
+---
+title: 平台
+description: 与 Vercel 平台配置和部署优化相关的规则。
+---
+
+这些规则用于发现平台级配置问题，并对 Vercel 部署给出优化建议。
+
+## vercel-edge-heavy-import
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-edge-heavy-import`</Callout>
+
+检测 edge runtime 文件中导入较重或偏 Node 的依赖，如 `node:fs`、`node:crypto`、`sharp`、`@aws-sdk/*`。
+
+**为何重要：** Edge 函数有严格的体积和执行限制。过重的 Node 依赖会增加冷启动时间，并可能运行时失败。
+
+**修复：** 将重量级逻辑移至 Node.js runtime 或后台任务，保持 edge 处理逻辑轻量。
+
+---
+
+## vercel-sequential-database-await
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-sequential-database-await`</Callout>
+
+检测 API 路由中存在 3 次或以上未使用 `Promise.all` 的 Prisma/数据库顺序调用。
+
+**为何重要：** 每次顺序数据库调用都会增加函数执行延迟。将独立查询并行化可缩短总时长并降低成本。
+
+```ts title="Bad"
+const users = await prisma.user.findMany();
+const posts = await prisma.post.findMany();
+const tags = await prisma.tag.findMany();
+```
+
+```ts title="Good"
+const [users, posts, tags] = await Promise.all([
+  prisma.user.findMany(),
+  prisma.post.findMany(),
+  prisma.tag.findMany(),
+]);
+```
+
+---
+
+## vercel-large-static-asset
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-large-static-asset`</Callout>
+
+检测应用仓库中大于等于 4 KB 的静态资源（图片、字体、视频、PDF）。
+
+**为何重要：** 从 Vercel 部署提供的大型静态文件会在每次请求时消耗带宽。将其移至独立 CDN 或对象存储（Cloudflare R2、S3）可降低带宽成本。
+
+最多报告 20 个文件，按大小降序（最大优先）。
+
+---
+
+## vercel-consider-bun-runtime
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-consider-bun-runtime`</Callout>
+
+检测未配置 Bun runtime 的项目（`package.json` 中无 `packageManager: "bun@..."`，且无 `bun.lock` 文件）。
+
+**为何重要：** Bun runtime 相比 Node.js 可减少 Vercel 上的安装和构建开销。
+
+**修复：** 参阅 [Bun runtime 指南](https://vercel.com/docs/functions/runtimes/bun)，若项目兼容则考虑切换。
+
+---
+
+## vercel-avoid-platform-cron
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-avoid-platform-cron`</Callout>
+
+检测 `vercel.json` 中配置的 `crons`。
+
+**为何重要：** Vercel cron 作为 serverless 函数按执行计费。有固定模式的定时任务通常用 GitHub Actions 或 Cloudflare Workers Cron Triggers 更便宜。
+
+---
+
+## vercel-consider-fluid-compute
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-consider-fluid-compute`</Callout>
+
+检测含有 3 个或以上 API/服务端路由的项目。
+
+**为何重要：** Fluid Compute 可提高并发并减少执行开销，适用于有延迟波动或突发流量的场景，对多路由项目值得评估。
+
+---
+
+## vercel-suggest-turbopack-build-cache
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-suggest-turbopack-build-cache`</Callout>
+
+检测 `next.config` 中有 `experimental` 配置但未启用 `turbopackFileSystemCacheForBuild` 的情况。
+
+**为何重要：** Next.js 16+ 支持 Turbopack 构建缓存，可显著缩短构建时间。
+
+```js title="Good"
+// next.config.js
+module.exports = {
+  experimental: {
+    turbopackFileSystemCacheForBuild: true,
+  },
+};
+```
+
+---
+
+## vercel-suggest-deploy-archive
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-suggest-deploy-archive`</Callout>
+
+检测含 5,000 个或更多文件的项目。
+
+**为何重要：** 大型项目在部署时可能触及 API 限流。使用 archive 模式会打包成单个 tarball 上传，而非逐个上传文件，可大幅缩短部署时间。
+
+```bash
+vercel deploy --archive=tgz
+```

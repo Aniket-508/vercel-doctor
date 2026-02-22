@@ -1,0 +1,97 @@
+---
+title: CLIリファレンス
+description: Vercel Doctorの全コマンドラインオプションとフラグ。
+icon: Terminal
+---
+
+## 使用方法
+
+```bash
+npx -y vercel-doctor@latest [directory] [options]
+```
+
+`directory` 引数はデフォルトで `.`（カレントディレクトリ）です。
+
+## オプション
+
+| Flag               | Description                                           |
+| ------------------ | ----------------------------------------------------- |
+| `-v, --version`    | Display the current version                           |
+| `--no-lint`        | Skip billing lint rules                               |
+| `--no-dead-code`   | Skip dead code detection (Knip)                       |
+| `--verbose`        | Show file paths and line numbers per rule             |
+| `--score`          | Output only the numeric score (useful for CI)         |
+| `-y, --yes`        | Skip interactive prompts, scan all workspace projects |
+| `--project <name>` | Select specific workspace project(s), comma-separated |
+| `--diff [base]`    | Scan only files changed vs the base branch            |
+| `--offline`        | Skip anonymous telemetry used for score calculation   |
+
+## 例
+
+### カレントディレクトリをスキャンする
+
+```bash
+npx -y vercel-doctor@latest .
+```
+
+### 詳細出力でスキャンする
+
+```bash
+npx -y vercel-doctor@latest . --verbose
+```
+
+各診断の影響ファイルと行番号を表示します。
+
+### 変更されたファイルのみをスキャンする
+
+```bash
+npx -y vercel-doctor@latest . --diff
+```
+
+ベースブランチを自動検出します。ベースを固定する場合：
+
+```bash
+npx -y vercel-doctor@latest . --diff main
+```
+
+### 特定のワークスペースプロジェクトをスキャンする
+
+```bash
+npx -y vercel-doctor@latest . --project web
+```
+
+複数プロジェクトの場合：
+
+```bash
+npx -y vercel-doctor@latest . --project web,api
+```
+
+### Dead code検出をスキップする
+
+```bash
+npx -y vercel-doctor@latest . --no-dead-code
+```
+
+### CIでの使用
+
+```bash
+npx -y vercel-doctor@latest . --yes --score
+```
+
+`--yes` フラグでインタラクティブプロンプトをスキップします。`--score` と組み合わせると、スクリプトやパイプライン用に数値スコアのみを出力します。
+
+## プログラムAPI
+
+Vercel Doctorは programmatic API もエクスポートしています：
+
+```ts
+import { run } from "vercel-doctor/api";
+```
+
+## Oxlint Plugin
+
+billing lint ルールはスタンドアロンの Oxlint プラグインとして利用できます：
+
+```ts
+import plugin from "vercel-doctor/oxlint-plugin";
+```

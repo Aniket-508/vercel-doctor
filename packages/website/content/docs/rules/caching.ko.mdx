@@ -1,0 +1,130 @@
+---
+title: 캐싱
+description: Vercel에서 효과적인 캐싱을 방해하는 패턴을 감지하는 규칙.
+---
+
+이 규칙들은 Vercel CDN 및 ISR 캐싱을 우회하여 불필요한 서버 사이드 렌더링을 유발하고 컴퓨팅 비용을 늘리는 패턴을 식별합니다.
+
+## nextjs-no-side-effect-in-get-handler
+
+<Callout type="error">Error · `vercel-doctor/nextjs-no-side-effect-in-get-handler`</Callout>
+
+부작용(쿠키, 헤더 변경, 데이터베이스 호출)이 있거나 `/logout`, `/signout`, `/delete` 등 변경성 라우트 세그먼트에 있는 GET 라우트 핸들러를 감지합니다.
+
+**이유:** GET 요청은 프리페치로 트리거될 수 있으며 CSRF에 취약합니다. GET 핸들러의 부작용은 캐싱도 방해합니다.
+
+```ts title="Bad"
+// app/api/logout/route.ts
+export async function GET() {
+  cookies().delete("session");
+  return Response.json({ ok: true });
+}
+```
+
+```ts title="Good"
+// app/api/logout/route.ts
+export async function POST() {
+  cookies().delete("session");
+  return Response.json({ ok: true });
+}
+```
+
+감지되는 변경성 라우트 세그먼트: `logout`, `log-out`, `signout`, `sign-out`, `unsubscribe`, `delete`, `remove`, `revoke`, `cancel`, `deactivate`.
+
+---
+
+## vercel-no-force-dynamic
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-no-force-dynamic`</Callout>
+
+`export const dynamic = "force-dynamic"`가 있는 페이지를 감지합니다.
+
+**이유:** `force-dynamic`은 매 요청마다 서버 사이드 렌더링을 강제하여 전체 페이지 캐싱을 완전히 우회합니다.
+
+```ts title="Bad"
+export const dynamic = "force-dynamic";
+
+export default function Page() { ... }
+```
+
+```ts title="Good"
+export const revalidate = 3600;
+
+export default function Page() { ... }
+```
+
+---
+
+## vercel-no-no-store-fetch
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-no-no-store-fetch`</Callout>
+
+`cache: "no-store"` 또는 `revalidate: 0`이 있는 fetch 호출을 감지합니다.
+
+**이유:** 이 옵션은 캐싱을 완전히 비활성화하여 매 요청마다 캐시되지 않은 대역폭과 컴퓨팅 비용을 늘립니다.
+
+```ts title="Bad"
+const data = await fetch(url, { cache: "no-store" });
+```
+
+```ts title="Good"
+const data = await fetch(url, {
+  next: { revalidate: 3600 },
+});
+```
+
+---
+
+## vercel-missing-cache-policy
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-missing-cache-policy`</Callout>
+
+명시적 캐시 설정이 없는 GET 라우트 핸들러를 감지합니다 — `Cache-Control` 헤더, `revalidate` 내보내기, `dynamic` 내보내기가 모두 없는 경우입니다.
+
+**이유:** 명시적 캐시 정책 없이는 응답이 CDN 캐싱 기회를 놓쳐 오리진이 반복 호출될 수 있습니다.
+
+```ts title="Bad"
+export async function GET() {
+  const data = await fetchData();
+  return Response.json(data);
+}
+```
+
+```ts title="Good"
+export const revalidate = 3600;
+
+export async function GET() {
+  const data = await fetchData();
+  return Response.json(data);
+}
+```
+
+---
+
+## vercel-prefer-get-static-props
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-prefer-get-static-props`</Callout>
+
+`getServerSideProps`를 사용하는 Pages Router 라우트를 감지합니다.
+
+**이유:** `getServerSideProps`는 매 요청마다 실행됩니다. `getStaticProps`(선택적 ISR 포함)로 전환하면 페이지가 CDN에 캐시되어 서버 컴퓨팅이 줄어듭니다.
+
+---
+
+## vercel-get-static-props-consider-isr
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-get-static-props-consider-isr`</Callout>
+
+`revalidate` 반환값이 없는 `getStaticProps`를 감지합니다.
+
+**이유:** `revalidate` 없이는 모든 페이지가 배포 시점에 빌드됩니다. 대규모 사이트에서는 빌드가 크게 느려집니다. ISR은 페이지를 온디맨드로 생성하고 캐시합니다.
+
+```ts title="Good"
+export async function getStaticProps() {
+  const data = await fetchData();
+  return {
+    props: { data },
+    revalidate: 3600,
+  };
+}
+```

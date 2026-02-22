@@ -1,0 +1,96 @@
+---
+title: 이미지 최적화
+description: 불필요한 이미지 최적화 비용을 유발하는 패턴을 감지하는 규칙.
+---
+
+이 규칙들은 Vercel 이미지 최적화 사용을 늘리거나 최적화되지 않은 이미지를 제공하는 Next.js 이미지 처리의 잘못된 구성을 식별합니다.
+
+## vercel-image-global-unoptimized
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-image-global-unoptimized`</Callout>
+
+`next.config`에서 `images.unoptimized: true`를 감지합니다.
+
+**이유:** 이 설정은 Vercel 이미지 최적화를 전역으로 비활성화합니다. 모든 이미지가 리사이징, 형식 변환, 압축 없이 그대로 제공되어 대역폭 비용이 늘고 성능이 저하됩니다.
+
+```js title="Bad"
+// next.config.js
+module.exports = {
+  images: {
+    unoptimized: true,
+  },
+};
+```
+
+```js title="Good"
+// next.config.js
+module.exports = {
+  images: {
+    remotePatterns: [{ hostname: "cdn.example.com" }],
+  },
+};
+```
+
+---
+
+## nextjs-image-missing-sizes
+
+<Callout type="warn">Warning · `vercel-doctor/nextjs-image-missing-sizes`</Callout>
+
+`fill`이 있지만 `sizes` 속성이 없는 `<Image>` 컴포넌트를 감지합니다.
+
+**이유:** `sizes` 없이는 브라우저가 뷰포트 너비와 관계없이 사용 가능한 가장 큰 이미지를 다운로드합니다. 이로 인해 대역폭이 낭비되고 이미지 최적화 사용량이 증가합니다.
+
+```tsx title="Bad"
+<Image src="/hero.jpg" alt="Hero" fill />
+```
+
+```tsx title="Good"
+<Image src="/hero.jpg" alt="Hero" fill sizes="(max-width: 768px) 100vw, 50vw" />
+```
+
+---
+
+## vercel-image-remote-pattern-too-broad
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-image-remote-pattern-too-broad`</Callout>
+
+과도하게 넓은 `pathname` 패턴(`/**` 또는 누락)이 있는 `images.remotePatterns` 항목을 감지합니다.
+
+**이유:** 제한 없는 원격 이미지 경로는 호스트네임의 모든 URL이 귀하의 계정을 통해 최적화될 수 있게 하여, 사용자 생성 콘텐츠나 서드파티 임베드에서 예상치 못한 최적화 사용을 유발할 수 있습니다.
+
+```js title="Bad"
+// next.config.js
+module.exports = {
+  images: {
+    remotePatterns: [{ hostname: "cdn.example.com", pathname: "/**" }],
+  },
+};
+```
+
+```js title="Good"
+// next.config.js
+module.exports = {
+  images: {
+    remotePatterns: [{ hostname: "cdn.example.com", pathname: "/avatars/**" }],
+  },
+};
+```
+
+---
+
+## vercel-image-svg-without-unoptimized
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-image-svg-without-unoptimized`</Callout>
+
+`unoptimized` prop이 없는 SVG `src`를 가진 `<Image>` 컴포넌트를 감지합니다.
+
+**이유:** SVG는 벡터 그래픽이라 이미지 최적화 파이프라인의 이점을 받지 못합니다. 파이프라인을 통과시키면 이득 없이 최적화 할당량만 낭비됩니다.
+
+```tsx title="Bad"
+<Image src="/logo.svg" alt="Logo" width={100} height={40} />
+```
+
+```tsx title="Good"
+<Image src="/logo.svg" alt="Logo" width={100} height={40} unoptimized />
+```

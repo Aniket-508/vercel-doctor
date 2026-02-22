@@ -1,0 +1,98 @@
+---
+title: التكوين
+description: تكوين Vercel Doctor بملف تكوين لتجاهل القواعد والملفات وتخصيص السلوك.
+icon: Settings
+---
+
+يعمل Vercel Doctor مباشرة دون أي تكوين. عند الحاجة لتخصيص السلوك، يمكنك إضافة ملف تكوين.
+
+## ملف التكوين
+
+أنشئ `vercel-doctor.config.json` في جذر المشروع:
+
+```json
+{
+  "ignore": {
+    "rules": ["vercel-doctor/nextjs-link-prefetch-default"],
+    "files": ["src/generated/**"]
+  }
+}
+```
+
+أو أضف مفتاح `"vercelDoctor"` إلى `package.json`:
+
+```json
+{
+  "vercelDoctor": {
+    "ignore": {
+      "rules": ["knip/exports"],
+      "files": ["src/generated/**"]
+    }
+  }
+}
+```
+
+إن وُجد الاثنان، فإن `vercel-doctor.config.json` له الأسبقية.
+
+## الخيارات
+
+| Key            | Type                | Default | الوصف                                      |
+| -------------- | ------------------- | ------- | ------------------------------------------ |
+| `ignore.rules` | `string[]`          | `[]`    | معرفات القواعد لقمعها بتنسيق `plugin/rule` |
+| `ignore.files` | `string[]`          | `[]`    | أنماط Glob لمسارات الملفات لتخطيها         |
+| `lint`         | `boolean`           | `true`  | تفعيل أو تعطيل قواعد billing lint          |
+| `deadCode`     | `boolean`           | `true`  | تفعيل أو تعطيل اكتشاف الكود الميت          |
+| `verbose`      | `boolean`           | `false` | عرض مسارات الملفات وأرقام الأسطر لكل قاعدة |
+| `diff`         | `boolean \| string` | `false` | تفعيل وضع diff أو تثبيت الفرع الأساسي      |
+
+## تجاهل القواعد
+
+استخدم تنسيق `plugin/rule` لمعرفات القواعد:
+
+```json
+{
+  "ignore": {
+    "rules": [
+      "vercel-doctor/nextjs-image-missing-sizes",
+      "vercel-doctor/vercel-large-static-asset",
+      "knip/exports"
+    ]
+  }
+}
+```
+
+راجع صفحات [Rules](/docs/rules/function-duration) لجميع معرفات القواعد المتاحة.
+
+## تجاهل الملفات
+
+استخدم أنماط Glob لاستبعاد الملفات من الفحص:
+
+```json
+{
+  "ignore": {
+    "files": ["src/generated/**", "**/*.stories.tsx", "scripts/**"]
+  }
+}
+```
+
+## تجاوزات CLI
+
+تأخذ أعلام CLI دائماً الأسبقية على قيم ملف التكوين. مثلاً، `--verbose` في سطر الأوامر يتجاوز `"verbose": false` في ملف التكوين.
+
+## مثال كامل
+
+```json
+{
+  "ignore": {
+    "rules": [
+      "vercel-doctor/vercel-consider-bun-runtime",
+      "vercel-doctor/vercel-avoid-platform-cron"
+    ],
+    "files": ["src/generated/**", "e2e/**"]
+  },
+  "lint": true,
+  "deadCode": true,
+  "verbose": false,
+  "diff": "main"
+}
+```

@@ -10,8 +10,15 @@ import { SectionContainer, SectionContent } from "./section-layout";
 import { SKILLS_COMMAND } from "@/constants/command";
 import { PACKAGE_MANAGERS } from "@/constants/package-managers";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import type { Translation } from "@/translations";
+import { getLocalizedPath } from "@/translations";
 
-const SkillsCommand = () => {
+interface HeroProps {
+  translation: Translation;
+  lang: string;
+}
+
+const SkillsCommand = ({ translation }: { translation: Translation }) => {
   const [didCopy, setDidCopy] = useState(false);
 
   const copyCommand = async () => {
@@ -25,10 +32,10 @@ const SkillsCommand = () => {
       type="button"
       onClick={copyCommand}
       className="cursor-copy inline-flex items-center gap-2 rounded-full border-x border-fd-border bg-fd-muted/60 px-4 py-1.5 text-xs font-mono text-fd-muted-foreground transition-colors hover:bg-fd-muted/80 hover:text-fd-foreground"
-      aria-label="Copy command"
+      aria-label={translation.hero.copyCommand}
     >
       {didCopy ? (
-        <span className="text-green-600 dark:text-green-400">Copied!</span>
+        <span className="text-green-600 dark:text-green-400">{translation.hero.copied}</span>
       ) : (
         <>
           <span className="text-fd-foreground">$</span>
@@ -41,7 +48,7 @@ const SkillsCommand = () => {
 
 const DEFAULT_PACKAGE_MANAGER = "npm";
 
-const CommandBlock = () => {
+const CommandBlock = ({ translation }: { translation: Translation }) => {
   const [selectedPackageManager, setSelectedPackageManager] = useState(DEFAULT_PACKAGE_MANAGER);
   const [didCopy, setDidCopy] = useState(false);
 
@@ -73,7 +80,7 @@ const CommandBlock = () => {
           </p>
           <p className="relative inline truncate font-mono text-xs tracking-tight text-fd-foreground opacity-90 md:text-sm">
             {didCopy ? (
-              <span className="text-green-600 dark:text-green-400">Copied!</span>
+              <span className="text-green-600 dark:text-green-400">{translation.hero.copied}</span>
             ) : (
               activeManager?.command
             )}
@@ -83,7 +90,7 @@ const CommandBlock = () => {
         <Select value={selectedPackageManager} onValueChange={setSelectedPackageManager}>
           <SelectTrigger
             className="h-7 w-auto gap-1 rounded-md border-none bg-transparent pl-2 pr-1 shadow-none hover:bg-fd-foreground/5"
-            aria-label="Select a package manager"
+            aria-label={translation.hero.selectPackageManager}
           >
             <span className="flex items-center">{activeManager?.icon}</span>
           </SelectTrigger>
@@ -101,38 +108,38 @@ const CommandBlock = () => {
   );
 };
 
-export const Hero = () => {
+export const Hero = ({ translation, lang }: HeroProps) => {
   return (
     <SectionContainer>
       <SectionContent className="border-t-0 flex flex-col gap-8 px-4 py-8 md:flex-row md:items-center md:gap-12 md:px-12 md:py-24">
         <div className="flex flex-col items-center gap-6 text-center md:w-1/2 md:items-start md:text-left">
-          <SkillsCommand />
+          <SkillsCommand translation={translation} />
 
           <div className="space-y-2">
             <h1 className="text-4xl font-pixel font-bold tracking-tight text-fd-foreground sm:text-5xl md:text-6xl">
-              Stop racking up
+              {translation.hero.headingLine1}
               <br />
-              Vercel costs
+              {translation.hero.headingLine2}
             </h1>
 
             <p className="text-base sm:text-lg text-fd-muted-foreground">
-              Let coding agents diagnose and fix your Vercel bill
+              {translation.hero.subtitle}
             </p>
           </div>
 
-          <CommandBlock />
+          <CommandBlock translation={translation} />
 
           <div className="flex items-center gap-4">
             <Button asChild>
-              <Link href="/docs">
-                Fix your costs
+              <Link href={getLocalizedPath(lang, "/docs")}>
+                {translation.hero.fixCosts}
                 <ArrowRightIcon />
               </Link>
             </Button>
             <Button variant="outline" asChild>
               <a href={LINK.GITHUB} target="_blank" rel="noopener noreferrer">
                 <GithubIcon />
-                GitHub
+                {translation.hero.github}
               </a>
             </Button>
           </div>

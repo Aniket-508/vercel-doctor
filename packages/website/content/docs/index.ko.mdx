@@ -1,0 +1,72 @@
+---
+title: Vercel Doctor란?
+description: 비용이 많이 드는 패턴을 찾아 Next.js 코드베이스를 스캔하여 Vercel 청구액을 줄이세요.
+icon: CircleQuestionMark
+---
+
+import { Step, Steps } from "fumadocs-ui/components/steps";
+
+Vercel Doctor는 Vercel에 배포된 Next.js 프로젝트를 위한 전문 헬스 체크 도구입니다. 함수 실행 시간, 캐시되지 않은 라우트, 최적화되지 않은 이미지 등 청구액을 늘리는 패턴을 코드베이스에서 찾아내고, 수정 가능한 진단과 함께 100점 만점의 점수를 제공합니다.
+
+## 빠른 시작
+
+<Steps>
+
+<Step>
+### 프로젝트에서 실행
+
+```bash
+npx -y vercel-doctor@latest .
+```
+
+설치나 설정 없이 바로 실행됩니다. 코드베이스를 스캔하여 진단과 함께 점수를 출력합니다.
+
+</Step>
+
+<Step>
+### 문제 해결
+
+각 진단에는 변경할 내용과 이유를 설명하는 도움말이 포함됩니다. 경고보다 오류를 먼저 해결하세요.
+
+</Step>
+
+<Step>
+### 재실행하여 확인
+
+```bash
+npx -y vercel-doctor@latest . --diff
+```
+
+`--diff`를 사용하면 기능 브랜치에서 변경된 파일만 스캔할 수 있습니다.
+
+</Step>
+
+</Steps>
+
+## 검사 항목
+
+Vercel Doctor는 두 가지 분석을 병렬로 실행합니다:
+
+1. **빌링 린트** — 비용이 많이 드는 Next.js와 Vercel 패턴을 탐지하는 AST 기반·패턴 기반 규칙
+2. **데드 코드 감지** — 번들을 비대하게 만들고 콜드 스타트를 느리게 하는 미사용 파일, 내보내기, 타입 감지
+
+### 규칙 카테고리
+
+| Category                                             | Rules | 검출 항목                                                                               |
+| ---------------------------------------------------- | ----- | --------------------------------------------------------------------------------------- |
+| [Function Duration](/docs/rules/function-duration)   | 3     | 순차적인 await, 블로킹 로깅, 병렬이 아닌 I/O                                            |
+| [Caching](/docs/rules/caching)                       | 6     | `force-dynamic`, 누락된 캐시 정책, `no-store` fetch, GET 핸들러 내 부작용               |
+| [Invocations](/docs/rules/invocations)               | 2     | 페이지 내 클라이언트 측 데이터 페치, 과도한 링크 프리페치                               |
+| [Image Optimization](/docs/rules/image-optimization) | 4     | 전역 `unoptimized`, 누락된 `sizes`, 과도한 remote 패턴, `unoptimized` 없는 SVG          |
+| [Platform](/docs/rules/platform)                     | 8     | Edge 무거운 임포트, cron 작업, Bun 런타임, Fluid Compute, 배포 아카이브, Turbopack 캐시 |
+| [Dead Code](/docs/rules/dead-code)                   | 4     | 미사용 파일, 내보내기, 타입, 중복                                                       |
+
+## 기능
+
+- **설정 불필요** — 모든 Next.js 프로젝트에서 바로 실행
+- **모노레포 지원** — 워크스페이스 자동 감지, 스캔할 프로젝트 선택 가능
+- **Diff 모드** — 기능 브랜치에서 변경된 파일만 스캔
+- **점수** — 0–100점 및 Great / Needs work / Critical 라벨
+- **CI 친화적** — 자동화된 파이프라인용 비대화형 모드
+- **설정 가능** — 설정 파일로 규칙 또는 파일 무시
+- **AI 스킬** — Claude Code, Cursor, Codex 등에 스킬로 설치 가능

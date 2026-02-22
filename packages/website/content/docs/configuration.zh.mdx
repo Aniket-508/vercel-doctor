@@ -1,0 +1,98 @@
+---
+title: 配置
+description: 通过配置文件让 Vercel Doctor 忽略规则、文件并自定义行为。
+icon: Settings
+---
+
+Vercel Doctor 默认无需配置即可运行。需要自定义时，可添加配置文件。
+
+## 配置文件
+
+在项目根目录创建 `vercel-doctor.config.json`：
+
+```json
+{
+  "ignore": {
+    "rules": ["vercel-doctor/nextjs-link-prefetch-default"],
+    "files": ["src/generated/**"]
+  }
+}
+```
+
+或在 `package.json` 中添加 `"vercelDoctor"` 字段：
+
+```json
+{
+  "vercelDoctor": {
+    "ignore": {
+      "rules": ["knip/exports"],
+      "files": ["src/generated/**"]
+    }
+  }
+}
+```
+
+若两者都存在，以 `vercel-doctor.config.json` 为准。
+
+## 选项
+
+| Key            | Type                | Default | Description                                   |
+| -------------- | ------------------- | ------- | --------------------------------------------- |
+| `ignore.rules` | `string[]`          | `[]`    | Rule IDs to suppress, in `plugin/rule` format |
+| `ignore.files` | `string[]`          | `[]`    | Glob patterns for file paths to skip          |
+| `lint`         | `boolean`           | `true`  | Enable or disable billing lint rules          |
+| `deadCode`     | `boolean`           | `true`  | Enable or disable dead code detection         |
+| `verbose`      | `boolean`           | `false` | Show file paths and line numbers per rule     |
+| `diff`         | `boolean \| string` | `false` | Enable diff mode or pin a base branch         |
+
+## 忽略规则
+
+规则 ID 使用 `plugin/rule` 格式：
+
+```json
+{
+  "ignore": {
+    "rules": [
+      "vercel-doctor/nextjs-image-missing-sizes",
+      "vercel-doctor/vercel-large-static-asset",
+      "knip/exports"
+    ]
+  }
+}
+```
+
+所有可用规则 ID 见 [Rules](/docs/rules/function-duration) 页面。
+
+## 忽略文件
+
+使用 glob 模式排除扫描范围内的文件：
+
+```json
+{
+  "ignore": {
+    "files": ["src/generated/**", "**/*.stories.tsx", "scripts/**"]
+  }
+}
+```
+
+## CLI 覆盖
+
+CLI 参数始终优先于配置文件。例如命令行中的 `--verbose` 会覆盖配置中的 `"verbose": false`。
+
+## 完整示例
+
+```json
+{
+  "ignore": {
+    "rules": [
+      "vercel-doctor/vercel-consider-bun-runtime",
+      "vercel-doctor/vercel-avoid-platform-cron"
+    ],
+    "files": ["src/generated/**", "e2e/**"]
+  },
+  "lint": true,
+  "deadCode": true,
+  "verbose": false,
+  "diff": "main"
+}
+```

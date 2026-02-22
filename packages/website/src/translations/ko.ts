@@ -1,0 +1,72 @@
+import type { Translation } from ".";
+
+export const ko: Translation = {
+  nav: {
+    docs: "문서",
+    showcase: "쇼케이스",
+    sponsors: "스폰서",
+  },
+  hero: {
+    copied: "복사됨!",
+    copyCommand: "명령어 복사",
+    selectPackageManager: "패키지 매니저 선택",
+    headingLine1: "Vercel 비용",
+    headingLine2: "늘리지 마세요",
+    subtitle: "코딩 에이전트가 Vercel 청구서를 진단하고 수정합니다",
+    fixCosts: "비용 절감",
+    github: "GitHub",
+  },
+  testimonials: {
+    sectionLabel: "[이용자 후기]",
+  },
+  preFooter: {
+    sectionLabel: "[비용 절감 준비되셨나요?]",
+    heading: "더 나은 청구",
+    by: "by",
+    getStarted: "시작하기",
+    viewOnGithub: "GitHub에서 보기",
+  },
+  footer: {
+    builtBy: "제작",
+    hostedOn: "호스팅",
+    sourceAvailableOn: "소스 코드는 다음에서 확인할 수 있습니다",
+    twitter: "Twitter",
+    llms: "LLMs",
+  },
+  disclaimer: {
+    text: "제휴 또는 승인되지 않음",
+  },
+  sponsorsSection: {
+    heading: "최고의 후원",
+    description: "후원은 Vercel Doctor를 포함한 오픈소스 프로젝트에 큰 의미가 있습니다.",
+    sponsorMyWork: "후원하기",
+  },
+  showcasePage: {
+    heading: "쇼케이스",
+    description: "Vercel Doctor를 사용하는 프로젝트 모음.",
+    suggestYours: "제안하기",
+    empty: "아직 쇼케이스가 없습니다. 첫 번째가 되어보세요!",
+  },
+  sponsorsPage: {
+    heading: "스폰서",
+    description: "후원은 Vercel Doctor를 포함한 오픈소스 프로젝트에 큰 의미가 있습니다.",
+    sponsorMyWork: "후원하기",
+    organizationSponsors: "기관 스폰서",
+    empty: "아직 스폰서가 없습니다. 첫 번째 지원자가 되어보세요!",
+  },
+  notFound: {
+    heading: "404",
+    description: "찾으시는 페이지가 이동했거나 존재하지 않을 수 있습니다.",
+    goHome: "홈으로",
+    explore: "둘러보기",
+  },
+  score: {
+    great: "우수",
+    needsWork: "개선 필요",
+    critical: "심각",
+  },
+  fumadocs: {
+    displayName: "한국어",
+    search: "문서 검색",
+  },
+};

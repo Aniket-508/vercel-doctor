@@ -1,0 +1,43 @@
+---
+title: AI Skills
+description: Installiere Vercel Doctor als Skill für KI-Coding-Assistenten.
+---
+
+Vercel Doctor kann als Skill für KI-Coding-Assistenten installiert werden. Nach der Installation wird dein KI-Assistent automatisch vorschlagen, Vercel Doctor auszuführen, wenn Änderungen an Next.js-Projekten vorgenommen wurden.
+
+## Einzeilige Installation
+
+```bash
+npx skills add vercel-doctor
+```
+
+Oder per curl installieren:
+
+```bash
+curl -fsSL https://vercel-doctor.com/install-skill.sh | bash
+```
+
+## Unterstützte Tools
+
+Der Installer erkennt automatisch alle unterstützten Tools auf deinem System und installiert für sie:
+
+| Tool        | Skill location                                 |
+| ----------- | ---------------------------------------------- |
+| Claude Code | `~/.claude/skills/vercel-doctor/`              |
+| Amp Code    | `~/.config/amp/skills/vercel-doctor/`          |
+| Cursor      | `~/.cursor/skills/vercel-doctor/`              |
+| OpenCode    | `~/.config/opencode/skills/vercel-doctor/`     |
+| Windsurf    | `~/.codeium/windsurf/memories/global_rules.md` |
+| Antigravity | `~/.gemini/antigravity/skills/vercel-doctor/`  |
+| Gemini CLI  | `~/.gemini/skills/vercel-doctor/`              |
+| Codex       | `~/.codex/skills/vercel-doctor/`               |
+
+Der Installer fügt den Skill auch dem `.agents/`-Verzeichnis deines Projekts für projektweiten Kontext hinzu.
+
+## Was der Skill macht
+
+Nach der Aktivierung wird der KI-Assistent:
+
+1. Über Vercel Doctor und was es scannt Bescheid wissen
+2. Vorschlagen, `npx -y vercel-doctor@latest . --verbose --diff` nach Änderungen auszuführen
+3. Sich zuerst auf die Behebung von Problemen konzentrieren, die Funktionsausführungszeit und Invocations reduzieren

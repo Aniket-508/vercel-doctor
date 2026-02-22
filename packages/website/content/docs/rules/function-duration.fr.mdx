@@ -1,0 +1,91 @@
+---
+title: Function Duration
+description: Règles qui détectent les motifs augmentant le temps d'exécution des fonctions serverless.
+---
+
+Ces règles repèrent les motifs qui augmentent le temps réel d'exécution de vos fonctions serverless. Des fonctions plus courtes signifient des factures plus basses — Vercel facture par GB-seconde de temps d'exécution.
+
+## async-parallel
+
+<Callout type="warn">Warning · `vercel-doctor/async-parallel`</Callout>
+
+Détecte 3 await ou plus en séquence qui semblent indépendants — les await suivants ne référencent pas de variables des précédents.
+
+**Why it matters:** Les await séquentiels s'exécutent un après l'autre. S'ils sont indépendants, les exécuter en parallèle avec `Promise.all()` peut réduire significativement la durée des fonctions.
+
+```ts title="Bad"
+const users = await db.user.findMany();
+const posts = await db.post.findMany();
+const comments = await db.comment.findMany();
+```
+
+```ts title="Good"
+const [users, posts, comments] = await Promise.all([
+  db.user.findMany(),
+  db.post.findMany(),
+  db.comment.findMany(),
+]);
+```
+
+---
+
+## server-after-nonblocking
+
+<Callout type="warn">Warning · `vercel-doctor/server-after-nonblocking`</Callout>
+
+Détecte les appels à `console.log()`, `console.info()`, `console.warn()`, `analytics.track()`, `analytics.identify()` ou `analytics.page()` dans les server actions (fichiers avec `"use server"`).
+
+**Why it matters:** Les appels de logging et analytics bloquent la réponse jusqu'à leur fin. Les envelopper dans `after()` permet de renvoyer la réponse immédiatement tout en poursuivant le travail en arrière-plan.
+
+```ts title="Bad"
+"use server";
+
+export const updateUser = async (data: FormData) => {
+  await db.user.update({ ... });
+  console.log("User updated");
+  analytics.track("user_updated");
+};
+```
+
+```ts title="Good"
+"use server";
+
+import { after } from "next/server";
+
+export const updateUser = async (data: FormData) => {
+  await db.user.update({ ... });
+  after(() => {
+    console.log("User updated");
+    analytics.track("user_updated");
+  });
+};
+```
+
+---
+
+## vercel-edge-sequential-await
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-edge-sequential-await`</Callout>
+
+Détecte les fichiers en edge runtime avec 2 await ou plus en séquence sans `Promise.all`.
+
+**Why it matters:** Les fonctions edge ont des limites strictes de temps d'exécution. L'I/O séquentielle gaspille des millisecondes précieuses qui pourraient être parallélisées.
+
+```ts title="Bad"
+export const runtime = "edge";
+
+export async function GET() {
+  const user = await getUser();
+  const settings = await getSettings();
+  return Response.json({ user, settings });
+}
+```
+
+```ts title="Good"
+export const runtime = "edge";
+
+export async function GET() {
+  const [user, settings] = await Promise.all([getUser(), getSettings()]);
+  return Response.json({ user, settings });
+}
+```

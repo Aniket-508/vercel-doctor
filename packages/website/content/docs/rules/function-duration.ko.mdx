@@ -1,0 +1,91 @@
+---
+title: 함수 실행 시간
+description: 서버리스 함수 실행 시간을 늘리는 패턴을 감지하는 규칙.
+---
+
+이 규칙들은 서버리스 함수의 실제 실행 시간을 늘리는 패턴을 포착합니다. 실행 시간이 짧을수록 비용이 낮아집니다 — Vercel은 실행 시간당 GB-초로 청구합니다.
+
+## async-parallel
+
+<Callout type="warn">Warning · `vercel-doctor/async-parallel`</Callout>
+
+서로 독립적으로 보이는 3개 이상의 순차적 `await` 문을 감지합니다 — 나중의 await가 이전 것의 변수를 참조하지 않는 경우입니다.
+
+**이유:** 순차적 await는 하나씩 실행됩니다. 서로 독립적이라면 `Promise.all()`로 병렬 실행하면 함수 실행 시간을 크게 줄일 수 있습니다.
+
+```ts title="Bad"
+const users = await db.user.findMany();
+const posts = await db.post.findMany();
+const comments = await db.comment.findMany();
+```
+
+```ts title="Good"
+const [users, posts, comments] = await Promise.all([
+  db.user.findMany(),
+  db.post.findMany(),
+  db.comment.findMany(),
+]);
+```
+
+---
+
+## server-after-nonblocking
+
+<Callout type="warn">Warning · `vercel-doctor/server-after-nonblocking`</Callout>
+
+서버 액션(`"use server"`가 있는 파일)에서 `console.log()`, `console.info()`, `console.warn()`, `analytics.track()`, `analytics.identify()`, 또는 `analytics.page()` 호출을 감지합니다.
+
+**이유:** 로깅과 분석 호출은 완료될 때까지 응답을 차단합니다. `after()`로 감싸면 응답이 즉시 완료되는 동안 작업은 백그라운드에서 계속됩니다.
+
+```ts title="Bad"
+"use server";
+
+export const updateUser = async (data: FormData) => {
+  await db.user.update({ ... });
+  console.log("User updated");
+  analytics.track("user_updated");
+};
+```
+
+```ts title="Good"
+"use server";
+
+import { after } from "next/server";
+
+export const updateUser = async (data: FormData) => {
+  await db.user.update({ ... });
+  after(() => {
+    console.log("User updated");
+    analytics.track("user_updated");
+  });
+};
+```
+
+---
+
+## vercel-edge-sequential-await
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-edge-sequential-await`</Callout>
+
+`Promise.all` 없이 2개 이상의 순차적 `await` 호출이 있는 Edge 런타임 파일을 감지합니다.
+
+**이유:** Edge 함수에는 엄격한 실행 시간 제한이 있습니다. 순차적 I/O는 병렬화할 수 있는 소중한 밀리초를 낭비합니다.
+
+```ts title="Bad"
+export const runtime = "edge";
+
+export async function GET() {
+  const user = await getUser();
+  const settings = await getSettings();
+  return Response.json({ user, settings });
+}
+```
+
+```ts title="Good"
+export const runtime = "edge";
+
+export async function GET() {
+  const [user, settings] = await Promise.all([getUser(), getSettings()]);
+  return Response.json({ user, settings });
+}
+```

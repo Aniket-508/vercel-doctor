@@ -1,0 +1,130 @@
+---
+title: 缓存
+description: 检测阻止在 Vercel 上有效缓存的规则。
+---
+
+这些规则用于发现会绕过 Vercel CDN 和 ISR 缓存、强制不必要服务端渲染并增加计算成本的做法。
+
+## nextjs-no-side-effect-in-get-handler
+
+<Callout type="error">Error · `vercel-doctor/nextjs-no-side-effect-in-get-handler`</Callout>
+
+检测在 GET 路由处理函数中存在副作用（修改 cookies、headers 或数据库调用），或处于具有副作用的路径段（如 `/logout`、`/signout`、`/delete` 等）。
+
+**为何重要：** GET 请求可能由 prefetch 触发，且易受 CSRF 攻击。GET 中的副作用也会阻止缓存。
+
+```ts title="Bad"
+// app/api/logout/route.ts
+export async function GET() {
+  cookies().delete("session");
+  return Response.json({ ok: true });
+}
+```
+
+```ts title="Good"
+// app/api/logout/route.ts
+export async function POST() {
+  cookies().delete("session");
+  return Response.json({ ok: true });
+}
+```
+
+检测到的变更类路径段：`logout`、`log-out`、`signout`、`sign-out`、`unsubscribe`、`delete`、`remove`、`revoke`、`cancel`、`deactivate`。
+
+---
+
+## vercel-no-force-dynamic
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-no-force-dynamic`</Callout>
+
+检测含有 `export const dynamic = "force-dynamic"` 的页面。
+
+**为何重要：** `force-dynamic` 会在每次请求时强制服务端渲染，完全跳过全页缓存。
+
+```ts title="Bad"
+export const dynamic = "force-dynamic";
+
+export default function Page() { ... }
+```
+
+```ts title="Good"
+export const revalidate = 3600;
+
+export default function Page() { ... }
+```
+
+---
+
+## vercel-no-no-store-fetch
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-no-no-store-fetch`</Callout>
+
+检测带 `cache: "no-store"` 或 `revalidate: 0` 的 fetch 调用。
+
+**为何重要：** 这些选项会完全关闭缓存，增加未缓存带宽和每次请求的计算成本。
+
+```ts title="Bad"
+const data = await fetch(url, { cache: "no-store" });
+```
+
+```ts title="Good"
+const data = await fetch(url, {
+  next: { revalidate: 3600 },
+});
+```
+
+---
+
+## vercel-missing-cache-policy
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-missing-cache-policy`</Callout>
+
+检测没有明确缓存配置的 GET 路由处理函数——无 `Cache-Control` 头、无 `revalidate` 导出、无 `dynamic` 导出。
+
+**为何重要：** 缺少明确缓存策略时，响应可能错失 CDN 缓存机会，导致反复回源。
+
+```ts title="Bad"
+export async function GET() {
+  const data = await fetchData();
+  return Response.json(data);
+}
+```
+
+```ts title="Good"
+export const revalidate = 3600;
+
+export async function GET() {
+  const data = await fetchData();
+  return Response.json(data);
+}
+```
+
+---
+
+## vercel-prefer-get-static-props
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-prefer-get-static-props`</Callout>
+
+检测 Pages Router 中使用 `getServerSideProps` 的路由。
+
+**为何重要：** `getServerSideProps` 每次请求都会执行。改用 `getStaticProps`（可选 ISR）可在 CDN 上缓存页面并减少服务端计算。
+
+---
+
+## vercel-get-static-props-consider-isr
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-get-static-props-consider-isr`</Callout>
+
+检测未返回 `revalidate` 的 `getStaticProps`。
+
+**为何重要：** 无 `revalidate` 时，所有页面在部署时构建，大站点会显著拖慢构建。ISR 按需生成并缓存页面。
+
+```ts title="Good"
+export async function getStaticProps() {
+  const data = await fetchData();
+  return {
+    props: { data },
+    revalidate: 3600,
+  };
+}
+```

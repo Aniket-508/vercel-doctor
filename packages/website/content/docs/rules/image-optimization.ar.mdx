@@ -1,0 +1,96 @@
+---
+title: تحسين الصور
+description: قواعد تكشف الأنماط التي تسبّب تكاليف تحسين صور غير ضرورية.
+---
+
+تكشف هذه القواعد سوء التكوينات في التعامل مع صور Next.js التي تزيد استخدام Vercel Image Optimization أو تخدم صوراً غير محسّنة.
+
+## vercel-image-global-unoptimized
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-image-global-unoptimized`</Callout>
+
+يكشف `images.unoptimized: true` في `next.config`.
+
+**لماذا يهم:** يعطّل هذا تحسين صور Vercel عالمياً. تُخدم جميع الصور كما هي، بدون تغيير حجم أو تحويل صيغة أو ضغط — مما يزيد تكاليف العرض الترددي ويُضرّ بالأداء.
+
+```js title="Bad"
+// next.config.js
+module.exports = {
+  images: {
+    unoptimized: true,
+  },
+};
+```
+
+```js title="Good"
+// next.config.js
+module.exports = {
+  images: {
+    remotePatterns: [{ hostname: "cdn.example.com" }],
+  },
+};
+```
+
+---
+
+## nextjs-image-missing-sizes
+
+<Callout type="warn">Warning · `vercel-doctor/nextjs-image-missing-sizes`</Callout>
+
+يكشف مكوّنات `<Image>` ذات `fill` دون سمة `sizes`.
+
+**لماذا يهم:** بدون `sizes`، المتصفح يحمّل أكبر صورة متاحة بغض النظر عن عرض نافذة العرض. هذا يهدر العرض الترددي ويزيد استخدام تحسين الصور.
+
+```tsx title="Bad"
+<Image src="/hero.jpg" alt="Hero" fill />
+```
+
+```tsx title="Good"
+<Image src="/hero.jpg" alt="Hero" fill sizes="(max-width: 768px) 100vw, 50vw" />
+```
+
+---
+
+## vercel-image-remote-pattern-too-broad
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-image-remote-pattern-too-broad`</Callout>
+
+يكشف إدخالات `images.remotePatterns` بأنماط `pathname` واسعة جداً (`/**` أو مفقود).
+
+**لماذا يهم:** مسارات الصور البعيدة غير المقيدة تسمح لأي URL على النطاق بالتحسين عبر حسابك، مما قد يحرّك استخدام تحسين غير متوقع من محتوى يولّده المستخدم أو تضمينات من جهات أخرى.
+
+```js title="Bad"
+// next.config.js
+module.exports = {
+  images: {
+    remotePatterns: [{ hostname: "cdn.example.com", pathname: "/**" }],
+  },
+};
+```
+
+```js title="Good"
+// next.config.js
+module.exports = {
+  images: {
+    remotePatterns: [{ hostname: "cdn.example.com", pathname: "/avatars/**" }],
+  },
+};
+```
+
+---
+
+## vercel-image-svg-without-unoptimized
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-image-svg-without-unoptimized`</Callout>
+
+يكشف مكوّنات `<Image>` مع `src` من نوع SVG دون الخاصية `unoptimized`.
+
+**لماذا يهم:** ملفات SVG رسومات متجهة ولا تستفيد من خط تحسين الصور. تشغيلها عبره يهدر حصة التحسين بدون أي فائدة.
+
+```tsx title="Bad"
+<Image src="/logo.svg" alt="Logo" width={100} height={40} />
+```
+
+```tsx title="Good"
+<Image src="/logo.svg" alt="Logo" width={100} height={40} unoptimized />
+```

@@ -1,0 +1,14 @@
+{
+  "title": "文档",
+  "pages": [
+    "---简介---",
+    "index",
+    "cli",
+    "configuration",
+    "scoring",
+    "---规则---",
+    "...rules",
+    "---集成---",
+    "ai-skills"
+  ]
+}

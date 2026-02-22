@@ -1,0 +1,97 @@
+---
+title: مرجع CLI
+description: جميع خيارات وأعلام سطر الأوامر لـ Vercel Doctor.
+icon: Terminal
+---
+
+## الاستخدام
+
+```bash
+npx -y vercel-doctor@latest [directory] [options]
+```
+
+حجم `directory` الافتراضي `.` (الدليل الحالي).
+
+## الخيارات
+
+| Flag               | الوصف                                                 |
+| ------------------ | ----------------------------------------------------- |
+| `-v, --version`    | عرض الإصدار الحالي                                    |
+| `--no-lint`        | تخطي قواعد billing lint                               |
+| `--no-dead-code`   | تخطي اكتشاف الكود الميت (Knip)                        |
+| `--verbose`        | عرض مسارات الملفات وأرقام الأسطر لكل قاعدة            |
+| `--score`          | إخراج الدرجة الرقمية فقط (مفيد لـ CI)                 |
+| `-y, --yes`        | تخطي المطالبات التفاعلية، فحص جميع مشاريع مساحة العمل |
+| `--project <name>` | تحديد مشروع مساحة عمل محدد، مفصول بفاصلة              |
+| `--diff [base]`    | فحص الملفات المتغيرة فقط مقابل الفرع الأساسي          |
+| `--offline`        | تخطي الإحصاء المجهول المستخدم لحساب الدرجة            |
+
+## أمثلة
+
+### فحص الدليل الحالي
+
+```bash
+npx -y vercel-doctor@latest .
+```
+
+### فحص مع مخرجات تفصيلية
+
+```bash
+npx -y vercel-doctor@latest . --verbose
+```
+
+يعرض مسارات الملفات المتأثرة وأرقام الأسطر لكل تشخيص.
+
+### فحص الملفات المتغيرة فقط
+
+```bash
+npx -y vercel-doctor@latest . --diff
+```
+
+يكتشف الفرع الأساسي تلقائياً. يمكنك أيضاً تثبيت قاعدة محددة:
+
+```bash
+npx -y vercel-doctor@latest . --diff main
+```
+
+### فحص مشروع مساحة عمل محدد
+
+```bash
+npx -y vercel-doctor@latest . --project web
+```
+
+لعدة مشاريع:
+
+```bash
+npx -y vercel-doctor@latest . --project web,api
+```
+
+### تخطي اكتشاف الكود الميت
+
+```bash
+npx -y vercel-doctor@latest . --no-dead-code
+```
+
+### استخدام CI
+
+```bash
+npx -y vercel-doctor@latest . --yes --score
+```
+
+يتخطى علم `--yes` المطالبات التفاعلية. مع `--score` يُخرج الدرجة الرقمية فقط للاستخدام في السكربتات والأنابيب.
+
+## API البرمجي
+
+يصدر Vercel Doctor أيضاً API برمجي:
+
+```ts
+import { run } from "vercel-doctor/api";
+```
+
+## إضافة Oxlint
+
+قواعد billing lint متاحة كإضافة Oxlint مستقلة:
+
+```ts
+import plugin from "vercel-doctor/oxlint-plugin";
+```

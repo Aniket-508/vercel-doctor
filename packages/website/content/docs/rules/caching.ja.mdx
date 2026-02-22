@@ -1,0 +1,130 @@
+---
+title: Caching
+description: Vercel上で効果的なキャッシュを妨げるパターンを検出するルール。
+---
+
+これらのルールは、VercelのCDNとISRキャッシュをバイパスし、不要なサーバーサイドレンダリングとコンピュートコストの増加を招くパターンを特定します。
+
+## nextjs-no-side-effect-in-get-handler
+
+<Callout type="error">Error · `vercel-doctor/nextjs-no-side-effect-in-get-handler`</Callout>
+
+side effect（cookie、header、DBの変更）を含むGETルートハンドラ、または `/logout`、`/signout`、`/delete` などの変更系ルートセグメント上にあるものを検出します。
+
+**Why it matters:** GETリクエストは prefetch で呼ばれる可能性があり、CSRFの影響を受けます。GETハンドラ内の side effect はキャッシュも妨げます。
+
+```ts title="Bad"
+// app/api/logout/route.ts
+export async function GET() {
+  cookies().delete("session");
+  return Response.json({ ok: true });
+}
+```
+
+```ts title="Good"
+// app/api/logout/route.ts
+export async function POST() {
+  cookies().delete("session");
+  return Response.json({ ok: true });
+}
+```
+
+検出される変更系ルートセグメント：`logout`、`log-out`、`signout`、`sign-out`、`unsubscribe`、`delete`、`remove`、`revoke`、`cancel`、`deactivate`。
+
+---
+
+## vercel-no-force-dynamic
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-no-force-dynamic`</Callout>
+
+`export const dynamic = "force-dynamic"` を持つページを検出します。
+
+**Why it matters:** `force-dynamic` はリクエストごとにサーバーサイドレンダリングを強制し、フルページキャッシュを完全にバイパスします。
+
+```ts title="Bad"
+export const dynamic = "force-dynamic";
+
+export default function Page() { ... }
+```
+
+```ts title="Good"
+export const revalidate = 3600;
+
+export default function Page() { ... }
+```
+
+---
+
+## vercel-no-no-store-fetch
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-no-no-store-fetch`</Callout>
+
+`cache: "no-store"` または `revalidate: 0` を使用した fetch 呼び出しを検出します。
+
+**Why it matters:** これらのオプションはキャッシュを完全に無効化し、リクエストごとに未キャッシュの帯域幅とコンピュートコストが増加します。
+
+```ts title="Bad"
+const data = await fetch(url, { cache: "no-store" });
+```
+
+```ts title="Good"
+const data = await fetch(url, {
+  next: { revalidate: 3600 },
+});
+```
+
+---
+
+## vercel-missing-cache-policy
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-missing-cache-policy`</Callout>
+
+明示的なキャッシュ設定（`Cache-Control` ヘッダー、`revalidate` エクスポート、`dynamic` エクスポート）がないGETルートハンドラを検出します。
+
+**Why it matters:** 明示的なキャッシュポリシーがないと、レスポンスがCDNキャッシュを活かしきれず、origin への繰り返しアクセスが発生します。
+
+```ts title="Bad"
+export async function GET() {
+  const data = await fetchData();
+  return Response.json(data);
+}
+```
+
+```ts title="Good"
+export const revalidate = 3600;
+
+export async function GET() {
+  const data = await fetchData();
+  return Response.json(data);
+}
+```
+
+---
+
+## vercel-prefer-get-static-props
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-prefer-get-static-props`</Callout>
+
+Pages Router で `getServerSideProps` を使っているルートを検出します。
+
+**Why it matters:** `getServerSideProps` は毎リクエストで実行されます。`getStaticProps`（オプションでISR）に切り替えると、ページはCDNでキャッシュされ、サーバーコンピュートが削減されます。
+
+---
+
+## vercel-get-static-props-consider-isr
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-get-static-props-consider-isr`</Callout>
+
+`revalidate` の戻り値がない `getStaticProps` を検出します。
+
+**Why it matters:** `revalidate` がないと、すべてのページがデプロイ時にビルドされます。大規模サイトではビルドが著しく遅くなります。ISRを使えば、オンデマンドでページを生成してキャッシュできます。
+
+```ts title="Good"
+export async function getStaticProps() {
+  const data = await fetchData();
+  return {
+    props: { data },
+    revalidate: 3600,
+  };
+}
+```

@@ -4,6 +4,7 @@ import { SectionContainer, SectionContent } from "./section-layout";
 import { LINK } from "@/constants/links";
 import { SPONSORS } from "@/constants/sponsors";
 import type { Sponsor } from "@/constants/sponsors";
+import { getTranslation } from "@/translations";
 
 const GRID_SIZE = 16;
 
@@ -52,16 +53,23 @@ const SponsorCell = ({ sponsor, isLastCell }: { sponsor: Sponsor | null; isLastC
   );
 };
 
-export const Sponsors = () => {
+interface SponsorsProps {
+  lang?: string;
+}
+
+export const Sponsors = ({ lang = "en" }: SponsorsProps) => {
+  const translation = getTranslation(lang);
   const sponsorSlots = SPONSORS.slice(0, GRID_SIZE);
 
   return (
     <SectionContainer>
       <SectionContent>
         <div className="px-6 py-10 md:px-10">
-          <h2 className="text-2xl font-bold text-fd-foreground">Supported by the Best</h2>
+          <h2 className="text-2xl font-bold text-fd-foreground">
+            {translation.sponsorsSection.heading}
+          </h2>
           <p className="mt-2 text-sm text-fd-muted-foreground">
-            Your sponsorship means a lot to open-source projects, including Vercel Doctor.
+            {translation.sponsorsSection.description}
           </p>
           <a
             href={LINK.SPONSOR}
@@ -69,7 +77,7 @@ export const Sponsors = () => {
             rel="noopener noreferrer"
             className="mt-4 inline-block text-sm font-medium text-fd-foreground underline underline-offset-4 transition-colors hover:text-fd-muted-foreground"
           >
-            Sponsor My Work
+            {translation.sponsorsSection.sponsorMyWork}
           </a>
         </div>
 

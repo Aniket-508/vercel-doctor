@@ -1,0 +1,72 @@
+---
+title: スコアリング
+description: Vercel Doctorがプロジェクトのヘルススコアをどのように計算するか。
+icon: Gauge
+---
+
+各スキャンでは0〜100のスコアが生成されます。スコアは、プロジェクトが発火させる固有ルールの数に、重大度で重み付けした結果を反映します。
+
+## 計算式
+
+```
+score = max(0, round(100 - penalties))
+```
+
+penaltiesは以下の通りです：
+
+| Severity | Penalty per unique rule |
+| -------- | ----------------------- |
+| Error    | 1.5 points              |
+| Warning  | 0.75 points             |
+
+スコアは**発火した固有ルール数**に基づき、診断の総数ではありません。同じルールが10ファイルで発火しても、1回しかカウントされません。
+
+## ラベル
+
+| Score  | Label      |
+| ------ | ---------- |
+| 75–100 | Great      |
+| 50–74  | Needs work |
+| 0–49   | Critical   |
+
+## 例
+
+エラールール2つ、警告ルール8つを持つプロジェクトの場合：
+
+```
+penalty = (2 × 1.5) + (8 × 0.75) = 3 + 6 = 9
+score = max(0, round(100 - 9)) = 91 → Great
+```
+
+## スコアを共有する
+
+Vercel Doctor実行後、スコアは共有可能なページで閲覧でき、SNSシェアボタンと埋め込みバッジに対応しています。
+
+### バッジ
+
+`README.md` にバッジを追加できます：
+
+```markdown
+[![Vercel Doctor](https://www.vercel-doctor.com/share/badge?s=91)](https://www.vercel-doctor.com/share?s=91)
+```
+
+### API
+
+プログラムでスコアを計算することもできます：
+
+```bash
+curl -X POST https://www.vercel-doctor.com/api/score \
+  -H "Content-Type: application/json" \
+  -d '{"diagnostics": [...]}'
+```
+
+戻り値：
+
+```json
+{
+  "score": 91,
+  "label": "Great"
+}
+```
+
+`/api/estimate-score` エンドポイントは、エラー85%、警告80%の推定修正率を用いて、問題修正後の推定スコアを返します。

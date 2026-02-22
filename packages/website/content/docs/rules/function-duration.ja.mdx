@@ -1,0 +1,91 @@
+---
+title: Function Duration
+description: serverless関数の実行時間を増加させるパターンを検出するルール。
+---
+
+これらのルールは、serverless関数の実行時間を膨らませるパターンを検出します。実行時間が短いほど請求額は下がります。VercelはGB秒あたりの実行時間で課金します。
+
+## async-parallel
+
+<Callout type="warn">Warning · `vercel-doctor/async-parallel`</Callout>
+
+3つ以上の直列な `await` で、互いに独立しているように見えるもの（後の await が前の変数を参照していない）を検出します。
+
+**Why it matters:** 直列な await は順番に実行されます。独立していれば、`Promise.all()` で並列実行すると、関数の実行時間を大幅に短縮できます。
+
+```ts title="Bad"
+const users = await db.user.findMany();
+const posts = await db.post.findMany();
+const comments = await db.comment.findMany();
+```
+
+```ts title="Good"
+const [users, posts, comments] = await Promise.all([
+  db.user.findMany(),
+  db.post.findMany(),
+  db.comment.findMany(),
+]);
+```
+
+---
+
+## server-after-nonblocking
+
+<Callout type="warn">Warning · `vercel-doctor/server-after-nonblocking`</Callout>
+
+server action（`"use server"` を含むファイル）内の `console.log()`、`console.info()`、`console.warn()`、`analytics.track()`、`analytics.identify()`、`analytics.page()` の呼び出しを検出します。
+
+**Why it matters:** ログや analytics 呼び出しは完了までレスポンスをブロックします。`after()` でラップすると、レスポンスは即座に返し、処理はバックグラウンドで続行できます。
+
+```ts title="Bad"
+"use server";
+
+export const updateUser = async (data: FormData) => {
+  await db.user.update({ ... });
+  console.log("User updated");
+  analytics.track("user_updated");
+};
+```
+
+```ts title="Good"
+"use server";
+
+import { after } from "next/server";
+
+export const updateUser = async (data: FormData) => {
+  await db.user.update({ ... });
+  after(() => {
+    console.log("User updated");
+    analytics.track("user_updated");
+  });
+};
+```
+
+---
+
+## vercel-edge-sequential-await
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-edge-sequential-await`</Callout>
+
+edge runtime のファイルで、`Promise.all` を使用せずに2つ以上の直列な `await` があることを検出します。
+
+**Why it matters:** edge 関数は実行時間制限が厳格です。直列な I/O は並列化できる貴重なミリ秒を無駄にします。
+
+```ts title="Bad"
+export const runtime = "edge";
+
+export async function GET() {
+  const user = await getUser();
+  const settings = await getSettings();
+  return Response.json({ user, settings });
+}
+```
+
+```ts title="Good"
+export const runtime = "edge";
+
+export async function GET() {
+  const [user, settings] = await Promise.all([getUser(), getSettings()]);
+  return Response.json({ user, settings });
+}
+```

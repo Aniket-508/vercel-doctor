@@ -1,0 +1,97 @@
+---
+title: CLI-Referenz
+description: Alle Kommandozeilen-Optionen und Flags für Vercel Doctor.
+icon: Terminal
+---
+
+## Verwendung
+
+```bash
+npx -y vercel-doctor@latest [directory] [options]
+```
+
+Das `directory`-Argument Standardwert ist `.` (aktuelles Verzeichnis).
+
+## Optionen
+
+| Flag               | Description                                           |
+| ------------------ | ----------------------------------------------------- |
+| `-v, --version`    | Display the current version                           |
+| `--no-lint`        | Skip billing lint rules                               |
+| `--no-dead-code`   | Skip dead code detection (Knip)                       |
+| `--verbose`        | Show file paths and line numbers per rule             |
+| `--score`          | Output only the numeric score (useful for CI)         |
+| `-y, --yes`        | Skip interactive prompts, scan all workspace projects |
+| `--project <name>` | Select specific workspace project(s), comma-separated |
+| `--diff [base]`    | Scan only files changed vs the base branch            |
+| `--offline`        | Skip anonymous telemetry used for score calculation   |
+
+## Beispiele
+
+### Aktuelles Verzeichnis scannen
+
+```bash
+npx -y vercel-doctor@latest .
+```
+
+### Mit ausführlicher Ausgabe scannen
+
+```bash
+npx -y vercel-doctor@latest . --verbose
+```
+
+Zeigt betroffene Dateipfade und Zeilennummern für jede Diagnose.
+
+### Nur geänderte Dateien scannen
+
+```bash
+npx -y vercel-doctor@latest . --diff
+```
+
+Erkennt den Base-Branch automatisch. Du kannst auch einen festen Base angeben:
+
+```bash
+npx -y vercel-doctor@latest . --diff main
+```
+
+### Bestimmtes Workspace-Projekt scannen
+
+```bash
+npx -y vercel-doctor@latest . --project web
+```
+
+Für mehrere Projekte:
+
+```bash
+npx -y vercel-doctor@latest . --project web,api
+```
+
+### Dead-Code-Erkennung überspringen
+
+```bash
+npx -y vercel-doctor@latest . --no-dead-code
+```
+
+### CI-Verwendung
+
+```bash
+npx -y vercel-doctor@latest . --yes --score
+```
+
+Das Flag `--yes` überspringt interaktive Prompts. In Kombination mit `--score` gibt es nur die numerische Bewertung für Scripts und Pipelines aus.
+
+## Programmatische API
+
+Vercel Doctor exportiert auch eine programmatische API:
+
+```ts
+import { run } from "vercel-doctor/api";
+```
+
+## Oxlint-Plugin
+
+Die Billing-Lint-Regeln sind als eigenständiges Oxlint-Plugin verfügbar:
+
+```ts
+import plugin from "vercel-doctor/oxlint-plugin";
+```
