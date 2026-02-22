@@ -1,11 +1,13 @@
+import { LINK } from "@/constants/links";
+import { LANGUAGES } from "@/lib/i18n";
 import { getPageImage, source } from "@/lib/source";
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from "fumadocs-ui/layouts/docs/page";
-import { notFound } from "next/navigation";
+import { createRelativeLink } from "fumadocs-ui/mdx";
 import { getMDXComponents } from "@/mdx-components";
 import type { Metadata } from "next";
-import { createRelativeLink } from "fumadocs-ui/mdx";
+import { notFound } from "next/navigation";
 import { LLMCopyButton, ViewOptions } from "@/components/ai/page-actions";
-import { LINK } from "@/constants/links";
+import { getLocalizedPath } from "@/translations";
 
 interface DocsPageProps {
   params: Promise<{ lang: string; slug?: string[] }>;
@@ -46,9 +48,20 @@ export async function generateMetadata({ params }: DocsPageProps): Promise<Metad
   const page = source.getPage(slug, lang);
   if (!page) notFound();
 
+  const docPath = `/docs/${page.slugs.join("/")}`;
+  const canonical = getLocalizedPath(lang, docPath);
+  const languages: Record<string, string> = Object.fromEntries(
+    LANGUAGES.map((locale) => [locale, getLocalizedPath(locale, docPath)]),
+  );
+  languages["x-default"] = getLocalizedPath("en", docPath);
+
   return {
     title: page.data.title,
     description: page.data.description,
+    alternates: {
+      canonical,
+      languages,
+    },
     openGraph: {
       images: getPageImage(page).url,
     },

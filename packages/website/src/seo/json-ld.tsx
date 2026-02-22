@@ -1,14 +1,23 @@
 import { LINK } from "@/constants/links";
 import { SITE } from "@/constants/site";
+import { LANGUAGES } from "@/lib/i18n";
+
+const LOCALE_TO_BCP47: Record<string, string> = {
+  en: "en-US",
+  zh: "zh-Hans",
+  "pt-br": "pt-BR",
+};
 
 const WebsiteJsonLd = () => {
+  const inLanguage = LANGUAGES.map((locale) => LOCALE_TO_BCP47[locale] ?? locale);
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: SITE.NAME,
     url: SITE.URL,
     description: SITE.DESCRIPTION.LONG,
-    inLanguage: "en-US",
+    inLanguage,
   };
 
   return (

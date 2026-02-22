@@ -36,7 +36,14 @@ export const GET = (request: Request) => {
   }
 
   const lastmod = new Date().toISOString().split("T")[0];
-  const docSlugs = source.getPages().map((page) => page.slugs);
+  const docSlugs = [
+    ...new Map(
+      source
+        .getPages()
+        .filter((page) => page.locale === lang)
+        .map((page) => [page.slugs.join("/"), page.slugs]),
+    ).values(),
+  ];
 
   const staticEntries = STATIC_PAGES.map(
     ({ path, priority }) => `  <url>

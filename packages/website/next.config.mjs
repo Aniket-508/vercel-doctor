@@ -30,7 +30,7 @@ const config = {
           destination: "/llms.txt",
         },
         {
-          source: "/docs/:path",
+          source: "/docs/:path*",
           destination: "/llms.mdx/docs/:path*",
           has: [
             {
@@ -41,7 +41,7 @@ const config = {
           ],
         },
         {
-          source: "/docs/:path*.mdx",
+          source: "/docs/:path*\\.mdx",
           destination: "/llms.mdx/docs/:path*",
         },
         {

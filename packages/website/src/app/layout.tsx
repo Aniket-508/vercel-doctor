@@ -10,7 +10,7 @@ const fontClassNames = [GeistSans.variable, GeistMono.variable, GeistPixelGrid.v
 
 export const metadata = baseMetadata;
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang="en" className={fontClassNames} suppressHydrationWarning>
       <head>
@@ -22,4 +22,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </body>
     </html>
   );
-}
+};
+
+export default RootLayout;
