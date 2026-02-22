@@ -1,0 +1,117 @@
+---
+title: Платформа
+description: Правила, специфичные для конфигурации платформы Vercel и оптимизации деплоя.
+---
+
+Эти правила обнаруживают проблемы конфигурации на уровне платформы и предлагают оптимизации для деплоев на Vercel.
+
+## vercel-edge-heavy-import
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-edge-heavy-import`</Callout>
+
+Обнаруживает файлы Edge Runtime, импортирующие тяжёлые или Node-ориентированные зависимости, такие как `node:fs`, `node:crypto`, `sharp` или `@aws-sdk/*`.
+
+**Почему это важно:** Edge-функции имеют строгие ограничения по размеру и времени выполнения. Тяжёлые зависимости Node.js увеличивают время холодного старта и могут вызывать ошибки во время выполнения.
+
+**Исправление:** Перенесите тяжёлую логику в функции на Node.js Runtime или фоновые задачи, а Edge-обработчики оставьте лёгкими.
+
+---
+
+## vercel-sequential-database-await
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-sequential-database-await`</Callout>
+
+Обнаруживает API-маршруты с 3 или более последовательными вызовами Prisma или базы данных без `Promise.all`.
+
+**Почему это важно:** Каждый последовательный вызов базы данных добавляет задержку к выполнению функции. Параллелизация независимых запросов сокращает общую длительность и стоимость.
+
+```ts title="Bad"
+const users = await prisma.user.findMany();
+const posts = await prisma.post.findMany();
+const tags = await prisma.tag.findMany();
+```
+
+```ts title="Good"
+const [users, posts, tags] = await Promise.all([
+  prisma.user.findMany(),
+  prisma.post.findMany(),
+  prisma.tag.findMany(),
+]);
+```
+
+---
+
+## vercel-large-static-asset
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-large-static-asset`</Callout>
+
+Обнаруживает статические ресурсы (изображения, шрифты, видео, PDF) размером 4 КБ или больше, отдаваемые из репозитория приложения.
+
+**Почему это важно:** Крупные статические файлы, отдаваемые с вашего деплоя Vercel, потребляют трафик при каждом запросе. Перенос их на выделенный CDN или объектное хранилище (Cloudflare R2, S3) снижает затраты на трафик.
+
+Отображает до 20 файлов, отсортированных по размеру (сначала самые большие).
+
+---
+
+## vercel-consider-bun-runtime
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-consider-bun-runtime`</Callout>
+
+Обнаруживает проекты, не настроенные для среды Bun (нет `packageManager: "bun@..."` в `package.json` и нет файла `bun.lock`).
+
+**Почему это важно:** Среда Bun может сократить накладные расходы на установку и сборку на Vercel по сравнению с Node.js.
+
+**Исправление:** Ознакомьтесь с [руководством по среде Bun](https://vercel.com/docs/functions/runtimes/bun) и переключитесь, если ваш проект совместим.
+
+---
+
+## vercel-avoid-platform-cron
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-avoid-platform-cron`</Callout>
+
+Обнаруживает `crons`, настроенные в `vercel.json`.
+
+**Почему это важно:** Cron-задачи Vercel работают как серверлесс-функции и тарифицируются за каждое выполнение. Запланированные рабочие нагрузки с предсказуемыми паттернами часто можно запустить дешевле через GitHub Actions или Cloudflare Workers Cron Triggers.
+
+---
+
+## vercel-consider-fluid-compute
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-consider-fluid-compute`</Callout>
+
+Обнаруживает проекты с 3 или более API/серверными маршрутами.
+
+**Почему это важно:** Fluid Compute улучшает параллелизм и снижает накладные расходы на выполнение для рабочих нагрузок с переменной задержкой или всплесками трафика. Стоит рассмотреть для проектов с множеством серверных маршрутов.
+
+---
+
+## vercel-suggest-turbopack-build-cache
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-suggest-turbopack-build-cache`</Callout>
+
+Обнаруживает файлы `next.config` с настройками `experimental`, но без `turbopackFileSystemCacheForBuild`.
+
+**Почему это важно:** Next.js 16+ поддерживает кеш сборки Turbopack, который может значительно сократить время сборки.
+
+```js title="Good"
+// next.config.js
+module.exports = {
+  experimental: {
+    turbopackFileSystemCacheForBuild: true,
+  },
+};
+```
+
+---
+
+## vercel-suggest-deploy-archive
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-suggest-deploy-archive`</Callout>
+
+Обнаруживает проекты с 5 000 или более файлами.
+
+**Почему это важно:** Крупные проекты могут столкнуться с ограничениями API при деплое. Использование режима архива загружает один tarball вместо отдельных файлов, сокращая время деплоя примерно на 50%.
+
+```bash
+vercel deploy --archive=tgz
+```

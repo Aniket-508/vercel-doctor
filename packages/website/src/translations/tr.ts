@@ -1,0 +1,72 @@
+import type { Translation } from ".";
+
+export const tr: Translation = {
+  nav: {
+    docs: "Belgeler",
+    showcase: "Vitrin",
+    sponsors: "Sponsorlar",
+  },
+  hero: {
+    copied: "Kopyalandı!",
+    copyCommand: "Komutu kopyala",
+    selectPackageManager: "Bir paket yöneticisi seçin",
+    headingLine1: "Biriken",
+    headingLine2: "Vercel maliyetlerini durdurun",
+    subtitle: "Kodlama ajanlarının Vercel faturanızı teşhis edip düzeltmesine izin verin",
+    fixCosts: "Maliyetlerinizi düzeltin",
+    github: "GitHub",
+  },
+  testimonials: {
+    sectionLabel: "[İNSANLAR NE DİYOR]",
+  },
+  preFooter: {
+    sectionLabel: "[TASARRUF ETMEYE HAZIR MISINIZ?]",
+    heading: "Daha iyi faturalandırma",
+    by: "tarafından",
+    getStarted: "Başla",
+    viewOnGithub: "GitHub'da Görüntüle",
+  },
+  footer: {
+    builtBy: "Yapan",
+    hostedOn: "Barındıran",
+    sourceAvailableOn: "Kaynak kodu şurada mevcut:",
+    twitter: "Twitter",
+    llms: "LLM'ler",
+  },
+  disclaimer: {
+    text: "Tarafından onaylanmamış veya bağlantılı değildir:",
+  },
+  sponsorsSection: {
+    heading: "En İyiler Tarafından Destekleniyor",
+    description: "Sponsorluğunuz Vercel Doctor dahil açık kaynak projeler için çok şey ifade eder.",
+    sponsorMyWork: "Çalışmamı Sponsorla",
+  },
+  showcasePage: {
+    heading: "Vitrin",
+    description: "Vercel Doctor kullanan projelerin bir koleksiyonu.",
+    suggestYours: "Kendinizinkini Önerin",
+    empty: "Henüz vitrin yok. İlk gönderen siz olun!",
+  },
+  sponsorsPage: {
+    heading: "Sponsorlar",
+    description: "Sponsorluğunuz Vercel Doctor dahil açık kaynak projeler için çok şey ifade eder.",
+    sponsorMyWork: "Çalışmamı Sponsorla",
+    organizationSponsors: "Kuruluş Sponsorları",
+    empty: "Henüz sponsor yok. Bu projeyi destekleyen ilk kişi siz olun!",
+  },
+  notFound: {
+    heading: "404",
+    description: "Aradığınız sayfa taşınmış veya mevcut olmayabilir.",
+    goHome: "Ana Sayfaya Git",
+    explore: "Keşfet",
+  },
+  score: {
+    great: "Harika",
+    needsWork: "İyileştirme gerekli",
+    critical: "Kritik",
+  },
+  fumadocs: {
+    displayName: "Türkçe",
+    search: "Belgelerde ara",
+  },
+};

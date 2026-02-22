@@ -1,0 +1,14 @@
+{
+  "title": "Dokumentation",
+  "pages": [
+    "---Introduktion---",
+    "index",
+    "cli",
+    "configuration",
+    "scoring",
+    "---Regler---",
+    "...rules",
+    "---Integrationer---",
+    "ai-skills"
+  ]
+}

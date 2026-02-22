@@ -1,0 +1,72 @@
+---
+title: Apa itu Vercel Doctor?
+description: Kurangi tagihan Vercel Anda dengan memindai codebase Next.js untuk menemukan pola-pola yang mahal.
+icon: CircleQuestionMark
+---
+
+import { Step, Steps } from "fumadocs-ui/components/steps";
+
+Vercel Doctor adalah alat pemeriksaan kesehatan khusus untuk proyek Next.js yang di-deploy di Vercel. Alat ini memindai codebase Anda untuk menemukan pola yang meningkatkan tagihan — durasi fungsi, route tanpa cache, gambar yang tidak dioptimasi, dan lainnya — kemudian memberikan skor dari 100 beserta perbaikan yang dapat ditindaklanjuti.
+
+## Mulai Cepat
+
+<Steps>
+
+<Step>
+### Jalankan di proyek Anda
+
+```bash
+npx -y vercel-doctor@latest .
+```
+
+Itu saja. Tanpa instalasi, tanpa konfigurasi. Alat ini memindai codebase Anda dan menghasilkan skor beserta diagnostik.
+
+</Step>
+
+<Step>
+### Perbaiki masalahnya
+
+Setiap diagnostik menyertakan pesan bantuan yang menjelaskan apa yang perlu diubah dan mengapa. Perbaiki aturan dengan dampak tertinggi terlebih dahulu — error sebelum warning.
+
+</Step>
+
+<Step>
+### Jalankan ulang untuk verifikasi
+
+```bash
+npx -y vercel-doctor@latest . --diff
+```
+
+Gunakan `--diff` pada branch fitur untuk memindai hanya file yang Anda ubah.
+
+</Step>
+
+</Steps>
+
+## Apa yang diperiksa
+
+Vercel Doctor menjalankan dua tahap analisis secara paralel:
+
+1. **Lint tagihan** — aturan berbasis AST dan pola yang mendeteksi pola Next.js dan Vercel yang mahal
+2. **Deteksi kode mati** — menemukan file, export, dan tipe yang tidak digunakan yang memperbesar bundle dan memperlambat cold start
+
+### Kategori aturan
+
+| Kategori                                          | Aturan | Apa yang dideteksi                                                                            |
+| ------------------------------------------------- | ------ | --------------------------------------------------------------------------------------------- |
+| [Durasi Fungsi](/docs/rules/function-duration)    | 3      | Await berurutan, logging yang memblokir, I/O non-paralel                                      |
+| [Caching](/docs/rules/caching)                    | 6      | `force-dynamic`, kebijakan cache yang hilang, fetch `no-store`, efek samping pada handler GET |
+| [Invokasi](/docs/rules/invocations)               | 2      | Fetch sisi klien di halaman, prefetching link yang agresif                                    |
+| [Optimasi Gambar](/docs/rules/image-optimization) | 4      | `unoptimized` global, `sizes` yang hilang, pola remote terlalu luas, SVG tanpa `unoptimized`  |
+| [Platform](/docs/rules/platform)                  | 8      | Import berat di Edge, cron job, runtime Bun, Fluid Compute, arsip deploy, cache Turbopack     |
+| [Kode Mati](/docs/rules/dead-code)                | 4      | File, export, tipe yang tidak digunakan, dan duplikat                                         |
+
+## Fitur
+
+- **Tanpa konfigurasi** — langsung berjalan pada proyek Next.js manapun
+- **Dukungan monorepo** — mendeteksi workspace secara otomatis, memungkinkan Anda memilih proyek mana yang akan dipindai
+- **Mode diff** — memindai hanya file yang diubah pada branch fitur
+- **Penilaian** — skor 0–100 dengan label Bagus / Perlu perbaikan / Kritis
+- **Siap untuk CI** — mode non-interaktif untuk pipeline otomatis
+- **Dapat dikonfigurasi** — abaikan aturan atau file melalui file konfigurasi
+- **Skill AI** — dapat diinstal sebagai skill untuk Claude Code, Cursor, Codex, dan lainnya

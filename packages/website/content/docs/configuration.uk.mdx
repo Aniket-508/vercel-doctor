@@ -1,0 +1,98 @@
+---
+title: Конфігурація
+description: Налаштуйте Vercel Doctor за допомогою конфігураційного файлу для ігнорування правил, файлів та налаштування поведінки.
+icon: Settings
+---
+
+Vercel Doctor працює одразу без жодної конфігурації. Коли потрібно налаштувати поведінку, можна додати конфігураційний файл.
+
+## Конфігураційний файл
+
+Створіть `vercel-doctor.config.json` у кореневій директорії проєкту:
+
+```json
+{
+  "ignore": {
+    "rules": ["vercel-doctor/nextjs-link-prefetch-default"],
+    "files": ["src/generated/**"]
+  }
+}
+```
+
+Альтернативно, додайте ключ `"vercelDoctor"` у ваш `package.json`:
+
+```json
+{
+  "vercelDoctor": {
+    "ignore": {
+      "rules": ["knip/exports"],
+      "files": ["src/generated/**"]
+    }
+  }
+}
+```
+
+Якщо існують обидва файли, `vercel-doctor.config.json` має пріоритет.
+
+## Параметри
+
+| Ключ           | Тип                 | За замовчуванням | Опис                                                       |
+| -------------- | ------------------- | ---------------- | ---------------------------------------------------------- |
+| `ignore.rules` | `string[]`          | `[]`             | ID правил для ігнорування у форматі `plugin/rule`          |
+| `ignore.files` | `string[]`          | `[]`             | Glob-патерни для шляхів файлів, які потрібно пропустити    |
+| `lint`         | `boolean`           | `true`           | Увімкнути або вимкнути правила лінтингу витрат             |
+| `deadCode`     | `boolean`           | `true`           | Увімкнути або вимкнути виявлення мертвого коду             |
+| `verbose`      | `boolean`           | `false`          | Показати шляхи файлів та номери рядків для кожного правила |
+| `diff`         | `boolean \| string` | `false`          | Увімкнути режим diff або вказати базову гілку              |
+
+## Ігнорування правил
+
+Використовуйте формат `plugin/rule` для ID правил:
+
+```json
+{
+  "ignore": {
+    "rules": [
+      "vercel-doctor/nextjs-image-missing-sizes",
+      "vercel-doctor/vercel-large-static-asset",
+      "knip/exports"
+    ]
+  }
+}
+```
+
+Перегляньте сторінки [Правила](/docs/rules/function-duration) для всіх доступних ID правил.
+
+## Ігнорування файлів
+
+Використовуйте glob-патерни для виключення файлів зі сканування:
+
+```json
+{
+  "ignore": {
+    "files": ["src/generated/**", "**/*.stories.tsx", "scripts/**"]
+  }
+}
+```
+
+## Перевизначення через CLI
+
+Прапорці CLI завжди мають пріоритет над значеннями конфігураційного файлу. Наприклад, `--verbose` у командному рядку перевизначає `"verbose": false` у конфігураційному файлі.
+
+## Повний приклад
+
+```json
+{
+  "ignore": {
+    "rules": [
+      "vercel-doctor/vercel-consider-bun-runtime",
+      "vercel-doctor/vercel-avoid-platform-cron"
+    ],
+    "files": ["src/generated/**", "e2e/**"]
+  },
+  "lint": true,
+  "deadCode": true,
+  "verbose": false,
+  "diff": "main"
+}
+```

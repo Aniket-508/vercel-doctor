@@ -1,0 +1,72 @@
+---
+title: Puanlama
+description: Vercel Doctor projenizin sağlık puanını nasıl hesaplar.
+icon: Gauge
+---
+
+Her tarama 0 ile 100 arasında bir puan üretir. Puan, projenizin tetiklediği benzersiz kuralların sayısını, önem derecesine göre ağırlıklandırarak yansıtır.
+
+## Hesaplama
+
+```
+score = max(0, round(100 - penalties))
+```
+
+Cezalar şunlardır:
+
+| Önem Derecesi | Benzersiz kural başına ceza |
+| ------------- | --------------------------- |
+| Hata          | 1,5 puan                    |
+| Uyarı         | 0,75 puan                   |
+
+Puan, toplam tanılama sayısına değil, **tetiklenen benzersiz kurallara** dayanır. Aynı kural 10 dosyada tetiklenirse, yalnızca bir kez sayılır.
+
+## Etiketler
+
+| Puan   | Etiket              |
+| ------ | ------------------- |
+| 75–100 | Harika              |
+| 50–74  | İyileştirme gerekli |
+| 0–49   | Kritik              |
+
+## Örnek
+
+2 hata kuralı ve 8 uyarı kuralı olan bir proje:
+
+```
+penalty = (2 × 1.5) + (8 × 0.75) = 3 + 6 = 9
+score = max(0, round(100 - 9)) = 91 → Harika
+```
+
+## Puanınızı paylaşın
+
+Vercel Doctor'ı çalıştırdıktan sonra, puanınız sosyal paylaşım düğmeleri ve gömülebilir bir rozet içeren paylaşılabilir bir sayfada kullanılabilir.
+
+### Rozet
+
+`README.md` dosyanıza bir rozet ekleyin:
+
+```markdown
+[![Vercel Doctor](https://www.vercel-doctor.com/share/badge?s=91)](https://www.vercel-doctor.com/share?s=91)
+```
+
+### API
+
+Puanları programatik olarak da hesaplayabilirsiniz:
+
+```bash
+curl -X POST https://www.vercel-doctor.com/api/score \
+  -H "Content-Type: application/json" \
+  -d '{"diagnostics": [...]}'
+```
+
+Döndürür:
+
+```json
+{
+  "score": 91,
+  "label": "Great"
+}
+```
+
+`/api/estimate-score` endpoint'i, hatalar için %85 ve uyarılar için %80 tahmini düzeltme oranları kullanarak sorunları düzelttikten sonra puanınızın ne olacağını tahmin eder.

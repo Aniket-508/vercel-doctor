@@ -1,0 +1,72 @@
+import type { Translation } from ".";
+
+export const id: Translation = {
+  nav: {
+    docs: "Dokumentasi",
+    showcase: "Etalase",
+    sponsors: "Sponsor",
+  },
+  hero: {
+    copied: "Disalin!",
+    copyCommand: "Salin perintah",
+    selectPackageManager: "Pilih manajer paket",
+    headingLine1: "Berhenti menumpuk",
+    headingLine2: "biaya Vercel",
+    subtitle: "Biarkan agen coding mendiagnosis dan memperbaiki tagihan Vercel Anda",
+    fixCosts: "Perbaiki biaya Anda",
+    github: "GitHub",
+  },
+  testimonials: {
+    sectionLabel: "[APA KATA ORANG]",
+  },
+  preFooter: {
+    sectionLabel: "[SIAP HEMAT?]",
+    heading: "Tagihan lebih baik",
+    by: "oleh",
+    getStarted: "Mulai",
+    viewOnGithub: "Lihat di GitHub",
+  },
+  footer: {
+    builtBy: "Dibuat oleh",
+    hostedOn: "Dihosting di",
+    sourceAvailableOn: "Kode sumber tersedia di",
+    twitter: "Twitter",
+    llms: "LLM",
+  },
+  disclaimer: {
+    text: "Tidak didukung atau berafiliasi dengan",
+  },
+  sponsorsSection: {
+    heading: "Didukung oleh yang Terbaik",
+    description: "Sponsorship Anda sangat berarti bagi proyek open source, termasuk Vercel Doctor.",
+    sponsorMyWork: "Sponsori Pekerjaan Saya",
+  },
+  showcasePage: {
+    heading: "Etalase",
+    description: "Kumpulan proyek yang menggunakan Vercel Doctor.",
+    suggestYours: "Sarankan Milik Anda",
+    empty: "Belum ada etalase. Jadilah yang pertama mengirimkan milik Anda!",
+  },
+  sponsorsPage: {
+    heading: "Sponsor",
+    description: "Sponsorship Anda sangat berarti bagi proyek open source, termasuk Vercel Doctor.",
+    sponsorMyWork: "Sponsori Pekerjaan Saya",
+    organizationSponsors: "Sponsor Organisasi",
+    empty: "Belum ada sponsor. Jadilah yang pertama mendukung proyek ini!",
+  },
+  notFound: {
+    heading: "404",
+    description: "Halaman yang Anda cari mungkin telah dipindahkan atau tidak ada.",
+    goHome: "Ke Beranda",
+    explore: "Jelajahi",
+  },
+  score: {
+    great: "Bagus",
+    needsWork: "Perlu perbaikan",
+    critical: "Kritis",
+  },
+  fumadocs: {
+    displayName: "Bahasa Indonesia",
+    search: "Cari dokumentasi",
+  },
+};

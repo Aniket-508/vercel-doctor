@@ -1,0 +1,130 @@
+---
+title: Caching
+description: Aturan yang mendeteksi pola yang mencegah caching efektif di Vercel.
+---
+
+Aturan-aturan ini mengidentifikasi pola yang melewati CDN dan caching ISR Vercel, memaksa rendering sisi server yang tidak perlu dan meningkatkan biaya komputasi.
+
+## nextjs-no-side-effect-in-get-handler
+
+<Callout type="error">Error · `vercel-doctor/nextjs-no-side-effect-in-get-handler`</Callout>
+
+Mendeteksi handler route GET yang mengandung efek samping (memodifikasi cookie, header, atau panggilan database) atau berada pada segmen route yang bermutasi seperti `/logout`, `/signout`, `/delete`, dll.
+
+**Mengapa ini penting:** Permintaan GET dapat dipicu oleh prefetching dan rentan terhadap CSRF. Efek samping pada handler GET juga mencegah caching.
+
+```ts title="Bad"
+// app/api/logout/route.ts
+export async function GET() {
+  cookies().delete("session");
+  return Response.json({ ok: true });
+}
+```
+
+```ts title="Good"
+// app/api/logout/route.ts
+export async function POST() {
+  cookies().delete("session");
+  return Response.json({ ok: true });
+}
+```
+
+Segmen route bermutasi yang terdeteksi: `logout`, `log-out`, `signout`, `sign-out`, `unsubscribe`, `delete`, `remove`, `revoke`, `cancel`, `deactivate`.
+
+---
+
+## vercel-no-force-dynamic
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-no-force-dynamic`</Callout>
+
+Mendeteksi halaman dengan `export const dynamic = "force-dynamic"`.
+
+**Mengapa ini penting:** `force-dynamic` memaksa rendering sisi server pada setiap permintaan, melewati caching halaman penuh sepenuhnya.
+
+```ts title="Bad"
+export const dynamic = "force-dynamic";
+
+export default function Page() { ... }
+```
+
+```ts title="Good"
+export const revalidate = 3600;
+
+export default function Page() { ... }
+```
+
+---
+
+## vercel-no-no-store-fetch
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-no-no-store-fetch`</Callout>
+
+Mendeteksi panggilan fetch dengan `cache: "no-store"` atau `revalidate: 0`.
+
+**Mengapa ini penting:** Opsi-opsi ini menonaktifkan caching sepenuhnya, meningkatkan bandwidth tanpa cache dan biaya komputasi pada setiap permintaan.
+
+```ts title="Bad"
+const data = await fetch(url, { cache: "no-store" });
+```
+
+```ts title="Good"
+const data = await fetch(url, {
+  next: { revalidate: 3600 },
+});
+```
+
+---
+
+## vercel-missing-cache-policy
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-missing-cache-policy`</Callout>
+
+Mendeteksi handler route GET tanpa konfigurasi cache eksplisit — tanpa header `Cache-Control`, tanpa export `revalidate`, dan tanpa export `dynamic`.
+
+**Mengapa ini penting:** Tanpa kebijakan cache eksplisit, respons mungkin kehilangan peluang caching CDN, menyebabkan hit berulang ke origin.
+
+```ts title="Bad"
+export async function GET() {
+  const data = await fetchData();
+  return Response.json(data);
+}
+```
+
+```ts title="Good"
+export const revalidate = 3600;
+
+export async function GET() {
+  const data = await fetchData();
+  return Response.json(data);
+}
+```
+
+---
+
+## vercel-prefer-get-static-props
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-prefer-get-static-props`</Callout>
+
+Mendeteksi route Pages Router yang menggunakan `getServerSideProps`.
+
+**Mengapa ini penting:** `getServerSideProps` berjalan pada setiap permintaan. Beralih ke `getStaticProps` (dengan ISR opsional) meng-cache halaman di CDN dan mengurangi komputasi server.
+
+---
+
+## vercel-get-static-props-consider-isr
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-get-static-props-consider-isr`</Callout>
+
+Mendeteksi `getStaticProps` tanpa nilai kembalian `revalidate`.
+
+**Mengapa ini penting:** Tanpa `revalidate`, semua halaman dibangun saat waktu deploy. Untuk situs besar ini memperlambat build secara drastis. ISR menghasilkan halaman sesuai permintaan dan meng-cache-nya.
+
+```ts title="Good"
+export async function getStaticProps() {
+  const data = await fetchData();
+  return {
+    props: { data },
+    revalidate: 3600,
+  };
+}
+```

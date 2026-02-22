@@ -1,0 +1,72 @@
+import type { Translation } from ".";
+
+export const ru: Translation = {
+  nav: {
+    docs: "Документация",
+    showcase: "Витрина",
+    sponsors: "Спонсоры",
+  },
+  hero: {
+    copied: "Скопировано!",
+    copyCommand: "Копировать команду",
+    selectPackageManager: "Выберите менеджер пакетов",
+    headingLine1: "Хватит накапливать",
+    headingLine2: "расходы на Vercel",
+    subtitle: "Позвольте ИИ-агентам диагностировать и исправить ваш счёт за Vercel",
+    fixCosts: "Исправьте расходы",
+    github: "GitHub",
+  },
+  testimonials: {
+    sectionLabel: "[ЧТО ГОВОРЯТ ЛЮДИ]",
+  },
+  preFooter: {
+    sectionLabel: "[ГОТОВЫ ЭКОНОМИТЬ?]",
+    heading: "Лучшая тарификация",
+    by: "от",
+    getStarted: "Начать",
+    viewOnGithub: "Смотреть на GitHub",
+  },
+  footer: {
+    builtBy: "Создано",
+    hostedOn: "Размещено на",
+    sourceAvailableOn: "Исходный код доступен на",
+    twitter: "Twitter",
+    llms: "LLM",
+  },
+  disclaimer: {
+    text: "Не одобрено и не связано с",
+  },
+  sponsorsSection: {
+    heading: "При поддержке лучших",
+    description: "Ваше спонсорство значит многое для open-source проектов, включая Vercel Doctor.",
+    sponsorMyWork: "Спонсировать мою работу",
+  },
+  showcasePage: {
+    heading: "Витрина",
+    description: "Коллекция проектов, использующих Vercel Doctor.",
+    suggestYours: "Предложите свой",
+    empty: "Пока нет проектов. Будьте первым, кто предложит свой!",
+  },
+  sponsorsPage: {
+    heading: "Спонсоры",
+    description: "Ваше спонсорство значит многое для open-source проектов, включая Vercel Doctor.",
+    sponsorMyWork: "Спонсировать мою работу",
+    organizationSponsors: "Спонсоры-организации",
+    empty: "Пока нет спонсоров. Будьте первым, кто поддержит этот проект!",
+  },
+  notFound: {
+    heading: "404",
+    description: "Страница, которую вы ищете, могла быть перемещена или не существует.",
+    goHome: "На главную",
+    explore: "Обзор",
+  },
+  score: {
+    great: "Отлично",
+    needsWork: "Требует доработки",
+    critical: "Критично",
+  },
+  fumadocs: {
+    displayName: "Русский",
+    search: "Поиск документации",
+  },
+};

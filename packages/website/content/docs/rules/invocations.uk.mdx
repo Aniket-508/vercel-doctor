@@ -1,0 +1,61 @@
+---
+title: Виклики
+description: Правила, що виявляють патерни, які спричиняють зайві виклики серверлес-функцій.
+---
+
+Ці правила виявляють патерни, що спричиняють додаткові виклики серверлес-функцій, збільшуючи ваш рахунок Vercel через додаткові цикли обчислень.
+
+## nextjs-no-client-fetch-for-server-data
+
+<Callout type="warn">Warning · `vercel-doctor/nextjs-no-client-fetch-for-server-data`</Callout>
+
+Виявляє патерни `useEffect` + `fetch` у файлах сторінок або макетів. Цей патерн перетворює те, що могло б бути одним серверним рендерингом, на два звернення: одне для рендерингу сторінки та ще один API-виклик з клієнта.
+
+**Чому це важливо:** Кожен клієнтський fetch ініціює окремий виклик серверлес-функції. Отримання даних на сервері в серверному компоненті повністю усуває API-зворотній шлях.
+
+```tsx title="Bad"
+"use client";
+
+import { useEffect, useState } from "react";
+
+export default function Page() {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    fetch("/api/data")
+      .then((res) => res.json())
+      .then(setData);
+  }, []);
+
+  return <div>{data?.title}</div>;
+}
+```
+
+```tsx title="Good"
+export default async function Page() {
+  const data = await fetchData();
+  return <div>{data.title}</div>;
+}
+```
+
+---
+
+## nextjs-link-prefetch-default
+
+<Callout type="warn">Warning · `vercel-doctor/nextjs-link-prefetch-default`</Callout>
+
+Виявляє компоненти `<Link>` без `prefetch={false}`. За замовчуванням Next.js попередньо завантажує кожне видиме посилання, що може ініціювати велику кількість викликів серверлес-функцій на сторінках з багатьма посиланнями.
+
+**Чому це важливо:** Кожне попереднє завантаження — це серверний запит. На сторінках з десятками посилань це створює сплеск викликів під час завантаження сторінки. Вимкніть попереднє завантаження глобально та додавайте його лише до критичних навігаційних посилань.
+
+```tsx title="Bad"
+<Link href="/dashboard">Dashboard</Link>
+<Link href="/settings">Settings</Link>
+<Link href="/profile">Profile</Link>
+```
+
+```tsx title="Good"
+<Link href="/dashboard" prefetch={false}>Dashboard</Link>
+<Link href="/settings" prefetch={false}>Settings</Link>
+<Link href="/profile" prefetch={true}>Profile</Link>
+```

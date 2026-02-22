@@ -1,0 +1,130 @@
+---
+title: Önbellekleme
+description: Vercel'de etkili önbelleklemeyi engelleyen kalıpları tespit eden kurallar.
+---
+
+Bu kurallar, Vercel'in CDN ve ISR önbelleklemesini atlayan, gereksiz sunucu taraflı render'a zorlayan ve işlem maliyetlerini artıran kalıpları tespit eder.
+
+## nextjs-no-side-effect-in-get-handler
+
+<Callout type="error">Error · `vercel-doctor/nextjs-no-side-effect-in-get-handler`</Callout>
+
+Yan etkiler (cookie'leri, header'ları değiştirme veya veritabanı çağrıları) içeren veya `/logout`, `/signout`, `/delete` gibi değiştirici rota segmentlerinde bulunan GET route handler'larını tespit eder.
+
+**Neden önemlidir:** GET istekleri prefetching tarafından tetiklenebilir ve CSRF'ye karşı savunmasızdır. GET handler'lardaki yan etkiler ayrıca önbelleklemeyi engeller.
+
+```ts title="Bad"
+// app/api/logout/route.ts
+export async function GET() {
+  cookies().delete("session");
+  return Response.json({ ok: true });
+}
+```
+
+```ts title="Good"
+// app/api/logout/route.ts
+export async function POST() {
+  cookies().delete("session");
+  return Response.json({ ok: true });
+}
+```
+
+Tespit edilen değiştirici rota segmentleri: `logout`, `log-out`, `signout`, `sign-out`, `unsubscribe`, `delete`, `remove`, `revoke`, `cancel`, `deactivate`.
+
+---
+
+## vercel-no-force-dynamic
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-no-force-dynamic`</Callout>
+
+`export const dynamic = "force-dynamic"` içeren sayfaları tespit eder.
+
+**Neden önemlidir:** `force-dynamic`, her istekte sunucu taraflı render'ı zorlar ve tam sayfa önbelleklemesini tamamen atlar.
+
+```ts title="Bad"
+export const dynamic = "force-dynamic";
+
+export default function Page() { ... }
+```
+
+```ts title="Good"
+export const revalidate = 3600;
+
+export default function Page() { ... }
+```
+
+---
+
+## vercel-no-no-store-fetch
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-no-no-store-fetch`</Callout>
+
+`cache: "no-store"` veya `revalidate: 0` ile yapılan fetch çağrılarını tespit eder.
+
+**Neden önemlidir:** Bu seçenekler önbelleklemeyi tamamen devre dışı bırakarak her istekte önbelleğe alınmamış bant genişliği ve işlem maliyetlerini artırır.
+
+```ts title="Bad"
+const data = await fetch(url, { cache: "no-store" });
+```
+
+```ts title="Good"
+const data = await fetch(url, {
+  next: { revalidate: 3600 },
+});
+```
+
+---
+
+## vercel-missing-cache-policy
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-missing-cache-policy`</Callout>
+
+Herhangi bir açık önbellek yapılandırması olmayan GET route handler'larını tespit eder — `Cache-Control` header'ları, `revalidate` export'u veya `dynamic` export'u yok.
+
+**Neden önemlidir:** Açık bir önbellek politikası olmadan yanıtlar CDN önbellekleme fırsatlarını kaçırabilir ve tekrarlayan origin isteklerine neden olabilir.
+
+```ts title="Bad"
+export async function GET() {
+  const data = await fetchData();
+  return Response.json(data);
+}
+```
+
+```ts title="Good"
+export const revalidate = 3600;
+
+export async function GET() {
+  const data = await fetchData();
+  return Response.json(data);
+}
+```
+
+---
+
+## vercel-prefer-get-static-props
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-prefer-get-static-props`</Callout>
+
+`getServerSideProps` kullanan Pages Router rotalarını tespit eder.
+
+**Neden önemlidir:** `getServerSideProps` her istekte çalışır. `getStaticProps`'a (isteğe bağlı ISR ile) geçmek sayfaları CDN'de önbelleğe alır ve sunucu işlem yükünü azaltır.
+
+---
+
+## vercel-get-static-props-consider-isr
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-get-static-props-consider-isr`</Callout>
+
+`revalidate` dönüş değeri olmayan `getStaticProps` kullanımını tespit eder.
+
+**Neden önemlidir:** `revalidate` olmadan tüm sayfalar dağıtım zamanında oluşturulur. Büyük siteler için bu, build süresini dramatik olarak yavaşlatır. ISR sayfaları talep üzerine oluşturur ve önbelleğe alır.
+
+```ts title="Good"
+export async function getStaticProps() {
+  const data = await fetchData();
+  return {
+    props: { data },
+    revalidate: 3600,
+  };
+}
+```

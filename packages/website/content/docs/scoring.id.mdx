@@ -1,0 +1,72 @@
+---
+title: Penilaian
+description: Bagaimana Vercel Doctor menghitung skor kesehatan proyek Anda.
+icon: Gauge
+---
+
+Setiap pemindaian menghasilkan skor dari 0 hingga 100. Skor mencerminkan berapa banyak aturan unik yang dipicu oleh proyek Anda, ditimbang berdasarkan tingkat keparahan.
+
+## Perhitungan
+
+```
+score = max(0, round(100 - penalti))
+```
+
+Di mana penaltinya adalah:
+
+| Tingkat Keparahan | Penalti per aturan unik |
+| ----------------- | ----------------------- |
+| Error             | 1,5 poin                |
+| Warning           | 0,75 poin               |
+
+Skor didasarkan pada **aturan unik yang dipicu**, bukan jumlah total diagnostik. Jika aturan yang sama terpicu pada 10 file, aturan tersebut hanya dihitung sekali.
+
+## Label
+
+| Skor   | Label           |
+| ------ | --------------- |
+| 75–100 | Bagus           |
+| 50–74  | Perlu perbaikan |
+| 0–49   | Kritis          |
+
+## Contoh
+
+Sebuah proyek dengan 2 aturan error dan 8 aturan warning:
+
+```
+penalti = (2 × 1,5) + (8 × 0,75) = 3 + 6 = 9
+skor = max(0, round(100 - 9)) = 91 → Bagus
+```
+
+## Bagikan skor Anda
+
+Setelah menjalankan Vercel Doctor, skor Anda tersedia di halaman yang dapat dibagikan dengan tombol berbagi sosial dan badge yang dapat disematkan.
+
+### Badge
+
+Tambahkan badge ke `README.md` Anda:
+
+```markdown
+[![Vercel Doctor](https://www.vercel-doctor.com/share/badge?s=91)](https://www.vercel-doctor.com/share?s=91)
+```
+
+### API
+
+Anda juga dapat menghitung skor secara programatik:
+
+```bash
+curl -X POST https://www.vercel-doctor.com/api/score \
+  -H "Content-Type: application/json" \
+  -d '{"diagnostics": [...]}'
+```
+
+Mengembalikan:
+
+```json
+{
+  "score": 91,
+  "label": "Great"
+}
+```
+
+Endpoint `/api/estimate-score` memperkirakan berapa skor Anda setelah memperbaiki masalah, menggunakan perkiraan tingkat perbaikan 85% untuk error dan 80% untuk warning.

@@ -1,0 +1,14 @@
+{
+  "title": "Dokumentasi",
+  "pages": [
+    "---Pendahuluan---",
+    "index",
+    "cli",
+    "configuration",
+    "scoring",
+    "---Aturan---",
+    "...rules",
+    "---Integrasi---",
+    "ai-skills"
+  ]
+}

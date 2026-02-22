@@ -1,0 +1,43 @@
+---
+title: Yapay Zeka Becerileri
+description: Vercel Doctor'ı yapay zeka kodlama asistanları için bir beceri olarak yükleyin.
+---
+
+Vercel Doctor, yapay zeka kodlama asistanları için bir beceri olarak yüklenebilir. Yüklendikten sonra, yapay zeka asistanınız Next.js projelerinde değişiklik yaptıktan sonra otomatik olarak Vercel Doctor'ı çalıştırmayı önerir.
+
+## Tek satırda kurulum
+
+```bash
+npx skills add vercel-doctor
+```
+
+Veya curl ile yükleyin:
+
+```bash
+curl -fsSL https://vercel-doctor.com/install-skill.sh | bash
+```
+
+## Desteklenen araçlar
+
+Yükleyici, sisteminizdeki tüm desteklenen araçları otomatik algılar ve yükler:
+
+| Araç        | Beceri konumu                                  |
+| ----------- | ---------------------------------------------- |
+| Claude Code | `~/.claude/skills/vercel-doctor/`              |
+| Amp Code    | `~/.config/amp/skills/vercel-doctor/`          |
+| Cursor      | `~/.cursor/skills/vercel-doctor/`              |
+| OpenCode    | `~/.config/opencode/skills/vercel-doctor/`     |
+| Windsurf    | `~/.codeium/windsurf/memories/global_rules.md` |
+| Antigravity | `~/.gemini/antigravity/skills/vercel-doctor/`  |
+| Gemini CLI  | `~/.gemini/skills/vercel-doctor/`              |
+| Codex       | `~/.codex/skills/vercel-doctor/`               |
+
+Yükleyici ayrıca proje düzeyinde bağlam için beceriyi projenizin `.agents/` dizinine ekler.
+
+## Beceri ne yapar
+
+Etkinleştirildiğinde, yapay zeka asistanı şunları yapacaktır:
+
+1. Vercel Doctor'ı ve neleri taradığını bilir
+2. Değişikliklerden sonra `npx -y vercel-doctor@latest . --verbose --diff` çalıştırmayı önerir
+3. Önce fonksiyon yürütme süresini ve çağrıları azaltan sorunları düzeltmeye odaklanır

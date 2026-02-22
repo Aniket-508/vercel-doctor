@@ -1,0 +1,72 @@
+---
+title: Hvad er Vercel Doctor?
+description: Reducer din Vercel-regning ved at scanne din Next.js-kodebase for dyre mønstre.
+icon: CircleQuestionMark
+---
+
+import { Step, Steps } from "fumadocs-ui/components/steps";
+
+Vercel Doctor er et specialiseret sundhedstjek-værktøj til Next.js-projekter deployeret på Vercel. Det scanner din kodebase for mønstre, der blæser din regning op — funktionsvarighed, ucachede ruter, uoptimerede billeder og mere — og giver dig derefter en score ud af 100 med konkrete løsningsforslag.
+
+## Hurtig start
+
+<Steps>
+
+<Step>
+### Kør på dit projekt
+
+```bash
+npx -y vercel-doctor@latest .
+```
+
+Det er det hele. Ingen installation, ingen konfiguration. Det scanner din kodebase og viser en score med diagnostik.
+
+</Step>
+
+<Step>
+### Ret problemerne
+
+Hver diagnostik inkluderer en hjælpebesked, der forklarer, hvad der skal ændres og hvorfor. Ret reglerne med størst effekt først — fejl før advarsler.
+
+</Step>
+
+<Step>
+### Kør igen for at verificere
+
+```bash
+npx -y vercel-doctor@latest . --diff
+```
+
+Brug `--diff` på feature-branches for kun at scanne de filer, du har ændret.
+
+</Step>
+
+</Steps>
+
+## Hvad det tjekker
+
+Vercel Doctor kører to analysepas parallelt:
+
+1. **Faktureringslinning** — AST-baserede og mønsterbaserede regler, der opdager dyre Next.js- og Vercel-mønstre
+2. **Detektering af død kode** — finder ubrugte filer, exports og typer, der opblæser din bundle og forlænger cold starts
+
+### Regelkategorier
+
+| Kategori                                           | Regler | Hvad det fanger                                                                              |
+| -------------------------------------------------- | ------ | -------------------------------------------------------------------------------------------- |
+| [Funktionsvarighed](/docs/rules/function-duration) | 3      | Sekventielle awaits, blokerende logning, ikke-parallel I/O                                   |
+| [Caching](/docs/rules/caching)                     | 6      | `force-dynamic`, manglende cache-politikker, `no-store` fetches, sideeffekter i GET-handlere |
+| [Invokationer](/docs/rules/invocations)            | 2      | Klientsidehentning på sider, aggressiv link-prefetching                                      |
+| [Billedoptimering](/docs/rules/image-optimization) | 4      | Global `unoptimized`, manglende `sizes`, brede remote-mønstre, SVG uden `unoptimized`        |
+| [Platform](/docs/rules/platform)                   | 8      | Edge tunge imports, cron-jobs, Bun-runtime, Fluid Compute, deploy-arkiv, Turbopack-cache     |
+| [Død kode](/docs/rules/dead-code)                  | 4      | Ubrugte filer, exports, typer og duplikater                                                  |
+
+## Funktioner
+
+- **Ingen konfiguration** — kører direkte på ethvert Next.js-projekt
+- **Monorepo-understøttelse** — opdager automatisk workspaces, lader dig vælge hvilke projekter der skal scannes
+- **Diff-tilstand** — scan kun ændrede filer på feature-branches
+- **Scoring** — 0–100 score med etiketterne Fantastisk / Skal forbedres / Kritisk
+- **CI-venlig** — ikke-interaktiv tilstand til automatiserede pipelines
+- **Konfigurerbar** — ignorer regler eller filer via konfigurationsfil
+- **AI-færdighed** — installer som en færdighed til Claude Code, Cursor, Codex og mere

@@ -1,0 +1,98 @@
+---
+title: Yapılandırma
+description: Kuralları, dosyaları yok saymak ve davranışı özelleştirmek için Vercel Doctor'ı bir yapılandırma dosyasıyla yapılandırın.
+icon: Settings
+---
+
+Vercel Doctor sıfır yapılandırma ile kutudan çıktığı gibi çalışır. Davranışı özelleştirmeniz gerektiğinde bir yapılandırma dosyası ekleyebilirsiniz.
+
+## Yapılandırma dosyası
+
+Proje kök dizininizde bir `vercel-doctor.config.json` oluşturun:
+
+```json
+{
+  "ignore": {
+    "rules": ["vercel-doctor/nextjs-link-prefetch-default"],
+    "files": ["src/generated/**"]
+  }
+}
+```
+
+Alternatif olarak, `package.json` dosyanıza bir `"vercelDoctor"` anahtarı ekleyin:
+
+```json
+{
+  "vercelDoctor": {
+    "ignore": {
+      "rules": ["knip/exports"],
+      "files": ["src/generated/**"]
+    }
+  }
+}
+```
+
+Her ikisi de mevcutsa, `vercel-doctor.config.json` öncelik alır.
+
+## Seçenekler
+
+| Anahtar        | Tür                 | Varsayılan | Açıklama                                                      |
+| -------------- | ------------------- | ---------- | ------------------------------------------------------------- |
+| `ignore.rules` | `string[]`          | `[]`       | Bastırılacak kural ID'leri, `plugin/rule` formatında          |
+| `ignore.files` | `string[]`          | `[]`       | Atlanacak dosya yolları için glob kalıpları                   |
+| `lint`         | `boolean`           | `true`     | Faturalama lint kurallarını etkinleştir veya devre dışı bırak |
+| `deadCode`     | `boolean`           | `true`     | Ölü kod tespitini etkinleştir veya devre dışı bırak           |
+| `verbose`      | `boolean`           | `false`    | Her kural için dosya yollarını ve satır numaralarını göster   |
+| `diff`         | `boolean \| string` | `false`    | Diff modunu etkinleştir veya bir base branch sabitle          |
+
+## Kuralları yok sayma
+
+Kural ID'leri için `plugin/rule` formatını kullanın:
+
+```json
+{
+  "ignore": {
+    "rules": [
+      "vercel-doctor/nextjs-image-missing-sizes",
+      "vercel-doctor/vercel-large-static-asset",
+      "knip/exports"
+    ]
+  }
+}
+```
+
+Mevcut tüm kural ID'leri için [Kurallar](/docs/rules/function-duration) sayfalarına bakın.
+
+## Dosyaları yok sayma
+
+Dosyaları taramadan hariç tutmak için glob kalıplarını kullanın:
+
+```json
+{
+  "ignore": {
+    "files": ["src/generated/**", "**/*.stories.tsx", "scripts/**"]
+  }
+}
+```
+
+## CLI geçersiz kılmaları
+
+CLI bayrakları her zaman yapılandırma dosyası değerlerinin önüne geçer. Örneğin, komut satırında `--verbose` kullanmak yapılandırma dosyasındaki `"verbose": false` değerini geçersiz kılar.
+
+## Tam örnek
+
+```json
+{
+  "ignore": {
+    "rules": [
+      "vercel-doctor/vercel-consider-bun-runtime",
+      "vercel-doctor/vercel-avoid-platform-cron"
+    ],
+    "files": ["src/generated/**", "e2e/**"]
+  },
+  "lint": true,
+  "deadCode": true,
+  "verbose": false,
+  "diff": "main"
+}
+```

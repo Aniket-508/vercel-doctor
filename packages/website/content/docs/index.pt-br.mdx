@@ -1,0 +1,72 @@
+---
+title: O que é o Vercel Doctor?
+description: Reduza sua conta da Vercel escaneando seu código Next.js em busca de padrões custosos.
+icon: CircleQuestionMark
+---
+
+import { Step, Steps } from "fumadocs-ui/components/steps";
+
+Vercel Doctor é uma ferramenta especializada de verificação de saúde para projetos Next.js implantados na Vercel. Ele escaneia seu código em busca de padrões que inflam sua conta — duração de funções, rotas sem cache, imagens não otimizadas e mais — e então atribui uma pontuação de 0 a 100 com correções práticas.
+
+## Início Rápido
+
+<Steps>
+
+<Step>
+### Execute no seu projeto
+
+```bash
+npx -y vercel-doctor@latest .
+```
+
+É só isso. Sem instalação, sem configuração. Ele escaneia seu código e retorna uma pontuação com diagnósticos.
+
+</Step>
+
+<Step>
+### Corrija os problemas
+
+Cada diagnóstico inclui uma mensagem de ajuda explicando o que mudar e por quê. Corrija primeiro as regras de maior impacto — erros antes de avisos.
+
+</Step>
+
+<Step>
+### Execute novamente para verificar
+
+```bash
+npx -y vercel-doctor@latest . --diff
+```
+
+Use `--diff` em branches de feature para escanear apenas os arquivos que você alterou.
+
+</Step>
+
+</Steps>
+
+## O que ele verifica
+
+O Vercel Doctor executa duas passagens de análise em paralelo:
+
+1. **Lint de faturamento** — regras baseadas em AST e padrões que detectam padrões custosos do Next.js e Vercel
+2. **Detecção de código morto** — encontra arquivos, exports e tipos não utilizados que aumentam o bundle e atrasam os cold starts
+
+### Categorias de regras
+
+| Categoria                                               | Regras | O que detecta                                                                                        |
+| ------------------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------- |
+| [Duração de Funções](/docs/rules/function-duration)     | 3      | Awaits sequenciais, logging bloqueante, I/O não paralelo                                             |
+| [Cache](/docs/rules/caching)                            | 6      | `force-dynamic`, políticas de cache ausentes, fetches `no-store`, efeitos colaterais em handlers GET |
+| [Invocações](/docs/rules/invocations)                   | 2      | Fetch no lado do cliente em páginas, prefetching agressivo de links                                  |
+| [Otimização de Imagens](/docs/rules/image-optimization) | 4      | `unoptimized` global, `sizes` ausente, padrões remotos amplos demais, SVG sem `unoptimized`          |
+| [Plataforma](/docs/rules/platform)                      | 8      | Imports pesados no Edge, cron jobs, runtime Bun, Fluid Compute, arquivo de deploy, cache Turbopack   |
+| [Código Morto](/docs/rules/dead-code)                   | 4      | Arquivos, exports, tipos não utilizados e duplicados                                                 |
+
+## Funcionalidades
+
+- **Zero configuração** — funciona imediatamente em qualquer projeto Next.js
+- **Suporte a monorepo** — detecta automaticamente workspaces, permite escolher quais projetos escanear
+- **Modo diff** — escaneia apenas arquivos alterados em branches de feature
+- **Pontuação** — pontuação de 0–100 com rótulos Ótimo / Precisa melhorar / Crítico
+- **Compatível com CI** — modo não interativo para pipelines automatizados
+- **Configurável** — ignore regras ou arquivos via arquivo de configuração
+- **Skill de IA** — instale como skill para Claude Code, Cursor, Codex e mais

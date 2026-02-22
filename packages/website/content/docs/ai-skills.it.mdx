@@ -1,0 +1,43 @@
+---
+title: Skill IA
+description: Installa Vercel Doctor come skill per assistenti di codifica IA.
+---
+
+Vercel Doctor può essere installato come skill per assistenti di codifica IA. Una volta installato, il tuo assistente IA suggerirà automaticamente di eseguire Vercel Doctor dopo aver apportato modifiche ai progetti Next.js.
+
+## Installazione rapida
+
+```bash
+npx skills add vercel-doctor
+```
+
+Oppure installa tramite curl:
+
+```bash
+curl -fsSL https://vercel-doctor.com/install-skill.sh | bash
+```
+
+## Strumenti supportati
+
+L'installer rileva automaticamente e installa per tutti gli strumenti supportati sul tuo sistema:
+
+| Strumento   | Posizione della skill                          |
+| ----------- | ---------------------------------------------- |
+| Claude Code | `~/.claude/skills/vercel-doctor/`              |
+| Amp Code    | `~/.config/amp/skills/vercel-doctor/`          |
+| Cursor      | `~/.cursor/skills/vercel-doctor/`              |
+| OpenCode    | `~/.config/opencode/skills/vercel-doctor/`     |
+| Windsurf    | `~/.codeium/windsurf/memories/global_rules.md` |
+| Antigravity | `~/.gemini/antigravity/skills/vercel-doctor/`  |
+| Gemini CLI  | `~/.gemini/skills/vercel-doctor/`              |
+| Codex       | `~/.codex/skills/vercel-doctor/`               |
+
+L'installer aggiunge anche la skill alla directory `.agents/` del tuo progetto per il contesto a livello di progetto.
+
+## Cosa fa la skill
+
+Quando attivata, l'assistente IA:
+
+1. Conosce Vercel Doctor e cosa scansiona
+2. Suggerisce di eseguire `npx -y vercel-doctor@latest . --verbose --diff` dopo le modifiche
+3. Si concentra sulla correzione dei problemi che riducono il tempo di esecuzione delle funzioni e le invocazioni

@@ -1,0 +1,43 @@
+---
+title: Навички ШІ
+description: Встановіть Vercel Doctor як навичку для ШІ-помічників з кодування.
+---
+
+Vercel Doctor можна встановити як навичку для ШІ-помічників з кодування. Після встановлення ваш ШІ-помічник автоматично пропонуватиме запустити Vercel Doctor після внесення змін у проєкти Next.js.
+
+## Встановлення одним рядком
+
+```bash
+npx skills add vercel-doctor
+```
+
+Або встановіть через curl:
+
+```bash
+curl -fsSL https://vercel-doctor.com/install-skill.sh | bash
+```
+
+## Підтримувані інструменти
+
+Інсталятор автоматично виявляє та встановлює для всіх підтримуваних інструментів у вашій системі:
+
+| Інструмент  | Розташування навички                           |
+| ----------- | ---------------------------------------------- |
+| Claude Code | `~/.claude/skills/vercel-doctor/`              |
+| Amp Code    | `~/.config/amp/skills/vercel-doctor/`          |
+| Cursor      | `~/.cursor/skills/vercel-doctor/`              |
+| OpenCode    | `~/.config/opencode/skills/vercel-doctor/`     |
+| Windsurf    | `~/.codeium/windsurf/memories/global_rules.md` |
+| Antigravity | `~/.gemini/antigravity/skills/vercel-doctor/`  |
+| Gemini CLI  | `~/.gemini/skills/vercel-doctor/`              |
+| Codex       | `~/.codex/skills/vercel-doctor/`               |
+
+Інсталятор також додає навичку до директорії `.agents/` вашого проєкту для контексту на рівні проєкту.
+
+## Що робить навичка
+
+Після активації ШІ-помічник буде:
+
+1. Знати про Vercel Doctor та що він сканує
+2. Пропонувати запуск `npx -y vercel-doctor@latest . --verbose --diff` після змін
+3. Зосереджуватися на виправленні проблем, які зменшують час виконання функцій та кількість викликів

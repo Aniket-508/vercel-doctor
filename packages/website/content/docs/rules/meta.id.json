@@ -1,0 +1,11 @@
+{
+  "title": "Aturan",
+  "pages": [
+    "function-duration",
+    "caching",
+    "invocations",
+    "image-optimization",
+    "platform",
+    "dead-code"
+  ]
+}

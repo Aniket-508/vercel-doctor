@@ -1,0 +1,98 @@
+---
+title: Konfigurasi
+description: Konfigurasikan Vercel Doctor dengan file konfigurasi untuk mengabaikan aturan, file, dan menyesuaikan perilaku.
+icon: Settings
+---
+
+Vercel Doctor bekerja langsung tanpa konfigurasi apapun. Ketika Anda perlu menyesuaikan perilaku, Anda dapat menambahkan file konfigurasi.
+
+## File konfigurasi
+
+Buat file `vercel-doctor.config.json` di root proyek Anda:
+
+```json
+{
+  "ignore": {
+    "rules": ["vercel-doctor/nextjs-link-prefetch-default"],
+    "files": ["src/generated/**"]
+  }
+}
+```
+
+Alternatifnya, tambahkan kunci `"vercelDoctor"` ke `package.json` Anda:
+
+```json
+{
+  "vercelDoctor": {
+    "ignore": {
+      "rules": ["knip/exports"],
+      "files": ["src/generated/**"]
+    }
+  }
+}
+```
+
+Jika keduanya ada, `vercel-doctor.config.json` yang diutamakan.
+
+## Opsi
+
+| Kunci          | Tipe                | Default | Deskripsi                                                     |
+| -------------- | ------------------- | ------- | ------------------------------------------------------------- |
+| `ignore.rules` | `string[]`          | `[]`    | ID aturan yang akan disembunyikan, dalam format `plugin/rule` |
+| `ignore.files` | `string[]`          | `[]`    | Pola glob untuk path file yang akan dilewati                  |
+| `lint`         | `boolean`           | `true`  | Mengaktifkan atau menonaktifkan aturan lint tagihan           |
+| `deadCode`     | `boolean`           | `true`  | Mengaktifkan atau menonaktifkan deteksi kode mati             |
+| `verbose`      | `boolean`           | `false` | Menampilkan path file dan nomor baris per aturan              |
+| `diff`         | `boolean \| string` | `false` | Mengaktifkan mode diff atau menentukan branch dasar           |
+
+## Mengabaikan aturan
+
+Gunakan format `plugin/rule` untuk ID aturan:
+
+```json
+{
+  "ignore": {
+    "rules": [
+      "vercel-doctor/nextjs-image-missing-sizes",
+      "vercel-doctor/vercel-large-static-asset",
+      "knip/exports"
+    ]
+  }
+}
+```
+
+Lihat halaman [Aturan](/docs/rules/function-duration) untuk semua ID aturan yang tersedia.
+
+## Mengabaikan file
+
+Gunakan pola glob untuk mengecualikan file dari pemindaian:
+
+```json
+{
+  "ignore": {
+    "files": ["src/generated/**", "**/*.stories.tsx", "scripts/**"]
+  }
+}
+```
+
+## Override CLI
+
+Flag CLI selalu mengambil prioritas di atas nilai file konfigurasi. Misalnya, `--verbose` pada baris perintah akan menggantikan `"verbose": false` di file konfigurasi.
+
+## Contoh lengkap
+
+```json
+{
+  "ignore": {
+    "rules": [
+      "vercel-doctor/vercel-consider-bun-runtime",
+      "vercel-doctor/vercel-avoid-platform-cron"
+    ],
+    "files": ["src/generated/**", "e2e/**"]
+  },
+  "lint": true,
+  "deadCode": true,
+  "verbose": false,
+  "diff": "main"
+}
+```

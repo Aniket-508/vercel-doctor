@@ -1,0 +1,117 @@
+---
+title: Platform
+description: Aturan khusus untuk konfigurasi platform Vercel dan optimasi deployment.
+---
+
+Aturan-aturan ini mendeteksi masalah konfigurasi tingkat platform dan menyarankan optimasi untuk deployment Vercel.
+
+## vercel-edge-heavy-import
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-edge-heavy-import`</Callout>
+
+Mendeteksi file runtime edge yang mengimpor dependensi berat atau yang berpusat pada Node seperti `node:fs`, `node:crypto`, `sharp`, atau `@aws-sdk/*`.
+
+**Mengapa ini penting:** Fungsi edge memiliki batas ukuran dan eksekusi yang ketat. Dependensi Node.js yang berat meningkatkan waktu cold start dan mungkin gagal saat runtime.
+
+**Solusi:** Pindahkan logika berat ke fungsi runtime Node.js atau job latar belakang, dan jaga agar handler edge tetap ringan.
+
+---
+
+## vercel-sequential-database-await
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-sequential-database-await`</Callout>
+
+Mendeteksi route API dengan 3 atau lebih panggilan Prisma atau database berurutan tanpa `Promise.all`.
+
+**Mengapa ini penting:** Setiap panggilan database berurutan menambah latensi pada eksekusi fungsi. Memparalelkan query independen mengurangi durasi total dan biaya.
+
+```ts title="Bad"
+const users = await prisma.user.findMany();
+const posts = await prisma.post.findMany();
+const tags = await prisma.tag.findMany();
+```
+
+```ts title="Good"
+const [users, posts, tags] = await Promise.all([
+  prisma.user.findMany(),
+  prisma.post.findMany(),
+  prisma.tag.findMany(),
+]);
+```
+
+---
+
+## vercel-large-static-asset
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-large-static-asset`</Callout>
+
+Mendeteksi aset statis (gambar, font, video, PDF) berukuran 4 KB atau lebih besar yang disajikan dari repositori aplikasi Anda.
+
+**Mengapa ini penting:** File statis besar yang disajikan dari deployment Vercel Anda mengonsumsi bandwidth pada setiap permintaan. Memindahkannya ke CDN khusus atau object storage (Cloudflare R2, S3) mengurangi biaya bandwidth.
+
+Melaporkan hingga 20 file, diurutkan berdasarkan ukuran (terbesar terlebih dahulu).
+
+---
+
+## vercel-consider-bun-runtime
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-consider-bun-runtime`</Callout>
+
+Mendeteksi proyek yang tidak dikonfigurasi untuk runtime Bun (tidak ada `packageManager: "bun@..."` di `package.json` dan tidak ada file `bun.lock`).
+
+**Mengapa ini penting:** Runtime Bun dapat mengurangi overhead instalasi dan build di Vercel dibandingkan Node.js.
+
+**Solusi:** Tinjau [panduan runtime Bun](https://vercel.com/docs/functions/runtimes/bun) dan beralih jika proyek Anda kompatibel.
+
+---
+
+## vercel-avoid-platform-cron
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-avoid-platform-cron`</Callout>
+
+Mendeteksi `crons` yang dikonfigurasi di `vercel.json`.
+
+**Mengapa ini penting:** Cron job Vercel berjalan sebagai fungsi serverless, ditagih per eksekusi. Beban kerja terjadwal dengan pola yang dapat diprediksi sering dapat dijalankan lebih murah menggunakan GitHub Actions atau Cloudflare Workers Cron Triggers.
+
+---
+
+## vercel-consider-fluid-compute
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-consider-fluid-compute`</Callout>
+
+Mendeteksi proyek dengan 3 atau lebih route API/server.
+
+**Mengapa ini penting:** Fluid Compute meningkatkan konkurensi dan mengurangi overhead eksekusi untuk beban kerja dengan latensi variabel atau lalu lintas yang melonjak. Layak dievaluasi untuk proyek dengan beberapa route server.
+
+---
+
+## vercel-suggest-turbopack-build-cache
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-suggest-turbopack-build-cache`</Callout>
+
+Mendeteksi file `next.config` dengan pengaturan `experimental` tetapi tanpa `turbopackFileSystemCacheForBuild`.
+
+**Mengapa ini penting:** Next.js 16+ mendukung cache build Turbopack, yang dapat mengurangi waktu build secara signifikan.
+
+```js title="Good"
+// next.config.js
+module.exports = {
+  experimental: {
+    turbopackFileSystemCacheForBuild: true,
+  },
+};
+```
+
+---
+
+## vercel-suggest-deploy-archive
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-suggest-deploy-archive`</Callout>
+
+Mendeteksi proyek dengan 5.000 file atau lebih.
+
+**Mengapa ini penting:** Proyek besar dapat mencapai batas rate API selama deployment. Menggunakan mode arsip mengunggah satu tarball alih-alih file individual, memangkas waktu deployment sekitar 50%.
+
+```bash
+vercel deploy --archive=tgz
+```

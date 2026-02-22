@@ -1,0 +1,91 @@
+---
+title: Fonksiyon Süresi
+description: Sunucusuz fonksiyon yürütme süresini artıran kalıpları tespit eden kurallar.
+---
+
+Bu kurallar, sunucusuz fonksiyonlarınızın duvar saati süresini şişiren kalıpları yakalar. Daha kısa fonksiyonlar daha düşük faturalar demektir — Vercel, GB-saniye yürütme süresi başına ücretlendirir.
+
+## async-parallel
+
+<Callout type="warn">Warning · `vercel-doctor/async-parallel`</Callout>
+
+Bağımsız görünen 3 veya daha fazla sıralı `await` ifadesini tespit eder — yani sonraki await'ler öncekilerden gelen değişkenlere referans vermez.
+
+**Neden önemlidir:** Sıralı await'ler birbiri ardına çalışır. Bağımsızlarsa, `Promise.all()` ile paralel çalıştırmak fonksiyon süresini önemli ölçüde azaltabilir.
+
+```ts title="Bad"
+const users = await db.user.findMany();
+const posts = await db.post.findMany();
+const comments = await db.comment.findMany();
+```
+
+```ts title="Good"
+const [users, posts, comments] = await Promise.all([
+  db.user.findMany(),
+  db.post.findMany(),
+  db.comment.findMany(),
+]);
+```
+
+---
+
+## server-after-nonblocking
+
+<Callout type="warn">Warning · `vercel-doctor/server-after-nonblocking`</Callout>
+
+Server action'larda (`"use server"` içeren dosyalarda) `console.log()`, `console.info()`, `console.warn()`, `analytics.track()`, `analytics.identify()` veya `analytics.page()` çağrılarını tespit eder.
+
+**Neden önemlidir:** Loglama ve analitik çağrıları tamamlanana kadar yanıtı engeller. Bunları `after()` içine sarmak, çalışma arka planda devam ederken yanıtın hemen tamamlanmasını sağlar.
+
+```ts title="Bad"
+"use server";
+
+export const updateUser = async (data: FormData) => {
+  await db.user.update({ ... });
+  console.log("User updated");
+  analytics.track("user_updated");
+};
+```
+
+```ts title="Good"
+"use server";
+
+import { after } from "next/server";
+
+export const updateUser = async (data: FormData) => {
+  await db.user.update({ ... });
+  after(() => {
+    console.log("User updated");
+    analytics.track("user_updated");
+  });
+};
+```
+
+---
+
+## vercel-edge-sequential-await
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-edge-sequential-await`</Callout>
+
+`Promise.all` olmadan 2 veya daha fazla sıralı `await` çağrısı içeren edge runtime dosyalarını tespit eder.
+
+**Neden önemlidir:** Edge fonksiyonlarının katı yürütme süresi sınırları vardır. Sıralı I/O, paralelleştirilebilecek değerli milisaniyeleri boşa harcar.
+
+```ts title="Bad"
+export const runtime = "edge";
+
+export async function GET() {
+  const user = await getUser();
+  const settings = await getSettings();
+  return Response.json({ user, settings });
+}
+```
+
+```ts title="Good"
+export const runtime = "edge";
+
+export async function GET() {
+  const [user, settings] = await Promise.all([getUser(), getSettings()]);
+  return Response.json({ user, settings });
+}
+```

@@ -1,0 +1,96 @@
+---
+title: Görsel Optimizasyonu
+description: Gereksiz görsel optimizasyon maliyetlerine neden olan kalıpları tespit eden kurallar.
+---
+
+Bu kurallar, Vercel Görsel Optimizasyonu kullanımını artıran veya optimize edilmemiş görseller sunan Next.js görsel işleme yapılandırma hatalarını tespit eder.
+
+## vercel-image-global-unoptimized
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-image-global-unoptimized`</Callout>
+
+`next.config` dosyasında `images.unoptimized: true` kullanımını tespit eder.
+
+**Neden önemlidir:** Bu, Vercel Görsel Optimizasyonunu global olarak devre dışı bırakır. Tüm görseller yeniden boyutlandırma, format dönüştürme veya sıkıştırma olmadan olduğu gibi sunulur — bant genişliği maliyetlerini artırır ve performansı düşürür.
+
+```js title="Bad"
+// next.config.js
+module.exports = {
+  images: {
+    unoptimized: true,
+  },
+};
+```
+
+```js title="Good"
+// next.config.js
+module.exports = {
+  images: {
+    remotePatterns: [{ hostname: "cdn.example.com" }],
+  },
+};
+```
+
+---
+
+## nextjs-image-missing-sizes
+
+<Callout type="warn">Warning · `vercel-doctor/nextjs-image-missing-sizes`</Callout>
+
+`fill` özelliğine sahip ancak `sizes` özelliği olmayan `<Image>` bileşenlerini tespit eder.
+
+**Neden önemlidir:** `sizes` olmadan, tarayıcı görüntü alanı genişliğinden bağımsız olarak mevcut en büyük görseli indirir. Bu bant genişliğini israf eder ve Görsel Optimizasyonu kullanımını artırır.
+
+```tsx title="Bad"
+<Image src="/hero.jpg" alt="Hero" fill />
+```
+
+```tsx title="Good"
+<Image src="/hero.jpg" alt="Hero" fill sizes="(max-width: 768px) 100vw, 50vw" />
+```
+
+---
+
+## vercel-image-remote-pattern-too-broad
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-image-remote-pattern-too-broad`</Callout>
+
+Aşırı geniş `pathname` kalıplarına (`/**` veya hiç belirtilmemiş) sahip `images.remotePatterns` girişlerini tespit eder.
+
+**Neden önemlidir:** Kısıtlanmamış uzak görsel yolları, hostname üzerindeki herhangi bir URL'nin hesabınız üzerinden optimize edilmesine izin verir ve kullanıcı tarafından oluşturulan içerik veya üçüncü taraf gömülerinden beklenmedik optimizasyon kullanımına yol açabilir.
+
+```js title="Bad"
+// next.config.js
+module.exports = {
+  images: {
+    remotePatterns: [{ hostname: "cdn.example.com", pathname: "/**" }],
+  },
+};
+```
+
+```js title="Good"
+// next.config.js
+module.exports = {
+  images: {
+    remotePatterns: [{ hostname: "cdn.example.com", pathname: "/avatars/**" }],
+  },
+};
+```
+
+---
+
+## vercel-image-svg-without-unoptimized
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-image-svg-without-unoptimized`</Callout>
+
+`unoptimized` prop'u olmayan SVG `src`'li `<Image>` bileşenlerini tespit eder.
+
+**Neden önemlidir:** SVG'ler vektör grafiklerdir ve Görsel Optimizasyonu pipeline'ından fayda sağlamazlar. Onları bu pipeline'dan geçirmek, hiçbir fayda sağlamadan optimizasyon kotasını israf eder.
+
+```tsx title="Bad"
+<Image src="/logo.svg" alt="Logo" width={100} height={40} />
+```
+
+```tsx title="Good"
+<Image src="/logo.svg" alt="Logo" width={100} height={40} unoptimized />
+```

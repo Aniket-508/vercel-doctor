@@ -1,0 +1,52 @@
+---
+title: Ölü Kod
+description: Kod tabanınızdaki kullanılmayan dosyaları, export'ları ve tipleri tespit eden kurallar.
+---
+
+Ölü kod tespiti [Knip](https://knip.dev) tarafından desteklenir. Kullanılmayan kod bundle'ınızı şişirir, cold start'ları yavaşlatır ve dağıtım boyutunu artırır — bunların hepsi daha yüksek Vercel maliyetlerine dönüşür.
+
+Ölü kod tespitini tamamen devre dışı bırakmak için `--no-dead-code` veya yapılandırma dosyanızda `"deadCode": false` kullanabilirsiniz.
+
+## knip/files
+
+<Callout type="warn">Warning · `knip/files`</Callout>
+
+Projede başka hiçbir dosya tarafından içe aktarılmayan dosyaları tespit eder.
+
+**Neden önemlidir:** Kullanılmayan dosyalar yine de dağıtılır ve build sırasında ayrıştırılır. Modül grafiğine eklenerek cold start süresini artırırlar.
+
+**Düzeltme:** Dosyayı silin veya kasıtlı olarak bağımsızsa, Knip yapılandırmanızın giriş kalıplarına ekleyin.
+
+---
+
+## knip/exports
+
+<Callout type="warn">Warning · `knip/exports`</Callout>
+
+Hiçbir yerde içe aktarılmayan dışa aktarılmış sembolleri (fonksiyonlar, değişkenler, sınıflar) tespit eder.
+
+**Neden önemlidir:** Kullanılmayan export'lar bundle'ınıza ölü kod ekler. Tree-shaking bunları her zaman ortadan kaldırmaz, özellikle sunucu taraflı kodda.
+
+**Düzeltme:** `export` anahtar kelimesini kaldırın veya artık gerekli değilse sembolü silin.
+
+---
+
+## knip/types
+
+<Callout type="warn">Warning · `knip/types`</Callout>
+
+Hiçbir yerde referans verilmeyen dışa aktarılmış TypeScript tiplerini ve arayüzlerini tespit eder.
+
+**Düzeltme:** Kullanılmayan tip export'larını kaldırın.
+
+---
+
+## knip/duplicates
+
+<Callout type="warn">Warning · `knip/duplicates`</Callout>
+
+Birden fazla dosyadan dışa aktarılan aynı sembolü tespit eder.
+
+**Neden önemlidir:** Yinelenen export'lar belirsizlik yaratır ve yanlış dosyadan içe aktarmaya yol açarak gerekenden fazla kod çekebilir.
+
+**Düzeltme:** Yinelenenleri tek bir dışa aktarma konumunda birleştirin.

@@ -1,0 +1,72 @@
+---
+title: Vercel Doctor Nedir?
+description: Next.js kod tabanınızı maliyetli kalıplar için tarayarak Vercel faturanızı azaltın.
+icon: CircleQuestionMark
+---
+
+import { Step, Steps } from "fumadocs-ui/components/steps";
+
+Vercel Doctor, Vercel üzerinde dağıtılan Next.js projeleri için özel bir sağlık kontrolü aracıdır. Faturanızı şişiren kalıpları tarar — fonksiyon süresi, önbelleğe alınmamış rotalar, optimize edilmemiş görseller ve daha fazlası — ardından uygulanabilir düzeltmelerle 100 üzerinden bir puan verir.
+
+## Hızlı Başlangıç
+
+<Steps>
+
+<Step>
+### Projenizde çalıştırın
+
+```bash
+npx -y vercel-doctor@latest .
+```
+
+Hepsi bu. Kurulum yok, yapılandırma yok. Kod tabanınızı tarar ve tanılamalarla birlikte bir puan verir.
+
+</Step>
+
+<Step>
+### Sorunları düzeltin
+
+Her tanılama, neyi değiştireceğinizi ve nedenini açıklayan bir yardım mesajı içerir. Önce en yüksek etkili kuralları düzeltin — uyarılardan önce hataları.
+
+</Step>
+
+<Step>
+### Doğrulamak için tekrar çalıştırın
+
+```bash
+npx -y vercel-doctor@latest . --diff
+```
+
+Yalnızca değiştirdiğiniz dosyaları taramak için feature branch'lerinde `--diff` kullanın.
+
+</Step>
+
+</Steps>
+
+## Neleri kontrol eder
+
+Vercel Doctor paralel olarak iki analiz geçişi çalıştırır:
+
+1. **Faturalama lint'i** — maliyetli Next.js ve Vercel kalıplarını tespit eden AST tabanlı ve kalıp tabanlı kurallar
+2. **Ölü kod tespiti** — bundle'ınızı şişiren ve cold start'ları yavaşlatan kullanılmayan dosyaları, export'ları ve tipleri bulur
+
+### Kural kategorileri
+
+| Kategori                                               | Kurallar | Neleri yakalar                                                                                        |
+| ------------------------------------------------------ | -------- | ----------------------------------------------------------------------------------------------------- |
+| [Fonksiyon Süresi](/docs/rules/function-duration)      | 3        | Sıralı await'ler, engelleyici loglama, paralel olmayan I/O                                            |
+| [Önbellek](/docs/rules/caching)                        | 6        | `force-dynamic`, eksik önbellek politikaları, `no-store` fetch'ler, GET handler'lardaki yan etkiler   |
+| [Çağrılar](/docs/rules/invocations)                    | 2        | Sayfalarda istemci taraflı fetch, agresif link prefetch'i                                             |
+| [Görsel Optimizasyonu](/docs/rules/image-optimization) | 4        | Global `unoptimized`, eksik `sizes`, geniş uzak kalıplar, `unoptimized` olmadan SVG                   |
+| [Platform](/docs/rules/platform)                       | 8        | Edge'de ağır import'lar, cron job'lar, Bun runtime, Fluid Compute, deploy arşivi, Turbopack önbelleği |
+| [Ölü Kod](/docs/rules/dead-code)                       | 4        | Kullanılmayan dosyalar, export'lar, tipler ve tekrarlar                                               |
+
+## Özellikler
+
+- **Sıfır yapılandırma** — herhangi bir Next.js projesinde kutudan çıktığı gibi çalışır
+- **Monorepo desteği** — workspace'leri otomatik algılar, hangi projeleri tarayacağınızı seçmenizi sağlar
+- **Diff modu** — feature branch'lerinde yalnızca değişen dosyaları tarar
+- **Puanlama** — Harika / İyileştirme gerekli / Kritik etiketleriyle 0–100 puan
+- **CI uyumlu** — otomatik pipeline'lar için etkileşimsiz mod
+- **Yapılandırılabilir** — yapılandırma dosyası ile kuralları veya dosyaları yok sayın
+- **Yapay zeka becerisi** — Claude Code, Cursor, Codex ve diğerleri için beceri olarak yükleyin

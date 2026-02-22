@@ -1,0 +1,52 @@
+---
+title: Kode Mati
+description: Aturan yang mendeteksi file, export, dan tipe yang tidak digunakan dalam codebase Anda.
+---
+
+Deteksi kode mati didukung oleh [Knip](https://knip.dev). Kode yang tidak digunakan memperbesar bundle, memperlambat cold start, dan meningkatkan ukuran deployment — semuanya berdampak pada biaya Vercel yang lebih tinggi.
+
+Anda dapat menonaktifkan deteksi kode mati sepenuhnya dengan `--no-dead-code` atau `"deadCode": false` di file konfigurasi Anda.
+
+## knip/files
+
+<Callout type="warn">Warning · `knip/files`</Callout>
+
+Mendeteksi file yang tidak diimpor oleh file lain manapun dalam proyek.
+
+**Mengapa ini penting:** File yang tidak digunakan tetap di-deploy dan diparse selama build. Mereka meningkatkan waktu cold start dengan menambah node pada grafik modul.
+
+**Solusi:** Hapus file tersebut, atau jika memang dirancang sebagai file mandiri, tambahkan ke pola entry di konfigurasi Knip Anda.
+
+---
+
+## knip/exports
+
+<Callout type="warn">Warning · `knip/exports`</Callout>
+
+Mendeteksi simbol yang diekspor (fungsi, variabel, kelas) yang tidak pernah diimpor di manapun.
+
+**Mengapa ini penting:** Export yang tidak digunakan menambah kode mati ke bundle Anda. Tree-shaking tidak selalu menghilangkannya, terutama dalam kode sisi server.
+
+**Solusi:** Hapus keyword `export`, atau hapus simbol tersebut jika sudah tidak diperlukan.
+
+---
+
+## knip/types
+
+<Callout type="warn">Warning · `knip/types`</Callout>
+
+Mendeteksi tipe dan interface TypeScript yang diekspor tetapi tidak pernah direferensikan.
+
+**Solusi:** Hapus export tipe yang tidak digunakan.
+
+---
+
+## knip/duplicates
+
+<Callout type="warn">Warning · `knip/duplicates`</Callout>
+
+Mendeteksi simbol yang sama diekspor dari beberapa file.
+
+**Mengapa ini penting:** Export duplikat menciptakan ambiguitas dan dapat menyebabkan impor dari file yang salah, menarik lebih banyak kode dari yang diperlukan.
+
+**Solusi:** Konsolidasikan duplikat ke satu lokasi export.

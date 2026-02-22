@@ -1,0 +1,98 @@
+---
+title: Configurazione
+description: Configura Vercel Doctor con un file di configurazione per ignorare regole, file e personalizzare il comportamento.
+icon: Settings
+---
+
+Vercel Doctor funziona immediatamente senza alcuna configurazione. Quando hai bisogno di personalizzare il comportamento, puoi aggiungere un file di configurazione.
+
+## File di configurazione
+
+Crea un file `vercel-doctor.config.json` nella root del tuo progetto:
+
+```json
+{
+  "ignore": {
+    "rules": ["vercel-doctor/nextjs-link-prefetch-default"],
+    "files": ["src/generated/**"]
+  }
+}
+```
+
+In alternativa, aggiungi una chiave `"vercelDoctor"` al tuo `package.json`:
+
+```json
+{
+  "vercelDoctor": {
+    "ignore": {
+      "rules": ["knip/exports"],
+      "files": ["src/generated/**"]
+    }
+  }
+}
+```
+
+Se entrambi esistono, `vercel-doctor.config.json` ha la precedenza.
+
+## Opzioni
+
+| Chiave         | Tipo                | Default | Descrizione                                                   |
+| -------------- | ------------------- | ------- | ------------------------------------------------------------- |
+| `ignore.rules` | `string[]`          | `[]`    | ID delle regole da sopprimere, nel formato `plugin/rule`      |
+| `ignore.files` | `string[]`          | `[]`    | Pattern glob per i percorsi dei file da saltare               |
+| `lint`         | `boolean`           | `true`  | Attiva o disattiva le regole di lint di fatturazione          |
+| `deadCode`     | `boolean`           | `true`  | Attiva o disattiva il rilevamento del codice morto            |
+| `verbose`      | `boolean`           | `false` | Mostra i percorsi dei file e i numeri di riga per ogni regola |
+| `diff`         | `boolean \| string` | `false` | Attiva la modalità diff o specifica un branch base            |
+
+## Ignorare regole
+
+Usa il formato `plugin/rule` per gli ID delle regole:
+
+```json
+{
+  "ignore": {
+    "rules": [
+      "vercel-doctor/nextjs-image-missing-sizes",
+      "vercel-doctor/vercel-large-static-asset",
+      "knip/exports"
+    ]
+  }
+}
+```
+
+Consulta le pagine delle [Regole](/docs/rules/function-duration) per tutti gli ID delle regole disponibili.
+
+## Ignorare file
+
+Usa pattern glob per escludere file dalla scansione:
+
+```json
+{
+  "ignore": {
+    "files": ["src/generated/**", "**/*.stories.tsx", "scripts/**"]
+  }
+}
+```
+
+## Override da CLI
+
+I flag della CLI hanno sempre la precedenza sui valori del file di configurazione. Ad esempio, `--verbose` sulla riga di comando sovrascrive `"verbose": false` nel file di configurazione.
+
+## Esempio completo
+
+```json
+{
+  "ignore": {
+    "rules": [
+      "vercel-doctor/vercel-consider-bun-runtime",
+      "vercel-doctor/vercel-avoid-platform-cron"
+    ],
+    "files": ["src/generated/**", "e2e/**"]
+  },
+  "lint": true,
+  "deadCode": true,
+  "verbose": false,
+  "diff": "main"
+}
+```

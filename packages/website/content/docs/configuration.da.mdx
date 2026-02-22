@@ -1,0 +1,98 @@
+---
+title: Konfiguration
+description: Konfigurer Vercel Doctor med en konfigurationsfil til at ignorere regler, filer og tilpasse adfærd.
+icon: Settings
+---
+
+Vercel Doctor fungerer direkte uden konfiguration. Når du har brug for at tilpasse adfærden, kan du tilføje en konfigurationsfil.
+
+## Konfigurationsfil
+
+Opret en `vercel-doctor.config.json` i din projektrod:
+
+```json
+{
+  "ignore": {
+    "rules": ["vercel-doctor/nextjs-link-prefetch-default"],
+    "files": ["src/generated/**"]
+  }
+}
+```
+
+Alternativt kan du tilføje en `"vercelDoctor"`-nøgle til din `package.json`:
+
+```json
+{
+  "vercelDoctor": {
+    "ignore": {
+      "rules": ["knip/exports"],
+      "files": ["src/generated/**"]
+    }
+  }
+}
+```
+
+Hvis begge eksisterer, har `vercel-doctor.config.json` forrang.
+
+## Muligheder
+
+| Nøgle          | Type                | Standard | Beskrivelse                                               |
+| -------------- | ------------------- | -------- | --------------------------------------------------------- |
+| `ignore.rules` | `string[]`          | `[]`     | Regel-ID'er der skal undertrykkes, i `plugin/rule`-format |
+| `ignore.files` | `string[]`          | `[]`     | Glob-mønstre for filstier der skal springes over          |
+| `lint`         | `boolean`           | `true`   | Aktiver eller deaktiver faktureringslinningsregler        |
+| `deadCode`     | `boolean`           | `true`   | Aktiver eller deaktiver detektering af død kode           |
+| `verbose`      | `boolean`           | `false`  | Vis filstier og linjenumre per regel                      |
+| `diff`         | `boolean \| string` | `false`  | Aktiver diff-tilstand eller angiv en base-branch          |
+
+## Ignorering af regler
+
+Brug `plugin/rule`-formatet for regel-ID'er:
+
+```json
+{
+  "ignore": {
+    "rules": [
+      "vercel-doctor/nextjs-image-missing-sizes",
+      "vercel-doctor/vercel-large-static-asset",
+      "knip/exports"
+    ]
+  }
+}
+```
+
+Se [Regler](/docs/rules/function-duration)-siderne for alle tilgængelige regel-ID'er.
+
+## Ignorering af filer
+
+Brug glob-mønstre til at udelukke filer fra scanning:
+
+```json
+{
+  "ignore": {
+    "files": ["src/generated/**", "**/*.stories.tsx", "scripts/**"]
+  }
+}
+```
+
+## CLI-tilsidesættelser
+
+CLI-flag har altid forrang over konfigurationsfilværdier. For eksempel tilsidesætter `--verbose` på kommandolinjen `"verbose": false` i konfigurationsfilen.
+
+## Fuldt eksempel
+
+```json
+{
+  "ignore": {
+    "rules": [
+      "vercel-doctor/vercel-consider-bun-runtime",
+      "vercel-doctor/vercel-avoid-platform-cron"
+    ],
+    "files": ["src/generated/**", "e2e/**"]
+  },
+  "lint": true,
+  "deadCode": true,
+  "verbose": false,
+  "diff": "main"
+}
+```

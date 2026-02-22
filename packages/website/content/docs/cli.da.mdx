@@ -1,0 +1,97 @@
+---
+title: CLI-reference
+description: Alle kommandolinjemuligheder og flag for Vercel Doctor.
+icon: Terminal
+---
+
+## Brug
+
+```bash
+npx -y vercel-doctor@latest [directory] [options]
+```
+
+Argumentet `directory` er som standard `.` (nuværende mappe).
+
+## Muligheder
+
+| Flag               | Beskrivelse                                                    |
+| ------------------ | -------------------------------------------------------------- |
+| `-v, --version`    | Vis den aktuelle version                                       |
+| `--no-lint`        | Spring faktureringslinningsregler over                         |
+| `--no-dead-code`   | Spring detektering af død kode over (Knip)                     |
+| `--verbose`        | Vis filstier og linjenumre per regel                           |
+| `--score`          | Vis kun den numeriske score (nyttigt til CI)                   |
+| `-y, --yes`        | Spring interaktive prompts over, scan alle workspace-projekter |
+| `--project <name>` | Vælg specifikke workspace-projekter, kommasepareret            |
+| `--diff [base]`    | Scan kun filer ændret i forhold til base-branchen              |
+| `--offline`        | Spring anonym telemetri til scoreberegning over                |
+
+## Eksempler
+
+### Scan den nuværende mappe
+
+```bash
+npx -y vercel-doctor@latest .
+```
+
+### Scan med detaljeret output
+
+```bash
+npx -y vercel-doctor@latest . --verbose
+```
+
+Viser berørte filstier og linjenumre for hver diagnostik.
+
+### Scan kun ændrede filer
+
+```bash
+npx -y vercel-doctor@latest . --diff
+```
+
+Opdager automatisk base-branchen. Du kan også angive en specifik base:
+
+```bash
+npx -y vercel-doctor@latest . --diff main
+```
+
+### Scan et specifikt workspace-projekt
+
+```bash
+npx -y vercel-doctor@latest . --project web
+```
+
+For flere projekter:
+
+```bash
+npx -y vercel-doctor@latest . --project web,api
+```
+
+### Spring detektering af død kode over
+
+```bash
+npx -y vercel-doctor@latest . --no-dead-code
+```
+
+### CI-brug
+
+```bash
+npx -y vercel-doctor@latest . --yes --score
+```
+
+Flaget `--yes` springer interaktive prompts over. Kombineret med `--score` viser det kun den numeriske score til brug i scripts og pipelines.
+
+## Programmatisk API
+
+Vercel Doctor eksporterer også et programmatisk API:
+
+```ts
+import { run } from "vercel-doctor/api";
+```
+
+## Oxlint-plugin
+
+Faktureringslinningsreglerne er tilgængelige som et selvstændigt Oxlint-plugin:
+
+```ts
+import plugin from "vercel-doctor/oxlint-plugin";
+```

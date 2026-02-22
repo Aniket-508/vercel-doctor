@@ -1,0 +1,96 @@
+---
+title: Optimasi Gambar
+description: Aturan yang mendeteksi pola yang menyebabkan biaya optimasi gambar yang tidak perlu.
+---
+
+Aturan-aturan ini mengidentifikasi kesalahan konfigurasi dalam penanganan gambar Next.js yang meningkatkan penggunaan Vercel Image Optimization atau menyajikan gambar yang tidak dioptimasi.
+
+## vercel-image-global-unoptimized
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-image-global-unoptimized`</Callout>
+
+Mendeteksi `images.unoptimized: true` di `next.config`.
+
+**Mengapa ini penting:** Ini menonaktifkan Vercel Image Optimization secara global. Semua gambar disajikan apa adanya, tanpa pengubahan ukuran, konversi format, atau kompresi — meningkatkan biaya bandwidth dan menurunkan performa.
+
+```js title="Bad"
+// next.config.js
+module.exports = {
+  images: {
+    unoptimized: true,
+  },
+};
+```
+
+```js title="Good"
+// next.config.js
+module.exports = {
+  images: {
+    remotePatterns: [{ hostname: "cdn.example.com" }],
+  },
+};
+```
+
+---
+
+## nextjs-image-missing-sizes
+
+<Callout type="warn">Warning · `vercel-doctor/nextjs-image-missing-sizes`</Callout>
+
+Mendeteksi komponen `<Image>` dengan `fill` tetapi tanpa atribut `sizes`.
+
+**Mengapa ini penting:** Tanpa `sizes`, browser mengunduh gambar terbesar yang tersedia terlepas dari lebar viewport. Ini membuang bandwidth dan meningkatkan penggunaan Image Optimization.
+
+```tsx title="Bad"
+<Image src="/hero.jpg" alt="Hero" fill />
+```
+
+```tsx title="Good"
+<Image src="/hero.jpg" alt="Hero" fill sizes="(max-width: 768px) 100vw, 50vw" />
+```
+
+---
+
+## vercel-image-remote-pattern-too-broad
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-image-remote-pattern-too-broad`</Callout>
+
+Mendeteksi entri `images.remotePatterns` dengan pola `pathname` yang terlalu luas (`/**` atau tidak ada).
+
+**Mengapa ini penting:** Path gambar remote yang tidak dibatasi memungkinkan URL apapun pada hostname tersebut dioptimasi melalui akun Anda, berpotensi menyebabkan penggunaan optimasi yang tidak terduga dari konten buatan pengguna atau embed pihak ketiga.
+
+```js title="Bad"
+// next.config.js
+module.exports = {
+  images: {
+    remotePatterns: [{ hostname: "cdn.example.com", pathname: "/**" }],
+  },
+};
+```
+
+```js title="Good"
+// next.config.js
+module.exports = {
+  images: {
+    remotePatterns: [{ hostname: "cdn.example.com", pathname: "/avatars/**" }],
+  },
+};
+```
+
+---
+
+## vercel-image-svg-without-unoptimized
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-image-svg-without-unoptimized`</Callout>
+
+Mendeteksi komponen `<Image>` dengan `src` SVG yang tidak memiliki prop `unoptimized`.
+
+**Mengapa ini penting:** SVG adalah grafik vektor dan tidak mendapat manfaat dari pipeline Image Optimization. Menjalankannya melalui pipeline membuang kuota optimasi tanpa manfaat apapun.
+
+```tsx title="Bad"
+<Image src="/logo.svg" alt="Logo" width={100} height={40} />
+```
+
+```tsx title="Good"
+<Image src="/logo.svg" alt="Logo" width={100} height={40} unoptimized />
+```

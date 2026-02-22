@@ -1,6 +1,24 @@
 import { defineI18n } from "fumadocs-core/i18n";
 
-export const LANGUAGES = ["en", "es", "zh", "ja", "fr", "de", "pt", "ko", "ar", "hi"] as const;
+export const LANGUAGES = [
+  "en",
+  "es",
+  "zh",
+  "ja",
+  "fr",
+  "de",
+  "pt",
+  "pt-br",
+  "ko",
+  "ar",
+  "hi",
+  "it",
+  "id",
+  "tr",
+  "ru",
+  "da",
+  "uk",
+] as const;
 
 export type Language = (typeof LANGUAGES)[number];
 

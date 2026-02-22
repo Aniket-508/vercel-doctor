@@ -1,0 +1,14 @@
+{
+  "title": "Belgeler",
+  "pages": [
+    "---Giriş---",
+    "index",
+    "cli",
+    "configuration",
+    "scoring",
+    "---Kurallar---",
+    "...rules",
+    "---Entegrasyonlar---",
+    "ai-skills"
+  ]
+}

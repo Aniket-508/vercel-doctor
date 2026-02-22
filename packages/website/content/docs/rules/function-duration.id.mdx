@@ -1,0 +1,91 @@
+---
+title: Durasi Fungsi
+description: Aturan yang mendeteksi pola yang meningkatkan waktu eksekusi fungsi serverless.
+---
+
+Aturan-aturan ini menangkap pola yang memperpanjang waktu eksekusi fungsi serverless Anda. Fungsi yang lebih singkat berarti tagihan lebih rendah — Vercel mengenakan biaya per GB-detik waktu eksekusi.
+
+## async-parallel
+
+<Callout type="warn">Warning · `vercel-doctor/async-parallel`</Callout>
+
+Mendeteksi 3 atau lebih pernyataan `await` berurutan yang tampak independen — artinya await berikutnya tidak mereferensikan variabel dari await sebelumnya.
+
+**Mengapa ini penting:** Await berurutan dijalankan satu per satu. Jika independen, menjalankannya secara paralel dengan `Promise.all()` dapat memangkas durasi fungsi secara signifikan.
+
+```ts title="Bad"
+const users = await db.user.findMany();
+const posts = await db.post.findMany();
+const comments = await db.comment.findMany();
+```
+
+```ts title="Good"
+const [users, posts, comments] = await Promise.all([
+  db.user.findMany(),
+  db.post.findMany(),
+  db.comment.findMany(),
+]);
+```
+
+---
+
+## server-after-nonblocking
+
+<Callout type="warn">Warning · `vercel-doctor/server-after-nonblocking`</Callout>
+
+Mendeteksi panggilan `console.log()`, `console.info()`, `console.warn()`, `analytics.track()`, `analytics.identify()`, atau `analytics.page()` di server action (file dengan `"use server"`).
+
+**Mengapa ini penting:** Panggilan logging dan analytics memblokir respons sampai selesai. Membungkusnya dalam `after()` memungkinkan respons selesai segera sementara pekerjaan berlanjut di latar belakang.
+
+```ts title="Bad"
+"use server";
+
+export const updateUser = async (data: FormData) => {
+  await db.user.update({ ... });
+  console.log("User updated");
+  analytics.track("user_updated");
+};
+```
+
+```ts title="Good"
+"use server";
+
+import { after } from "next/server";
+
+export const updateUser = async (data: FormData) => {
+  await db.user.update({ ... });
+  after(() => {
+    console.log("User updated");
+    analytics.track("user_updated");
+  });
+};
+```
+
+---
+
+## vercel-edge-sequential-await
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-edge-sequential-await`</Callout>
+
+Mendeteksi file runtime edge dengan 2 atau lebih panggilan `await` berurutan tanpa `Promise.all`.
+
+**Mengapa ini penting:** Fungsi edge memiliki batas waktu eksekusi yang ketat. I/O berurutan membuang milidetik berharga yang bisa diparalelkan.
+
+```ts title="Bad"
+export const runtime = "edge";
+
+export async function GET() {
+  const user = await getUser();
+  const settings = await getSettings();
+  return Response.json({ user, settings });
+}
+```
+
+```ts title="Good"
+export const runtime = "edge";
+
+export async function GET() {
+  const [user, settings] = await Promise.all([getUser(), getSettings()]);
+  return Response.json({ user, settings });
+}
+```

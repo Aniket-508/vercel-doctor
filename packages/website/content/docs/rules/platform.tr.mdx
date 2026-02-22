@@ -1,0 +1,117 @@
+---
+title: Platform
+description: Vercel platform yapılandırması ve dağıtım optimizasyonuna özgü kurallar.
+---
+
+Bu kurallar, platform düzeyinde yapılandırma sorunlarını tespit eder ve Vercel dağıtımları için optimizasyonlar önerir.
+
+## vercel-edge-heavy-import
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-edge-heavy-import`</Callout>
+
+`node:fs`, `node:crypto`, `sharp` veya `@aws-sdk/*` gibi ağır veya Node-merkezli bağımlılıkları içe aktaran edge runtime dosyalarını tespit eder.
+
+**Neden önemlidir:** Edge fonksiyonlarının katı boyut ve yürütme sınırları vardır. Ağır Node.js bağımlılıkları cold start süresini artırır ve çalışma zamanında başarısız olabilir.
+
+**Düzeltme:** Ağır mantığı Node.js runtime fonksiyonlarına veya arka plan görevlerine taşıyın ve edge handler'ları hafif tutun.
+
+---
+
+## vercel-sequential-database-await
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-sequential-database-await`</Callout>
+
+`Promise.all` olmadan 3 veya daha fazla sıralı Prisma veya veritabanı çağrısı içeren API rotalarını tespit eder.
+
+**Neden önemlidir:** Her sıralı veritabanı çağrısı fonksiyon yürütmesine gecikme ekler. Bağımsız sorguları paralelleştirmek toplam süreyi ve maliyeti azaltır.
+
+```ts title="Bad"
+const users = await prisma.user.findMany();
+const posts = await prisma.post.findMany();
+const tags = await prisma.tag.findMany();
+```
+
+```ts title="Good"
+const [users, posts, tags] = await Promise.all([
+  prisma.user.findMany(),
+  prisma.post.findMany(),
+  prisma.tag.findMany(),
+]);
+```
+
+---
+
+## vercel-large-static-asset
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-large-static-asset`</Callout>
+
+Uygulama deponuzdan sunulan 4 KB veya daha büyük statik varlıkları (görseller, fontlar, videolar, PDF'ler) tespit eder.
+
+**Neden önemlidir:** Vercel dağıtımınızdan sunulan büyük statik dosyalar her istekte bant genişliği tüketir. Bunları özel bir CDN veya nesne depolamasına (Cloudflare R2, S3) taşımak bant genişliği maliyetlerini azaltır.
+
+Boyuta göre sıralanmış (en büyükten başlayarak) en fazla 20 dosya raporlar.
+
+---
+
+## vercel-consider-bun-runtime
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-consider-bun-runtime`</Callout>
+
+Bun runtime için yapılandırılmamış projeleri tespit eder (`package.json`'da `packageManager: "bun@..."` yok ve `bun.lock` dosyası yok).
+
+**Neden önemlidir:** Bun runtime, Node.js'e kıyasla Vercel'de kurulum ve build yükünü azaltabilir.
+
+**Düzeltme:** [Bun runtime kılavuzunu](https://vercel.com/docs/functions/runtimes/bun) inceleyin ve projeniz uyumluysa geçiş yapın.
+
+---
+
+## vercel-avoid-platform-cron
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-avoid-platform-cron`</Callout>
+
+`vercel.json` dosyasında yapılandırılmış `crons` kullanımını tespit eder.
+
+**Neden önemlidir:** Vercel cron job'ları sunucusuz fonksiyonlar olarak çalışır ve yürütme başına ücretlendirilir. Öngörülebilir kalıplara sahip zamanlanmış iş yükleri genellikle GitHub Actions veya Cloudflare Workers Cron Triggers kullanarak daha ucuza çalışabilir.
+
+---
+
+## vercel-consider-fluid-compute
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-consider-fluid-compute`</Callout>
+
+3 veya daha fazla API/sunucu rotası olan projeleri tespit eder.
+
+**Neden önemlidir:** Fluid Compute, değişken gecikme veya ani trafik artışları olan iş yükleri için eşzamanlılığı artırır ve yürütme yükünü azaltır. Birden fazla sunucu rotası olan projeler için değerlendirmeye değer.
+
+---
+
+## vercel-suggest-turbopack-build-cache
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-suggest-turbopack-build-cache`</Callout>
+
+`experimental` ayarları içeren ancak `turbopackFileSystemCacheForBuild` olmayan `next.config` dosyalarını tespit eder.
+
+**Neden önemlidir:** Next.js 16+ Turbopack build önbelleğini destekler ve bu, build sürelerini önemli ölçüde azaltabilir.
+
+```js title="Good"
+// next.config.js
+module.exports = {
+  experimental: {
+    turbopackFileSystemCacheForBuild: true,
+  },
+};
+```
+
+---
+
+## vercel-suggest-deploy-archive
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-suggest-deploy-archive`</Callout>
+
+5.000 veya daha fazla dosyası olan projeleri tespit eder.
+
+**Neden önemlidir:** Büyük projeler dağıtım sırasında API hız sınırlarına takılabilir. Arşiv modunu kullanmak, tek tek dosyalar yerine tek bir tarball yükleyerek dağıtım süresini yaklaşık %50 azaltır.
+
+```bash
+vercel deploy --archive=tgz
+```

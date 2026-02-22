@@ -1,0 +1,97 @@
+---
+title: Riferimento CLI
+description: Tutte le opzioni e i flag della riga di comando per Vercel Doctor.
+icon: Terminal
+---
+
+## Utilizzo
+
+```bash
+npx -y vercel-doctor@latest [directory] [options]
+```
+
+L'argomento `directory` ha come valore predefinito `.` (directory corrente).
+
+## Opzioni
+
+| Flag               | Descrizione                                                          |
+| ------------------ | -------------------------------------------------------------------- |
+| `-v, --version`    | Mostra la versione corrente                                          |
+| `--no-lint`        | Salta le regole di lint di fatturazione                              |
+| `--no-dead-code`   | Salta il rilevamento del codice morto (Knip)                         |
+| `--verbose`        | Mostra i percorsi dei file e i numeri di riga per ogni regola        |
+| `--score`          | Restituisce solo il punteggio numerico (utile per CI)                |
+| `-y, --yes`        | Salta i prompt interattivi, scansiona tutti i progetti del workspace |
+| `--project <name>` | Seleziona specifici progetti del workspace, separati da virgola      |
+| `--diff [base]`    | Scansiona solo i file modificati rispetto al branch base             |
+| `--offline`        | Salta la telemetria anonima usata per il calcolo del punteggio       |
+
+## Esempi
+
+### Scansiona la directory corrente
+
+```bash
+npx -y vercel-doctor@latest .
+```
+
+### Scansiona con output dettagliato
+
+```bash
+npx -y vercel-doctor@latest . --verbose
+```
+
+Mostra i percorsi dei file e i numeri di riga per ogni diagnostica.
+
+### Scansiona solo i file modificati
+
+```bash
+npx -y vercel-doctor@latest . --diff
+```
+
+Rileva automaticamente il branch base. Puoi anche specificare un base specifico:
+
+```bash
+npx -y vercel-doctor@latest . --diff main
+```
+
+### Scansiona un progetto workspace specifico
+
+```bash
+npx -y vercel-doctor@latest . --project web
+```
+
+Per più progetti:
+
+```bash
+npx -y vercel-doctor@latest . --project web,api
+```
+
+### Salta il rilevamento del codice morto
+
+```bash
+npx -y vercel-doctor@latest . --no-dead-code
+```
+
+### Utilizzo in CI
+
+```bash
+npx -y vercel-doctor@latest . --yes --score
+```
+
+Il flag `--yes` salta i prompt interattivi. Combinato con `--score`, restituisce solo il punteggio numerico per l'uso in script e pipeline.
+
+## API Programmatica
+
+Vercel Doctor espone anche un'API programmatica:
+
+```ts
+import { run } from "vercel-doctor/api";
+```
+
+## Plugin Oxlint
+
+Le regole di lint di fatturazione sono disponibili come plugin standalone per Oxlint:
+
+```ts
+import plugin from "vercel-doctor/oxlint-plugin";
+```

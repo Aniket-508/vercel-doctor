@@ -1,0 +1,97 @@
+---
+title: Referensi CLI
+description: Semua opsi dan flag baris perintah untuk Vercel Doctor.
+icon: Terminal
+---
+
+## Penggunaan
+
+```bash
+npx -y vercel-doctor@latest [directory] [options]
+```
+
+Argumen `directory` secara default adalah `.` (direktori saat ini).
+
+## Opsi
+
+| Flag               | Deskripsi                                                       |
+| ------------------ | --------------------------------------------------------------- |
+| `-v, --version`    | Menampilkan versi saat ini                                      |
+| `--no-lint`        | Melewati aturan lint tagihan                                    |
+| `--no-dead-code`   | Melewati deteksi kode mati (Knip)                               |
+| `--verbose`        | Menampilkan path file dan nomor baris per aturan                |
+| `--score`          | Hanya menampilkan skor numerik (berguna untuk CI)               |
+| `-y, --yes`        | Melewati prompt interaktif, memindai semua proyek workspace     |
+| `--project <name>` | Memilih proyek workspace tertentu, dipisahkan koma              |
+| `--diff [base]`    | Memindai hanya file yang berubah dibandingkan branch dasar      |
+| `--offline`        | Melewati telemetri anonim yang digunakan untuk perhitungan skor |
+
+## Contoh
+
+### Memindai direktori saat ini
+
+```bash
+npx -y vercel-doctor@latest .
+```
+
+### Memindai dengan output detail
+
+```bash
+npx -y vercel-doctor@latest . --verbose
+```
+
+Menampilkan path file yang terpengaruh dan nomor baris untuk setiap diagnostik.
+
+### Memindai hanya file yang diubah
+
+```bash
+npx -y vercel-doctor@latest . --diff
+```
+
+Mendeteksi branch dasar secara otomatis. Anda juga dapat menentukan base tertentu:
+
+```bash
+npx -y vercel-doctor@latest . --diff main
+```
+
+### Memindai proyek workspace tertentu
+
+```bash
+npx -y vercel-doctor@latest . --project web
+```
+
+Untuk beberapa proyek:
+
+```bash
+npx -y vercel-doctor@latest . --project web,api
+```
+
+### Melewati deteksi kode mati
+
+```bash
+npx -y vercel-doctor@latest . --no-dead-code
+```
+
+### Penggunaan di CI
+
+```bash
+npx -y vercel-doctor@latest . --yes --score
+```
+
+Flag `--yes` melewati prompt interaktif. Dikombinasikan dengan `--score`, hanya menampilkan skor numerik untuk digunakan dalam skrip dan pipeline.
+
+## API Programatik
+
+Vercel Doctor juga mengekspor API programatik:
+
+```ts
+import { run } from "vercel-doctor/api";
+```
+
+## Plugin Oxlint
+
+Aturan lint tagihan tersedia sebagai plugin Oxlint mandiri:
+
+```ts
+import plugin from "vercel-doctor/oxlint-plugin";
+```

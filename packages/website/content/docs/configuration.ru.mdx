@@ -1,0 +1,98 @@
+---
+title: Конфигурация
+description: Настройте Vercel Doctor с помощью конфигурационного файла для игнорирования правил, файлов и изменения поведения.
+icon: Settings
+---
+
+Vercel Doctor работает из коробки без какой-либо настройки. Когда вам нужно изменить поведение, вы можете добавить конфигурационный файл.
+
+## Конфигурационный файл
+
+Создайте файл `vercel-doctor.config.json` в корне проекта:
+
+```json
+{
+  "ignore": {
+    "rules": ["vercel-doctor/nextjs-link-prefetch-default"],
+    "files": ["src/generated/**"]
+  }
+}
+```
+
+Альтернативно добавьте ключ `"vercelDoctor"` в ваш `package.json`:
+
+```json
+{
+  "vercelDoctor": {
+    "ignore": {
+      "rules": ["knip/exports"],
+      "files": ["src/generated/**"]
+    }
+  }
+}
+```
+
+Если оба файла существуют, `vercel-doctor.config.json` имеет приоритет.
+
+## Параметры
+
+| Ключ           | Тип                 | По умолчанию | Описание                                                  |
+| -------------- | ------------------- | ------------ | --------------------------------------------------------- |
+| `ignore.rules` | `string[]`          | `[]`         | ID правил для подавления в формате `plugin/rule`          |
+| `ignore.files` | `string[]`          | `[]`         | Glob-паттерны путей файлов для пропуска                   |
+| `lint`         | `boolean`           | `true`       | Включить или отключить правила линтинга счетов            |
+| `deadCode`     | `boolean`           | `true`       | Включить или отключить обнаружение мёртвого кода          |
+| `verbose`      | `boolean`           | `false`      | Показывать пути файлов и номера строк для каждого правила |
+| `diff`         | `boolean \| string` | `false`      | Включить режим diff или указать базовую ветку             |
+
+## Игнорирование правил
+
+Используйте формат `plugin/rule` для ID правил:
+
+```json
+{
+  "ignore": {
+    "rules": [
+      "vercel-doctor/nextjs-image-missing-sizes",
+      "vercel-doctor/vercel-large-static-asset",
+      "knip/exports"
+    ]
+  }
+}
+```
+
+Смотрите страницы [Правила](/docs/rules/function-duration) для списка всех доступных ID правил.
+
+## Игнорирование файлов
+
+Используйте glob-паттерны для исключения файлов из сканирования:
+
+```json
+{
+  "ignore": {
+    "files": ["src/generated/**", "**/*.stories.tsx", "scripts/**"]
+  }
+}
+```
+
+## Приоритет CLI
+
+Флаги CLI всегда имеют приоритет над значениями конфигурационного файла. Например, `--verbose` в командной строке переопределяет `"verbose": false` в конфигурационном файле.
+
+## Полный пример
+
+```json
+{
+  "ignore": {
+    "rules": [
+      "vercel-doctor/vercel-consider-bun-runtime",
+      "vercel-doctor/vercel-avoid-platform-cron"
+    ],
+    "files": ["src/generated/**", "e2e/**"]
+  },
+  "lint": true,
+  "deadCode": true,
+  "verbose": false,
+  "diff": "main"
+}
+```

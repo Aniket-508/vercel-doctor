@@ -1,0 +1,72 @@
+---
+title: Scoring
+description: Hvordan Vercel Doctor beregner dit projekts sundhedsscore.
+icon: Gauge
+---
+
+Hver scanning producerer en score fra 0 til 100. Scoren afspejler, hvor mange unikke regler dit projekt udløser, vægtet efter alvorlighed.
+
+## Beregning
+
+```
+score = max(0, round(100 - penalties))
+```
+
+Hvor strafpoint er:
+
+| Alvorlighed | Strafpoint per unik regel |
+| ----------- | ------------------------- |
+| Fejl        | 1,5 point                 |
+| Advarsel    | 0,75 point                |
+
+Scoren er baseret på **unikke udløste regler**, ikke det samlede antal diagnostikker. Hvis den samme regel udløses i 10 filer, tæller den kun én gang.
+
+## Etiketter
+
+| Score  | Etiket         |
+| ------ | -------------- |
+| 75–100 | Fantastisk     |
+| 50–74  | Skal forbedres |
+| 0–49   | Kritisk        |
+
+## Eksempel
+
+Et projekt med 2 fejlregler og 8 advarselsregler:
+
+```
+penalty = (2 × 1.5) + (8 × 0.75) = 3 + 6 = 9
+score = max(0, round(100 - 9)) = 91 → Fantastisk
+```
+
+## Del din score
+
+Efter at have kørt Vercel Doctor er din score tilgængelig på en delbar side med knapper til deling på sociale medier og et integrerbart badge.
+
+### Badge
+
+Tilføj et badge til din `README.md`:
+
+```markdown
+[![Vercel Doctor](https://www.vercel-doctor.com/share/badge?s=91)](https://www.vercel-doctor.com/share?s=91)
+```
+
+### API
+
+Du kan også beregne scorer programmatisk:
+
+```bash
+curl -X POST https://www.vercel-doctor.com/api/score \
+  -H "Content-Type: application/json" \
+  -d '{"diagnostics": [...]}'
+```
+
+Returnerer:
+
+```json
+{
+  "score": 91,
+  "label": "Great"
+}
+```
+
+Endpointet `/api/estimate-score` estimerer, hvad din score ville være efter at have rettet problemer, ved at bruge estimerede rettelsesrater på 85% for fejl og 80% for advarsler.

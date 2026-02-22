@@ -1,0 +1,43 @@
+---
+title: AI-færdigheder
+description: Installer Vercel Doctor som en færdighed til AI-kodningsassistenter.
+---
+
+Vercel Doctor kan installeres som en færdighed til AI-kodningsassistenter. Når den er installeret, vil din AI-assistent automatisk foreslå at køre Vercel Doctor efter ændringer i Next.js-projekter.
+
+## Installation med én kommando
+
+```bash
+npx skills add vercel-doctor
+```
+
+Eller installer via curl:
+
+```bash
+curl -fsSL https://vercel-doctor.com/install-skill.sh | bash
+```
+
+## Understøttede værktøjer
+
+Installationsprogrammet opdager automatisk og installerer til alle understøttede værktøjer på dit system:
+
+| Værktøj     | Færdighedsplacering                            |
+| ----------- | ---------------------------------------------- |
+| Claude Code | `~/.claude/skills/vercel-doctor/`              |
+| Amp Code    | `~/.config/amp/skills/vercel-doctor/`          |
+| Cursor      | `~/.cursor/skills/vercel-doctor/`              |
+| OpenCode    | `~/.config/opencode/skills/vercel-doctor/`     |
+| Windsurf    | `~/.codeium/windsurf/memories/global_rules.md` |
+| Antigravity | `~/.gemini/antigravity/skills/vercel-doctor/`  |
+| Gemini CLI  | `~/.gemini/skills/vercel-doctor/`              |
+| Codex       | `~/.codex/skills/vercel-doctor/`               |
+
+Installationsprogrammet tilføjer også færdigheden til dit projekts `.agents/`-mappe for kontekst på projektniveau.
+
+## Hvad færdigheden gør
+
+Når den er aktiveret, vil AI-assistenten:
+
+1. Kende til Vercel Doctor og hvad det scanner for
+2. Foreslå at køre `npx -y vercel-doctor@latest . --verbose --diff` efter ændringer
+3. Fokusere på at rette problemer, der først og fremmest reducerer funktionsudførelsestid og antal invokationer

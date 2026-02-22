@@ -6,9 +6,16 @@ import { ja } from "./ja";
 import { fr } from "./fr";
 import { de } from "./de";
 import { pt } from "./pt";
+import { ptBr } from "./pt-br";
 import { ko } from "./ko";
 import { ar } from "./ar";
 import { hi } from "./hi";
+import { it } from "./it";
+import { id } from "./id";
+import { tr } from "./tr";
+import { ru } from "./ru";
+import { da } from "./da";
+import { uk } from "./uk";
 
 export interface Translation {
   nav: {
@@ -89,9 +96,16 @@ const translations: Record<Language, Translation> = {
   fr,
   de,
   pt,
+  "pt-br": ptBr,
   ko,
   ar,
   hi,
+  it,
+  id,
+  tr,
+  ru,
+  da,
+  uk,
 };
 
 export const getTranslation = (locale: string): Translation =>

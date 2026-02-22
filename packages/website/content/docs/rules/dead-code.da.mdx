@@ -1,0 +1,52 @@
+---
+title: Død kode
+description: Regler der opdager ubrugte filer, exports og typer i din kodebase.
+---
+
+Detektering af død kode drives af [Knip](https://knip.dev). Ubrugt kode opblæser din bundle, forlænger cold starts og øger deployeringsstørrelsen — alt sammen fører til højere Vercel-omkostninger.
+
+Du kan deaktivere detektering af død kode helt med `--no-dead-code` eller `"deadCode": false` i din konfigurationsfil.
+
+## knip/files
+
+<Callout type="warn">Warning · `knip/files`</Callout>
+
+Opdager filer, der ikke importeres af nogen anden fil i projektet.
+
+**Hvorfor det er vigtigt:** Ubrugte filer deployes og parses stadig under builds. De øger cold start-tiden ved at tilføje til modulgrafen.
+
+**Løsning:** Slet filen, eller hvis den bevidst er selvstændig, tilføj den til dine Knip-konfigurations entry-mønstre.
+
+---
+
+## knip/exports
+
+<Callout type="warn">Warning · `knip/exports`</Callout>
+
+Opdager eksporterede symboler (funktioner, variabler, klasser), der aldrig importeres nogen steder.
+
+**Hvorfor det er vigtigt:** Ubrugte exports tilføjer død kode til din bundle. Tree-shaking eliminerer dem ikke altid, især i server-side kode.
+
+**Løsning:** Fjern `export`-nøgleordet, eller slet symbolet, hvis det ikke længere er nødvendigt.
+
+---
+
+## knip/types
+
+<Callout type="warn">Warning · `knip/types`</Callout>
+
+Opdager eksporterede TypeScript-typer og interfaces, der aldrig refereres.
+
+**Løsning:** Fjern ubrugte type-exports.
+
+---
+
+## knip/duplicates
+
+<Callout type="warn">Warning · `knip/duplicates`</Callout>
+
+Opdager det samme symbol eksporteret fra flere filer.
+
+**Hvorfor det er vigtigt:** Duplikerede exports skaber tvetydighed og kan føre til import fra den forkerte fil, hvilket trækker mere kode ind end nødvendigt.
+
+**Løsning:** Konsolider duplikater til ét eksportsted.

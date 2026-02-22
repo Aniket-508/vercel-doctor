@@ -1,0 +1,52 @@
+---
+title: Codice Morto
+description: Regole che rilevano file, export e tipi inutilizzati nel tuo codice.
+---
+
+Il rilevamento del codice morto è alimentato da [Knip](https://knip.dev). Il codice inutilizzato appesantisce il bundle, rallenta i cold start e aumenta la dimensione del deployment — tutto ciò si traduce in costi Vercel più elevati.
+
+Puoi disabilitare completamente il rilevamento del codice morto con `--no-dead-code` o `"deadCode": false` nel tuo file di configurazione.
+
+## knip/files
+
+<Callout type="warn">Warning · `knip/files`</Callout>
+
+Rileva file che non vengono importati da nessun altro file nel progetto.
+
+**Perché è importante:** I file inutilizzati vengono comunque deployati e analizzati durante le build. Aumentano il tempo di cold start aggiungendo nodi al grafo dei moduli.
+
+**Soluzione:** Elimina il file, oppure se è intenzionalmente standalone, aggiungilo ai pattern di entry nella configurazione di Knip.
+
+---
+
+## knip/exports
+
+<Callout type="warn">Warning · `knip/exports`</Callout>
+
+Rileva simboli esportati (funzioni, variabili, classi) che non vengono mai importati da nessuna parte.
+
+**Perché è importante:** Gli export inutilizzati aggiungono codice morto al bundle. Il tree-shaking non li elimina sempre, specialmente nel codice lato server.
+
+**Soluzione:** Rimuovi la keyword `export`, oppure elimina il simbolo se non è più necessario.
+
+---
+
+## knip/types
+
+<Callout type="warn">Warning · `knip/types`</Callout>
+
+Rileva tipi e interfacce TypeScript esportati che non vengono mai referenziati.
+
+**Soluzione:** Rimuovi gli export di tipi inutilizzati.
+
+---
+
+## knip/duplicates
+
+<Callout type="warn">Warning · `knip/duplicates`</Callout>
+
+Rileva lo stesso simbolo esportato da più file.
+
+**Perché è importante:** Gli export duplicati creano ambiguità e possono portare a importare dal file sbagliato, includendo più codice del necessario.
+
+**Soluzione:** Consolida i duplicati in un'unica posizione di export.

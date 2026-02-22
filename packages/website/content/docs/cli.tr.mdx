@@ -1,0 +1,97 @@
+---
+title: CLI Referansı
+description: Vercel Doctor için tüm komut satırı seçenekleri ve bayrakları.
+icon: Terminal
+---
+
+## Kullanım
+
+```bash
+npx -y vercel-doctor@latest [directory] [options]
+```
+
+`directory` argümanı varsayılan olarak `.` (geçerli dizin) değerini alır.
+
+## Seçenekler
+
+| Bayrak             | Açıklama                                                      |
+| ------------------ | ------------------------------------------------------------- |
+| `-v, --version`    | Geçerli sürümü gösterir                                       |
+| `--no-lint`        | Faturalama lint kurallarını atlar                             |
+| `--no-dead-code`   | Ölü kod tespitini atlar (Knip)                                |
+| `--verbose`        | Her kural için dosya yollarını ve satır numaralarını gösterir |
+| `--score`          | Yalnızca sayısal puanı verir (CI için kullanışlı)             |
+| `-y, --yes`        | Etkileşimli istemleri atlar, tüm workspace projelerini tarar  |
+| `--project <name>` | Belirli workspace projelerini seçer, virgülle ayrılmış        |
+| `--diff [base]`    | Yalnızca base branch'e göre değişen dosyaları tarar           |
+| `--offline`        | Puan hesaplama için kullanılan anonim telemetriyi atlar       |
+
+## Örnekler
+
+### Geçerli dizini tarama
+
+```bash
+npx -y vercel-doctor@latest .
+```
+
+### Ayrıntılı çıktı ile tarama
+
+```bash
+npx -y vercel-doctor@latest . --verbose
+```
+
+Her tanılama için dosya yollarını ve satır numaralarını gösterir.
+
+### Yalnızca değişen dosyaları tarama
+
+```bash
+npx -y vercel-doctor@latest . --diff
+```
+
+Base branch'i otomatik algılar. Belirli bir base de sabitleyebilirsiniz:
+
+```bash
+npx -y vercel-doctor@latest . --diff main
+```
+
+### Belirli bir workspace projesini tarama
+
+```bash
+npx -y vercel-doctor@latest . --project web
+```
+
+Birden fazla proje için:
+
+```bash
+npx -y vercel-doctor@latest . --project web,api
+```
+
+### Ölü kod tespitini atlama
+
+```bash
+npx -y vercel-doctor@latest . --no-dead-code
+```
+
+### CI kullanımı
+
+```bash
+npx -y vercel-doctor@latest . --yes --score
+```
+
+`--yes` bayrağı etkileşimli istemleri atlar. `--score` ile birlikte kullanıldığında, script'lerde ve pipeline'larda kullanılmak üzere yalnızca sayısal puanı verir.
+
+## Programatik API
+
+Vercel Doctor ayrıca programatik bir API sunar:
+
+```ts
+import { run } from "vercel-doctor/api";
+```
+
+## Oxlint Eklentisi
+
+Faturalama lint kuralları bağımsız bir Oxlint eklentisi olarak mevcuttur:
+
+```ts
+import plugin from "vercel-doctor/oxlint-plugin";
+```

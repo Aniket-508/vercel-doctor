@@ -1,0 +1,130 @@
+---
+title: Кешування
+description: Правила, що виявляють патерни, які перешкоджають ефективному кешуванню на Vercel.
+---
+
+Ці правила виявляють патерни, що обходять кешування CDN та ISR Vercel, змушуючи виконувати непотрібний серверний рендеринг і збільшуючи витрати на обчислення.
+
+## nextjs-no-side-effect-in-get-handler
+
+<Callout type="error">Error · `vercel-doctor/nextjs-no-side-effect-in-get-handler`</Callout>
+
+Виявляє GET-обробники маршрутів, що містять побічні ефекти (зміна cookies, заголовків або виклики бази даних) або знаходяться на мутуючих сегментах маршруту, як-от `/logout`, `/signout`, `/delete` тощо.
+
+**Чому це важливо:** GET-запити можуть бути ініційовані попереднім завантаженням і вразливі до CSRF. Побічні ефекти в GET-обробниках також перешкоджають кешуванню.
+
+```ts title="Bad"
+// app/api/logout/route.ts
+export async function GET() {
+  cookies().delete("session");
+  return Response.json({ ok: true });
+}
+```
+
+```ts title="Good"
+// app/api/logout/route.ts
+export async function POST() {
+  cookies().delete("session");
+  return Response.json({ ok: true });
+}
+```
+
+Виявлені мутуючі сегменти маршруту: `logout`, `log-out`, `signout`, `sign-out`, `unsubscribe`, `delete`, `remove`, `revoke`, `cancel`, `deactivate`.
+
+---
+
+## vercel-no-force-dynamic
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-no-force-dynamic`</Callout>
+
+Виявляє сторінки з `export const dynamic = "force-dynamic"`.
+
+**Чому це важливо:** `force-dynamic` примусово виконує серверний рендеринг при кожному запиті, повністю обходячи кешування повної сторінки.
+
+```ts title="Bad"
+export const dynamic = "force-dynamic";
+
+export default function Page() { ... }
+```
+
+```ts title="Good"
+export const revalidate = 3600;
+
+export default function Page() { ... }
+```
+
+---
+
+## vercel-no-no-store-fetch
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-no-no-store-fetch`</Callout>
+
+Виявляє виклики fetch з `cache: "no-store"` або `revalidate: 0`.
+
+**Чому це важливо:** Ці параметри повністю вимикають кешування, збільшуючи некешовану пропускну здатність та витрати на обчислення при кожному запиті.
+
+```ts title="Bad"
+const data = await fetch(url, { cache: "no-store" });
+```
+
+```ts title="Good"
+const data = await fetch(url, {
+  next: { revalidate: 3600 },
+});
+```
+
+---
+
+## vercel-missing-cache-policy
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-missing-cache-policy`</Callout>
+
+Виявляє GET-обробники маршрутів без явної конфігурації кешування — без заголовків `Cache-Control`, без експорту `revalidate` та без експорту `dynamic`.
+
+**Чому це важливо:** Без явної політики кешування відповіді можуть втрачати можливості кешування CDN, спричиняючи повторні запити до сервера.
+
+```ts title="Bad"
+export async function GET() {
+  const data = await fetchData();
+  return Response.json(data);
+}
+```
+
+```ts title="Good"
+export const revalidate = 3600;
+
+export async function GET() {
+  const data = await fetchData();
+  return Response.json(data);
+}
+```
+
+---
+
+## vercel-prefer-get-static-props
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-prefer-get-static-props`</Callout>
+
+Виявляє маршрути Pages Router, що використовують `getServerSideProps`.
+
+**Чому це важливо:** `getServerSideProps` виконується при кожному запиті. Перехід на `getStaticProps` (з опціональним ISR) кешує сторінки на CDN та зменшує серверні обчислення.
+
+---
+
+## vercel-get-static-props-consider-isr
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-get-static-props-consider-isr`</Callout>
+
+Виявляє `getStaticProps` без значення `revalidate` у поверненні.
+
+**Чому це важливо:** Без `revalidate` всі сторінки генеруються під час збірки. Для великих сайтів це суттєво сповільнює збірку. ISR генерує сторінки на вимогу та кешує їх.
+
+```ts title="Good"
+export async function getStaticProps() {
+  const data = await fetchData();
+  return {
+    props: { data },
+    revalidate: 3600,
+  };
+}
+```

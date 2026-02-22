@@ -1,0 +1,43 @@
+---
+title: Skill AI
+description: Instal Vercel Doctor sebagai skill untuk asisten coding AI.
+---
+
+Vercel Doctor dapat diinstal sebagai skill untuk asisten coding AI. Setelah diinstal, asisten AI Anda akan secara otomatis menyarankan untuk menjalankan Vercel Doctor setelah melakukan perubahan pada proyek Next.js.
+
+## Instalasi cepat
+
+```bash
+npx skills add vercel-doctor
+```
+
+Atau instal melalui curl:
+
+```bash
+curl -fsSL https://vercel-doctor.com/install-skill.sh | bash
+```
+
+## Alat yang didukung
+
+Installer mendeteksi secara otomatis dan menginstal untuk semua alat yang didukung di sistem Anda:
+
+| Alat        | Lokasi skill                                   |
+| ----------- | ---------------------------------------------- |
+| Claude Code | `~/.claude/skills/vercel-doctor/`              |
+| Amp Code    | `~/.config/amp/skills/vercel-doctor/`          |
+| Cursor      | `~/.cursor/skills/vercel-doctor/`              |
+| OpenCode    | `~/.config/opencode/skills/vercel-doctor/`     |
+| Windsurf    | `~/.codeium/windsurf/memories/global_rules.md` |
+| Antigravity | `~/.gemini/antigravity/skills/vercel-doctor/`  |
+| Gemini CLI  | `~/.gemini/skills/vercel-doctor/`              |
+| Codex       | `~/.codex/skills/vercel-doctor/`               |
+
+Installer juga menambahkan skill ke direktori `.agents/` proyek Anda untuk konteks tingkat proyek.
+
+## Apa yang dilakukan skill ini
+
+Ketika diaktifkan, asisten AI akan:
+
+1. Mengetahui tentang Vercel Doctor dan apa yang dipindainya
+2. Menyarankan menjalankan `npx -y vercel-doctor@latest . --verbose --diff` setelah perubahan
+3. Fokus pada perbaikan masalah yang mengurangi waktu eksekusi fungsi dan invokasi terlebih dahulu

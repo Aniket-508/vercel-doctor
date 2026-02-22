@@ -1,0 +1,91 @@
+---
+title: Funktionsvarighed
+description: Regler der opdager mønstre, som øger serverless-funktioners udførelsestid.
+---
+
+Disse regler fanger mønstre, der forlænger wall-clock-tiden for dine serverless-funktioner. Kortere funktioner betyder lavere regninger — Vercel fakturerer per GB-sekund udførelsestid.
+
+## async-parallel
+
+<Callout type="warn">Warning · `vercel-doctor/async-parallel`</Callout>
+
+Opdager 3 eller flere sekventielle `await`-sætninger, der ser ud til at være uafhængige — hvilket betyder, at senere awaits ikke refererer til variabler fra tidligere.
+
+**Hvorfor det er vigtigt:** Sekventielle awaits kører én efter én. Hvis de er uafhængige, kan parallel kørsel med `Promise.all()` reducere funktionsvarigheden markant.
+
+```ts title="Bad"
+const users = await db.user.findMany();
+const posts = await db.post.findMany();
+const comments = await db.comment.findMany();
+```
+
+```ts title="Good"
+const [users, posts, comments] = await Promise.all([
+  db.user.findMany(),
+  db.post.findMany(),
+  db.comment.findMany(),
+]);
+```
+
+---
+
+## server-after-nonblocking
+
+<Callout type="warn">Warning · `vercel-doctor/server-after-nonblocking`</Callout>
+
+Opdager `console.log()`, `console.info()`, `console.warn()`, `analytics.track()`, `analytics.identify()` eller `analytics.page()`-kald i server actions (filer med `"use server"`).
+
+**Hvorfor det er vigtigt:** Logning og analytics-kald blokerer svaret, indtil de er færdige. Ved at pakke dem ind i `after()` kan svaret afsluttes med det samme, mens arbejdet fortsætter i baggrunden.
+
+```ts title="Bad"
+"use server";
+
+export const updateUser = async (data: FormData) => {
+  await db.user.update({ ... });
+  console.log("User updated");
+  analytics.track("user_updated");
+};
+```
+
+```ts title="Good"
+"use server";
+
+import { after } from "next/server";
+
+export const updateUser = async (data: FormData) => {
+  await db.user.update({ ... });
+  after(() => {
+    console.log("User updated");
+    analytics.track("user_updated");
+  });
+};
+```
+
+---
+
+## vercel-edge-sequential-await
+
+<Callout type="warn">Warning · `vercel-doctor/vercel-edge-sequential-await`</Callout>
+
+Opdager Edge Runtime-filer med 2 eller flere sekventielle `await`-kald uden `Promise.all`.
+
+**Hvorfor det er vigtigt:** Edge-funktioner har strenge udførelsestidsbegrænsninger. Sekventiel I/O spilder dyrebare millisekunder, der kunne paralleliseres.
+
+```ts title="Bad"
+export const runtime = "edge";
+
+export async function GET() {
+  const user = await getUser();
+  const settings = await getSettings();
+  return Response.json({ user, settings });
+}
+```
+
+```ts title="Good"
+export const runtime = "edge";
+
+export async function GET() {
+  const [user, settings] = await Promise.all([getUser(), getSettings()]);
+  return Response.json({ user, settings });
+}
+```

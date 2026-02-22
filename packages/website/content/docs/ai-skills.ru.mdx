@@ -1,0 +1,43 @@
+---
+title: AI-навыки
+description: Установите Vercel Doctor как навык для AI-помощников по программированию.
+---
+
+Vercel Doctor можно установить как навык для AI-помощников по программированию. После установки ваш AI-помощник будет автоматически предлагать запустить Vercel Doctor после внесения изменений в проекты Next.js.
+
+## Установка одной командой
+
+```bash
+npx skills add vercel-doctor
+```
+
+Или установите через curl:
+
+```bash
+curl -fsSL https://vercel-doctor.com/install-skill.sh | bash
+```
+
+## Поддерживаемые инструменты
+
+Установщик автоматически определяет и устанавливает для всех поддерживаемых инструментов в вашей системе:
+
+| Инструмент  | Расположение навыка                            |
+| ----------- | ---------------------------------------------- |
+| Claude Code | `~/.claude/skills/vercel-doctor/`              |
+| Amp Code    | `~/.config/amp/skills/vercel-doctor/`          |
+| Cursor      | `~/.cursor/skills/vercel-doctor/`              |
+| OpenCode    | `~/.config/opencode/skills/vercel-doctor/`     |
+| Windsurf    | `~/.codeium/windsurf/memories/global_rules.md` |
+| Antigravity | `~/.gemini/antigravity/skills/vercel-doctor/`  |
+| Gemini CLI  | `~/.gemini/skills/vercel-doctor/`              |
+| Codex       | `~/.codex/skills/vercel-doctor/`               |
+
+Установщик также добавляет навык в директорию `.agents/` вашего проекта для контекста на уровне проекта.
+
+## Что делает навык
+
+При активации AI-помощник будет:
+
+1. Знать о Vercel Doctor и о том, что он проверяет
+2. Предлагать запуск `npx -y vercel-doctor@latest . --verbose --diff` после изменений
+3. Сосредоточиваться на исправлении проблем, которые в первую очередь сокращают время выполнения функций и количество вызовов
