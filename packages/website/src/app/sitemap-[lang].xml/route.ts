@@ -11,6 +11,8 @@ const STATIC_PAGES = [
   { path: "/sponsors", priority: 0.6 },
 ];
 
+const LANG_FROM_URL_PATTERN = /\/sitemap-([a-z-]+)\.xml/;
+
 export const generateStaticParams = () => LANGUAGES.map((lang) => ({ lang }));
 
 const buildUrl = (lang: string, path: string): string => {
@@ -24,8 +26,10 @@ const buildAlternates = (lang: string, path: string): string =>
       `      <xhtml:link rel="alternate" hreflang="${alternateLang}" href="${buildUrl(alternateLang, path)}" />`,
   ).join("\n");
 
-export const GET = async (_request: Request, { params }: { params: Promise<{ lang: string }> }) => {
-  const { lang } = await params;
+export const GET = (request: Request) => {
+  const url = new URL(request.url);
+  const match = LANG_FROM_URL_PATTERN.exec(url.pathname);
+  const lang = match?.[1] ?? "";
 
   if (!LANGUAGES.includes(lang as Language)) {
     return new Response("Not Found", { status: 404 });

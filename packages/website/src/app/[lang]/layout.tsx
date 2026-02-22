@@ -13,7 +13,10 @@ const { provider } = defineI18nUI(i18n, {
     fr: { displayName: "Français", search: "Rechercher la documentation" },
     de: { displayName: "Deutsch", search: "Dokumentation durchsuchen" },
     pt: { displayName: "Português", search: "Pesquisar documentação" },
-    "pt-br": { displayName: "Português do Brasil", search: "Pesquisar documentação" },
+    "pt-br": {
+      displayName: "Português do Brasil",
+      search: "Pesquisar documentação",
+    },
     ko: { displayName: "한국어", search: "문서 검색" },
     ar: { displayName: "العربية", search: "البحث في الوثائق" },
     hi: { displayName: "हिन्दी", search: "दस्तावेज़ खोजें" },
@@ -37,9 +40,9 @@ const LangLayout = async ({
   const isRtl = RTL_LANGUAGES.has(lang);
 
   return (
-    <div dir={isRtl ? "rtl" : "ltr"}>
-      <RootProvider i18n={provider(lang)}>{children}</RootProvider>
-    </div>
+    <RootProvider i18n={provider(lang)} dir={isRtl ? "rtl" : "ltr"}>
+      {children}
+    </RootProvider>
   );
 };
 
