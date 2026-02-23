@@ -82,6 +82,24 @@ export interface Translation {
     needsWork: string;
     critical: string;
   };
+  share: {
+    myProject: string;
+    tweetSuffix: string;
+    runOnCodebase: string;
+    shareOnX: string;
+    shareOnLinkedIn: string;
+    addBadgeToReadme: string;
+    openSvg: string;
+    copy: string;
+    copied: string;
+    error: string;
+    errors: string;
+    warning: string;
+    warnings: string;
+    across: string;
+    file: string;
+    files: string;
+  };
   fumadocs: {
     displayName: string;
     search: string;

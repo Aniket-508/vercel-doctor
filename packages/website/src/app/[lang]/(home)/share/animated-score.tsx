@@ -35,12 +35,12 @@ const AnimatedScore = ({ targetScore }: { targetScore: number }) => {
 
   return (
     <>
-      <div className="mb-2 pl-2 font-mono">
+      <div className="mb-2 font-mono">
         <span className={colorClass}>{animatedScore}</span>
         {` / ${PERFECT_SCORE}  `}
         <span className={colorClass}>{getScoreLabel(animatedScore)}</span>
       </div>
-      <div className="mb-6 pl-2">
+      <div className="mb-6">
         <ScoreBar score={animatedScore} barWidth={SCORE_BAR_WIDTH} />
       </div>
     </>

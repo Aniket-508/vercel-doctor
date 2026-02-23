@@ -1,168 +1,49 @@
 import type { Metadata } from "next";
-import { COMMAND } from "@/constants/command";
-import { PERFECT_SCORE } from "@/constants/score";
-import { SITE } from "@/constants/site";
-import getScoreLabel from "@/utils/get-score-label";
-import getScoreColorClass from "@/utils/get-score-color-class";
-import clampScore from "@/utils/clamp-score";
-import DoctorFace from "@/components/doctor-face";
-import AnimatedScore from "./animated-score";
-import BadgeSnippet from "./badge-snippet";
+import { HomeLayout } from "fumadocs-ui/layouts/home";
+import { RootProvider } from "fumadocs-ui/provider/next";
+import { provider } from "@/lib/i18n";
+import { baseOptions } from "@/lib/layout.shared";
+import {
+  getShareSearchParamsFromRecord,
+  type ShareSearchParams,
+} from "@/utils/get-share-page-data";
+import LocalizedSharePage, {
+  generateMetadata as generateLocalizedShareMetadata,
+} from "../[lang]/(home)/share/page";
 
-const X_ICON_PATH =
-  "M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z";
-const LINKEDIN_ICON_PATH =
-  "M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z";
+const DEFAULT_LANG = "en";
 
-interface ShareSearchParams {
-  p?: string;
-  s?: string;
-  e?: string;
-  w?: string;
-  f?: string;
+interface SharePageSearchParams {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-const SHARE_BASE_URL = `${SITE.URL}/share`;
+const getNormalizedShareSearchParams = async (
+  searchParams: Promise<Record<string, string | string[] | undefined>>,
+): Promise<ShareSearchParams> => getShareSearchParamsFromRecord(await searchParams);
 
 export const generateMetadata = async ({
   searchParams,
-}: {
-  searchParams: Promise<ShareSearchParams>;
-}): Promise<Metadata> => {
-  const resolvedParams = await searchParams;
-  const projectName = resolvedParams.p ?? null;
-  const score = clampScore(Number(resolvedParams.s) || 0);
-  const errorCount = Math.max(0, Number(resolvedParams.e) || 0);
-  const warningCount = Math.max(0, Number(resolvedParams.w) || 0);
-  const label = getScoreLabel(score);
+}: SharePageSearchParams): Promise<Metadata> => {
+  const normalizedSearchParams = getNormalizedShareSearchParams(searchParams);
 
-  const titlePrefix = projectName ? `${projectName} - ` : "";
-  const title = `Vercel Doctor - ${titlePrefix}Score: ${score}/${PERFECT_SCORE} (${label})`;
-  const descriptionParts: string[] = [];
-  if (errorCount > 0) descriptionParts.push(`${errorCount} error${errorCount === 1 ? "" : "s"}`);
-  if (warningCount > 0)
-    descriptionParts.push(`${warningCount} warning${warningCount === 1 ? "" : "s"}`);
-  const description =
-    descriptionParts.length > 0
-      ? `${descriptionParts.join(
-          ", ",
-        )} found. Run vercel-doctor on your codebase to reduce your Vercel bill.`
-      : "Run vercel-doctor on your codebase to reduce your Vercel bill.";
-
-  const ogSearchParams = new URLSearchParams();
-  if (resolvedParams.p) ogSearchParams.set("p", resolvedParams.p);
-  if (resolvedParams.s) ogSearchParams.set("s", resolvedParams.s);
-  if (resolvedParams.e) ogSearchParams.set("e", resolvedParams.e);
-  if (resolvedParams.w) ogSearchParams.set("w", resolvedParams.w);
-  if (resolvedParams.f) ogSearchParams.set("f", resolvedParams.f);
-  const ogImageUrl = `/share/og?${ogSearchParams.toString()}`;
-
-  return {
-    title,
-    description,
-    openGraph: { title, description, images: [ogImageUrl] },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: [ogImageUrl],
-    },
-  };
+  return generateLocalizedShareMetadata({
+    params: Promise.resolve({ lang: DEFAULT_LANG }),
+    searchParams: normalizedSearchParams,
+  });
 };
 
-const SharePage = async ({ searchParams }: { searchParams: Promise<ShareSearchParams> }) => {
-  const resolvedParams = await searchParams;
-  const projectName = resolvedParams.p ?? null;
-  const score = clampScore(Number(resolvedParams.s) || 0);
-  const errorCount = Math.max(0, Number(resolvedParams.e) || 0);
-  const warningCount = Math.max(0, Number(resolvedParams.w) || 0);
-  const fileCount = Math.max(0, Number(resolvedParams.f) || 0);
-  const label = getScoreLabel(score);
-  const colorClass = getScoreColorClass(score);
-
-  const shareSearchParams = new URLSearchParams();
-  if (resolvedParams.p) shareSearchParams.set("p", resolvedParams.p);
-  if (resolvedParams.s) shareSearchParams.set("s", resolvedParams.s);
-  if (resolvedParams.e) shareSearchParams.set("e", resolvedParams.e);
-  if (resolvedParams.w) shareSearchParams.set("w", resolvedParams.w);
-  if (resolvedParams.f) shareSearchParams.set("f", resolvedParams.f);
-  const shareUrl = `${SHARE_BASE_URL}?${shareSearchParams.toString()}`;
-
-  const projectLabel = projectName ? `${projectName} ` : "My Next.js project ";
-  const tweetText = `${projectLabel}scored ${score}/${PERFECT_SCORE} (${label}) on Vercel Doctor. Run it on yours:`;
-  const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-    tweetText,
-  )}&url=${encodeURIComponent(shareUrl)}`;
-  const linkedinShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
-    shareUrl,
-  )}`;
+const SharePage = async ({ searchParams }: SharePageSearchParams) => {
+  const normalizedSearchParams = getNormalizedShareSearchParams(searchParams);
 
   return (
-    <div className="mx-auto min-h-screen w-full max-w-3xl bg-[#0a0a0a] p-6 pb-32 font-mono text-base leading-relaxed text-neutral-300 sm:p-8 sm:pb-40 sm:text-lg">
-      <div className="mb-6">
-        {projectName && <div className="mb-4 text-xl text-white">{projectName}</div>}
-        <DoctorFace score={score} />
-        <div className="mt-2 text-neutral-500">
-          Vercel Doctor{" "}
-          <span className="text-neutral-600">({SITE.URL.replace(/^https?:\/\//, "")})</span>
-        </div>
-      </div>
-
-      <AnimatedScore targetScore={score} />
-
-      {(errorCount > 0 || warningCount > 0 || fileCount > 0) && (
-        <div className="mb-8 pl-2">
-          {errorCount > 0 && (
-            <span className={colorClass}>
-              {errorCount} error{errorCount === 1 ? "" : "s"}
-            </span>
-          )}
-          {warningCount > 0 && (
-            <span className="text-yellow-500">
-              {"  "}
-              {warningCount} warning{warningCount === 1 ? "" : "s"}
-            </span>
-          )}
-          {fileCount > 0 && (
-            <span className="text-neutral-500">
-              {"  "}across {fileCount} file{fileCount === 1 ? "" : "s"}
-            </span>
-          )}
-        </div>
-      )}
-
-      <div className="text-neutral-500">Run it on your codebase:</div>
-      <div className="mt-2">
-        <span className="border border-white/20 px-3 py-1.5 text-white">{COMMAND}</span>
-      </div>
-
-      <div className="mt-8 flex flex-wrap items-center gap-3">
-        <a
-          href={twitterShareUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap border border-white/20 bg-white px-3 py-1.5 text-black transition-all hover:bg-white/90 active:scale-[0.98]"
-        >
-          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-            <path d={X_ICON_PATH} />
-          </svg>
-          Share on X
-        </a>
-        <a
-          href={linkedinShareUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap border border-white/20 bg-white px-3 py-1.5 text-black transition-all hover:bg-white/90 active:scale-[0.98]"
-        >
-          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-            <path d={LINKEDIN_ICON_PATH} />
-          </svg>
-          Share on LinkedIn
-        </a>
-      </div>
-
-      <BadgeSnippet searchParamsString={shareSearchParams.toString()} />
-    </div>
+    <RootProvider i18n={provider(DEFAULT_LANG)} dir="ltr">
+      <HomeLayout {...baseOptions(DEFAULT_LANG)}>
+        <LocalizedSharePage
+          params={Promise.resolve({ lang: DEFAULT_LANG })}
+          searchParams={normalizedSearchParams}
+        />
+      </HomeLayout>
+    </RootProvider>
   );
 };
 
