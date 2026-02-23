@@ -33,9 +33,10 @@ const BadgeSnippet = ({ searchParamsString, lang, translation }: BadgeSnippetPro
   };
 
   return (
-    <div className="mt-8">
-      <div className="text-fd-muted-foreground">{translation.share.addBadgeToReadme}</div>
-      <div className="mt-3 flex flex-wrap items-center gap-3">
+    <div className="space-y-3">
+      <p className="text-fd-muted-foreground">{translation.share.addBadgeToReadme}</p>
+
+      <div className="flex flex-wrap items-center gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={badgePreviewPath} alt="Vercel Doctor score badge" height={20} className="block" />
         <a
@@ -48,8 +49,8 @@ const BadgeSnippet = ({ searchParamsString, lang, translation }: BadgeSnippetPro
         </a>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-start gap-2">
-        <code className="min-w-0 flex-1 break-all rounded-md border border-fd-border bg-fd-muted/50 px-3 py-1.5 text-xs text-fd-foreground">
+      <div className="flex flex-col sm:flex-row gap-2">
+        <code className="min-w-0 flex-1 break-all rounded-md border flex items-center border-fd-border bg-fd-muted/50 px-3 py-1.75 text-xs text-fd-foreground">
           {markdownSnippet}
         </code>
         <Button type="button" variant="outline" size="sm" onClick={handleCopy} className="shrink-0">

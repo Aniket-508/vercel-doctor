@@ -87,65 +87,68 @@ const SharePage = async ({
   return (
     <>
       <SectionContainer className="flex-1 flex flex-col">
-        <SectionContent className="w-full flex flex-col flex-1 gap-6 px-4 py-8 md:px-12 md:py-16">
-          <div className="mb-2">
-            {projectName && <div className="mb-4 text-xl text-fd-foreground">{projectName}</div>}
-            <DoctorFace score={score} />
-            <div className="mt-2 text-fd-muted-foreground">
-              {SITE.NAME}{" "}
-              <span className="text-fd-muted-foreground/80">
-                ({SITE.URL.replace(/^https?:\/\//, "")})
-              </span>
+        <SectionContent className="w-full flex flex-col flex-1 gap-8 px-4 py-8 md:px-12 md:py-16">
+          <div className="space-y-3">
+            <div className="mb-6">
+              {projectName && <div className="mb-2 text-xl text-fd-foreground">{projectName}</div>}
+              <DoctorFace score={score} />
+              <div className="mt-2 text-fd-muted-foreground">
+                {SITE.NAME}{" "}
+                <span className="text-fd-muted-foreground/80">
+                  ({SITE.URL.replace(/^https?:\/\//, "")})
+                </span>
+              </div>
             </div>
+
+            <AnimatedScore targetScore={score} />
+
+            {(errorCount > 0 || warningCount > 0 || fileCount > 0) && (
+              <>
+                {errorCount > 0 && (
+                  <span className={colorClass}>
+                    {errorCount}{" "}
+                    {errorCount === 1 ? translation.share.error : translation.share.errors}
+                  </span>
+                )}
+                {warningCount > 0 && (
+                  <span className="text-yellow-500">
+                    {"  "}
+                    {warningCount}{" "}
+                    {warningCount === 1 ? translation.share.warning : translation.share.warnings}
+                  </span>
+                )}
+                {fileCount > 0 && (
+                  <span className="text-fd-muted-foreground">
+                    {"  "}
+                    {translation.share.across} {fileCount}{" "}
+                    {fileCount === 1 ? translation.share.file : translation.share.files}
+                  </span>
+                )}
+              </>
+            )}
           </div>
 
-          <AnimatedScore targetScore={score} />
+          <div className="space-y-3">
+            <div className="text-fd-muted-foreground">{translation.share.runOnCodebase}</div>
 
-          {(errorCount > 0 || warningCount > 0 || fileCount > 0) && (
-            <>
-              {errorCount > 0 && (
-                <span className={colorClass}>
-                  {errorCount}{" "}
-                  {errorCount === 1 ? translation.share.error : translation.share.errors}
-                </span>
-              )}
-              {warningCount > 0 && (
-                <span className="text-yellow-500">
-                  {"  "}
-                  {warningCount}{" "}
-                  {warningCount === 1 ? translation.share.warning : translation.share.warnings}
-                </span>
-              )}
-              {fileCount > 0 && (
-                <span className="text-fd-muted-foreground">
-                  {"  "}
-                  {translation.share.across} {fileCount}{" "}
-                  {fileCount === 1 ? translation.share.file : translation.share.files}
-                </span>
-              )}
-            </>
-          )}
-
-          <div className="text-fd-muted-foreground">{translation.share.runOnCodebase}</div>
-          <div>
-            <code className="inline-block rounded-md border border-fd-border bg-fd-muted/50 px-3 py-1.5 text-fd-foreground">
+            <code className="inline-block rounded-md border border-fd-border bg-fd-muted/50 px-3 py-1.25 text-fd-foreground">
               {COMMAND}
             </code>
-          </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <Button asChild variant="default" size="sm">
-              <a href={twitterShareUrl} target="_blank" rel="noreferrer">
-                <XIcon />
-                {translation.share.shareOnX}
-              </a>
-            </Button>
-            <Button asChild variant="outline" size="sm">
-              <a href={linkedinShareUrl} target="_blank" rel="noreferrer">
-                <LinkedInIcon />
-                {translation.share.shareOnLinkedIn}
-              </a>
-            </Button>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button asChild variant="default">
+                <a href={twitterShareUrl} target="_blank" rel="noreferrer">
+                  <XIcon />
+                  {translation.share.shareOnX}
+                </a>
+              </Button>
+              <Button asChild variant="outline">
+                <a href={linkedinShareUrl} target="_blank" rel="noreferrer">
+                  <LinkedInIcon />
+                  {translation.share.shareOnLinkedIn}
+                </a>
+              </Button>
+            </div>
           </div>
 
           <BadgeSnippet
