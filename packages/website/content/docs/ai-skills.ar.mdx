@@ -3,13 +3,14 @@ title: مهارات AI
 description: تثبيت Vercel Doctor كمهارة لمساعدي الترميز بالذكاء الاصطناعي.
 ---
 
+import { SKILLS_COMMAND } from "@/constants/command";
+import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
+
 يمكن تثبيت Vercel Doctor كمهارة لمساعدي الترميز بالذكاء الاصطناعي. بمجرد التثبيت، سيُقترح مساعد الذكاء الاصطناعي تلقائياً تشغيل Vercel Doctor بعد إجراء تغييرات على مشاريع Next.js.
 
 ## تثبيت بسطر واحد
 
-```bash
-npx skills add vercel-doctor
-```
+<DynamicCodeBlock lang="bash" code={SKILLS_COMMAND} />
 
 أو التثبيت عبر curl:
 

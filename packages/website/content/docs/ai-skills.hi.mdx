@@ -3,13 +3,14 @@ title: AI Skills
 description: AI coding assistants के लिए skill के रूप में Vercel Doctor इंस्टॉल करें।
 ---
 
+import { SKILLS_COMMAND } from "@/constants/command";
+import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
+
 Vercel Doctor को AI coding assistants के लिए skill के रूप में इंस्टॉल किया जा सकता है। एक बार इंस्टॉल होने पर, आपका AI assistant Next.js प्रोजेक्ट में बदलाव करने के बाद स्वचालित रूप से Vercel Doctor चलाने का सुझाव देगा।
 
 ## One-line install
 
-```bash
-npx skills add vercel-doctor
-```
+<DynamicCodeBlock lang="bash" code={SKILLS_COMMAND} />
 
 या curl के माध्यम से इंस्टॉल करें:
 

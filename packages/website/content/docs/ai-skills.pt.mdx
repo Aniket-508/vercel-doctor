@@ -3,13 +3,14 @@ title: AI Skills
 description: Instale o Vercel Doctor como skill para assistentes de codificação com IA.
 ---
 
+import { SKILLS_COMMAND } from "@/constants/command";
+import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
+
 O Vercel Doctor pode ser instalado como skill para assistentes de codificação com IA. Após a instalação, seu assistente de IA sugerirá automaticamente executar o Vercel Doctor após alterações em projetos Next.js.
 
 ## Instalação em uma linha
 
-```bash
-npx skills add vercel-doctor
-```
+<DynamicCodeBlock lang="bash" code={SKILLS_COMMAND} />
 
 Ou instale via curl:
 

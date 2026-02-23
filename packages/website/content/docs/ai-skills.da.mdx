@@ -3,13 +3,14 @@ title: AI-færdigheder
 description: Installer Vercel Doctor som en færdighed til AI-kodningsassistenter.
 ---
 
+import { SKILLS_COMMAND } from "@/constants/command";
+import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
+
 Vercel Doctor kan installeres som en færdighed til AI-kodningsassistenter. Når den er installeret, vil din AI-assistent automatisk foreslå at køre Vercel Doctor efter ændringer i Next.js-projekter.
 
 ## Installation med én kommando
 
-```bash
-npx skills add vercel-doctor
-```
+<DynamicCodeBlock lang="bash" code={SKILLS_COMMAND} />
 
 Eller installer via curl:
 
