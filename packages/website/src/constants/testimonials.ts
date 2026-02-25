@@ -38,6 +38,14 @@ export const TESTIMONIALS_ROW_ONE: Testimonial[] = [
     url: "https://www.reddit.com/r/vercel/comments/1r9umkt/comment/o6fqqys",
     quote: "Looks good!!!",
   },
+  {
+    authorAvatar: "https://unavatar.io/x/AmyAEgan",
+    authorName: "Amy Egan",
+    authorTagline: "Community @Vercel",
+    url: "https://community.vercel.com/t/kept-seeing-racked-up-vercel-bills-every-now-and-then-built-a-tool-to-fix-this-once-and-for-all/34159/3?u=aniket-508",
+    quote:
+      "Love that you saw a problem and found a way to solve it with a very smart solution. And it's open source 😍",
+  },
 ];
 
 export const TESTIMONIALS_ROW_TWO: Testimonial[] = [
