@@ -22,6 +22,9 @@ interface CliFlags {
   offline: boolean;
   project?: string;
   diff?: boolean | string;
+  output?: "human" | "json" | "markdown";
+  report?: string;
+  aiPrompts?: string;
 }
 
 const exitWithFixHint = () => {
@@ -83,6 +86,12 @@ const program = new Command()
   .option("--project <name>", "select workspace project (comma-separated for multiple)")
   .option("--diff [base]", "scan only files changed vs base branch")
   .option("--offline", "skip telemetry (anonymous, not stored, only used to calculate score)")
+  .option("--output <format>", 'output format: "human" (default), "json", or "markdown"')
+  .option("--report <file>", "write human-readable report to file")
+  .option(
+    "--ai-prompts <file>",
+    "write AI fix prompts to JSON file for use with Cursor/Claude/Windsurf",
+  )
   .action(async (directory: string, flags: CliFlags) => {
     const isScoreOnly = flags.score;
 
@@ -106,6 +115,9 @@ const program = new Command()
         verbose: isCliOverride("verbose") ? Boolean(flags.verbose) : (userConfig?.verbose ?? false),
         scoreOnly: isScoreOnly,
         offline: flags.offline,
+        output: flags.output ?? "human",
+        reportFile: flags.report,
+        aiPromptsFile: flags.aiPrompts,
       };
 
       const isAutomatedEnvironment = [

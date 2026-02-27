@@ -19,6 +19,12 @@ import { calculateScore } from "./utils/calculate-score.js";
 import { discoverProject, formatFrameworkName } from "./utils/discover-project.js";
 import { filterIgnoredDiagnostics } from "./utils/filter-diagnostics.js";
 import { type FramedLine, createFramedLine, printFramedBox } from "./utils/framed-box.js";
+import {
+  generateAIPrompts,
+  generateAIPromptsMarkdown,
+  generateHumanReadableReport,
+  generateMarkdownReport,
+} from "./utils/generate-report.js";
 import { groupBy } from "./utils/group-by.js";
 import { highlighter } from "./utils/highlighter.js";
 import { indentMultilineText } from "./utils/indent-multiline-text.js";
@@ -332,6 +338,9 @@ export const scan = async (
     scoreOnly: inputOptions.scoreOnly ?? false,
     offline: inputOptions.offline ?? false,
     includePaths: inputOptions.includePaths,
+    output: inputOptions.output ?? "human",
+    reportFile: inputOptions.reportFile,
+    aiPromptsFile: inputOptions.aiPromptsFile,
   };
 
   const includePaths = options.includePaths ?? [];
@@ -482,6 +491,44 @@ export const scan = async (
     displayedSourceFileCount,
     noScoreMessage,
   );
+
+  if (options.output === "markdown" || options.reportFile) {
+    const markdownReport = generateMarkdownReport(diagnostics, projectInfo.projectName);
+    if (options.reportFile) {
+      writeFileSync(options.reportFile, markdownReport);
+      logger.break();
+      logger.success(`Report written to ${options.reportFile}`);
+    } else if (options.output === "markdown") {
+      logger.break();
+      logger.log(markdownReport);
+    }
+  }
+
+  if (options.output === "human") {
+    const humanReport = generateHumanReadableReport(diagnostics);
+    logger.break();
+    logger.log(humanReport);
+  }
+
+  if (options.aiPromptsFile) {
+    const isMarkdown =
+      options.aiPromptsFile.endsWith(".md") || options.aiPromptsFile.endsWith(".markdown");
+
+    if (isMarkdown) {
+      const markdownContent = generateAIPromptsMarkdown(diagnostics);
+      writeFileSync(options.aiPromptsFile, markdownContent);
+      logger.break();
+      logger.success(`AI prompts (Markdown) written to ${options.aiPromptsFile}`);
+      logger.dim(`Open this file and copy any prompt to paste into Cursor, Claude, or Windsurf.`);
+    } else {
+      const aiPrompts = generateAIPrompts(diagnostics);
+      const promptsObject = Object.fromEntries(aiPrompts.entries());
+      writeFileSync(options.aiPromptsFile, JSON.stringify(promptsObject, null, 2));
+      logger.break();
+      logger.success(`AI prompts (JSON) written to ${options.aiPromptsFile}`);
+      logger.dim(`Use these prompts with Cursor, Claude, Windsurf, or other AI coding tools.`);
+    }
+  }
 
   return { diagnostics, scoreResult };
 };
