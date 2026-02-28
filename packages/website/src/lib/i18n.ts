@@ -23,6 +23,7 @@ export const i18n = defineI18n({
     "uk",
   ],
   hideLocale: "default-locale",
+  parser: "dir",
 });
 
 export const { provider } = defineI18nUI(i18n, {
