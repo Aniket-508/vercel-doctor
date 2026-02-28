@@ -192,6 +192,8 @@ fi
 echo "Done! The skill will activate when working on Next.js projects."
 `;
 
+export const dynamic = "force-static";
+
 export const GET = (): Response =>
   new Response(INSTALL_SCRIPT, {
     headers: {

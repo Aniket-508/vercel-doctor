@@ -6,7 +6,10 @@ import { LINK } from "@/constants/links";
 import { SPONSORS } from "@/constants/sponsors";
 import type { Sponsor } from "@/constants/sponsors";
 import { Button } from "@/components/ui/button";
+import { i18n } from "@/lib/i18n";
 import { getTranslation } from "@/translations";
+
+export const generateStaticParams = () => i18n.languages.map((lang) => ({ lang }));
 
 const SponsorCard = ({ sponsor }: { sponsor: Sponsor }) => (
   <a
