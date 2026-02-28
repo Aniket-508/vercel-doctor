@@ -5,6 +5,7 @@ import { LINK } from "@/constants/links";
 import { SPONSORS } from "@/constants/sponsors";
 import type { Sponsor } from "@/constants/sponsors";
 import { getTranslation } from "@/translations";
+import { i18n } from "@/lib/i18n";
 
 const GRID_SIZE = 16;
 
@@ -54,10 +55,10 @@ const SponsorCell = ({ sponsor, isLastCell }: { sponsor: Sponsor | null; isLastC
 };
 
 interface SponsorsProps {
-  lang?: string;
+  lang?: (typeof i18n.languages)[number];
 }
 
-export const Sponsors = ({ lang = "en" }: SponsorsProps) => {
+export const Sponsors = ({ lang = i18n.defaultLanguage }: SponsorsProps) => {
   const translation = getTranslation(lang);
   const sponsorSlots = SPONSORS.slice(0, GRID_SIZE);
 

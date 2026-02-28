@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { HomeLayout } from "fumadocs-ui/layouts/home";
 import { RootProvider } from "fumadocs-ui/provider/next";
-import { provider } from "@/lib/i18n";
+import { i18n, provider } from "@/lib/i18n";
 import { baseOptions } from "@/lib/layout.shared";
 import {
   getShareSearchParamsFromRecord,
@@ -11,7 +11,7 @@ import LocalizedSharePage, {
   generateMetadata as generateLocalizedShareMetadata,
 } from "../[lang]/(home)/share/page";
 
-const DEFAULT_LANG = "en";
+const DEFAULT_LANG = i18n.defaultLanguage;
 
 interface SharePageSearchParams {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

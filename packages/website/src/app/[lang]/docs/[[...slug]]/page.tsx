@@ -53,7 +53,7 @@ export async function generateMetadata({ params }: DocsPageProps): Promise<Metad
   const languages: Record<string, string> = Object.fromEntries(
     i18n.languages.map((locale) => [locale, getLocalizedPath(locale, docPath)]),
   );
-  languages["x-default"] = getLocalizedPath("en", docPath);
+  languages["x-default"] = getLocalizedPath(i18n.defaultLanguage, docPath);
 
   return {
     title: page.data.title,
