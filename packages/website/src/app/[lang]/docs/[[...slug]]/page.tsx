@@ -1,5 +1,5 @@
 import { LINK } from "@/constants/links";
-import { LANGUAGES } from "@/lib/i18n";
+import { i18n } from "@/lib/i18n";
 import { getPageImage, source } from "@/lib/source";
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from "fumadocs-ui/layouts/docs/page";
 import { createRelativeLink } from "fumadocs-ui/mdx";
@@ -51,7 +51,7 @@ export async function generateMetadata({ params }: DocsPageProps): Promise<Metad
   const docPath = `/docs/${page.slugs.join("/")}`;
   const canonical = getLocalizedPath(lang, docPath);
   const languages: Record<string, string> = Object.fromEntries(
-    LANGUAGES.map((locale) => [locale, getLocalizedPath(locale, docPath)]),
+    i18n.languages.map((locale) => [locale, getLocalizedPath(locale, docPath)]),
   );
   languages["x-default"] = getLocalizedPath("en", docPath);
 

@@ -1,6 +1,6 @@
 import { LINK } from "@/constants/links";
 import { SITE } from "@/constants/site";
-import { LANGUAGES } from "@/lib/i18n";
+import { i18n } from "@/lib/i18n";
 
 const LOCALE_TO_BCP47: Record<string, string> = {
   en: "en-US",
@@ -9,7 +9,7 @@ const LOCALE_TO_BCP47: Record<string, string> = {
 };
 
 const WebsiteJsonLd = () => {
-  const inLanguage = LANGUAGES.map((locale) => LOCALE_TO_BCP47[locale] ?? locale);
+  const inLanguage = i18n.languages.map((locale) => LOCALE_TO_BCP47[locale] ?? locale);
 
   const jsonLd = {
     "@context": "https://schema.org",
