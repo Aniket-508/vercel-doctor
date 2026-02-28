@@ -55,6 +55,8 @@ export async function generateMetadata({ params }: DocsPageProps): Promise<Metad
   );
   languages["x-default"] = getLocalizedPath(i18n.defaultLanguage, docPath);
 
+  const ogLocale = lang.replace("-", "_");
+
   return {
     title: page.data.title,
     description: page.data.description,
@@ -63,7 +65,24 @@ export async function generateMetadata({ params }: DocsPageProps): Promise<Metad
       languages,
     },
     openGraph: {
-      images: getPageImage(page).url,
+      title: page.data.title,
+      description: page.data.description,
+      type: "article",
+      locale: ogLocale,
+      images: [
+        {
+          url: getPageImage(page).url,
+          width: 1200,
+          height: 630,
+          alt: page.data.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: page.data.title,
+      description: page.data.description,
+      images: [getPageImage(page).url],
     },
   };
 }

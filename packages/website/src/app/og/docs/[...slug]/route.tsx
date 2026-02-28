@@ -1,8 +1,8 @@
+import DocsOgImage from "@/components/og/docs-og-image";
 import { i18n } from "@/lib/i18n";
 import { getPageImage, source } from "@/lib/source";
 import { loadFontsForLocale } from "@/utils/load-og-fonts";
 import { ImageResponse } from "@takumi-rs/image-response";
-import { generate as DefaultImage } from "fumadocs-ui/og";
 import { notFound } from "next/navigation";
 
 export const revalidate = false;
@@ -20,11 +20,7 @@ export async function GET(_req: Request, { params }: RouteContext<"/og/docs/[...
   const localeFonts = await loadFontsForLocale(locale);
 
   return new ImageResponse(
-    <DefaultImage
-      title={page.data.title}
-      description={page.data.description}
-      site="Vercel Doctor"
-    />,
+    <DocsOgImage title={page.data.title} description={page.data.description} />,
     {
       width: 1200,
       height: 630,
