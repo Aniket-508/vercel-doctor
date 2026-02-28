@@ -91,6 +91,9 @@ importers:
 
   packages/website:
     dependencies:
+      '@takumi-rs/image-response':
+        specifier: ^0.69.4
+        version: 0.69.4
       '@vercel/analytics':
         specifier: ^1.6.1
         version: 1.6.1(next@16.1.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
@@ -2553,6 +2556,71 @@ packages:
 
   '@tailwindcss/postcss@4.1.18':
     resolution: {integrity: sha512-Ce0GFnzAOuPyfV5SxjXGn0CubwGcuDB0zcdaPuCSzAa/2vII24JTkH+I6jcbXLb1ctjZMZZI6OjDaLPJQL1S0g==}
+
+  '@takumi-rs/core-darwin-arm64@0.69.4':
+    resolution: {integrity: sha512-YG1VhNMPnqC7mVt62b8c/X4uSepNBaAd0JnY/gxnlx7AyK8w35AhMF6IT7msxW3aeYl5oOPeHbto6mUi4bX+aw==}
+    engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@takumi-rs/core-darwin-x64@0.69.4':
+    resolution: {integrity: sha512-3BQI2wPA+g6l0kSLD75v/+31p5aD2bQdnAwhiR5wUZ3MMcXsSEDdBMBRqR5BUf2cP8rHCUnG5Z7/VdNLhsem/Q==}
+    engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@takumi-rs/core-linux-arm64-gnu@0.69.4':
+    resolution: {integrity: sha512-LIKCfEPPtDkbR7S2YksJv07giqJd/jU6sOajOgPRkuJFKOFzDurLTL4VHTE4862fItjqU9aKieUAWPoEFO9HYQ==}
+    engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  '@takumi-rs/core-linux-arm64-musl@0.69.4':
+    resolution: {integrity: sha512-Zq6AaSZwRu6W5wjFJ5MP2JK/JDD5DSybg2n3qwrI5bA/z8gatTzv60rMQuFHXglj26FljDyztnwZWB//t2wlzw==}
+    engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
+
+  '@takumi-rs/core-linux-x64-gnu@0.69.4':
+    resolution: {integrity: sha512-Phb38OULUH+zg7S/f2HJ8+HSEpUcrLo4S0wo8SgNtDsHNVjvofvw21+9QYqeNEF18qMrM6M0GFINsXecUBaRmg==}
+    engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@takumi-rs/core-linux-x64-musl@0.69.4':
+    resolution: {integrity: sha512-1dV24CIy55eY9yFRIPQlBHargaxdUNfYxbDXA0i3+eyRuueSHAOLVnZUkf7cCbckmivCdzqV1lMODJQ+5nhKUQ==}
+    engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
+  '@takumi-rs/core-win32-arm64-msvc@0.69.4':
+    resolution: {integrity: sha512-6Gup4rg/TvxJAkctyFrW2F6VD/qe27oz8MpQoPXki19fdoM1v8Q+p3qD0WQnn+6/ue5eAN/C4s/Icv4+GxaeiA==}
+    engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@takumi-rs/core-win32-x64-msvc@0.69.4':
+    resolution: {integrity: sha512-yWhCS/D8GVcM6H5n6xCkxgjnvEShUPpCiX3pO1UnFb8N8v/hNPjjoKBcxlTMcPlVxRYOMYml6bztr15sI4Aw3A==}
+    engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
+    cpu: [x64]
+    os: [win32]
+
+  '@takumi-rs/core@0.69.4':
+    resolution: {integrity: sha512-8KPOaTWrY+pYesqyehf+XECRteRpj9AcC9ULjAyCavOWKewOO2iZK6P7/micgY0wzg/fkc1KKkxIkXQW25wIZg==}
+    engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
+
+  '@takumi-rs/helpers@0.69.4':
+    resolution: {integrity: sha512-4BrjA3jRqmvR3OY2lkV0OGZyKdnPL04lY+mOclJp+KYNgjXXOvUl15ZS1ry21Nn60jsaINiTo7+rVH2lqNx6Dw==}
+
+  '@takumi-rs/image-response@0.69.4':
+    resolution: {integrity: sha512-rjykbtQ2g3kzUe2Bq31NOplBljFnLEsk0DZVFHe1Bj4BR5J2sp9/ZOwNgygkkUJLophrtuSZyLO0RKvoHJHCdw==}
+
+  '@takumi-rs/wasm@0.69.4':
+    resolution: {integrity: sha512-v7MKa31sLtDUsQWMVZmuCFS/uhB2nGI2a/k2GfRieWsI3HWUalvBw4/hWcpKoJ5BLpJKHl9gQXcVljdDagdC8Q==}
 
   '@tybys/wasm-util@0.10.1':
     resolution: {integrity: sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg==}
@@ -6901,14 +6969,14 @@ snapshots:
       '@remotion/media-parser': 4.0.421
       '@remotion/studio': 4.0.421(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@remotion/studio-shared': 4.0.421(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      css-loader: 5.2.7(webpack@5.105.0(esbuild@0.25.0))
+      css-loader: 5.2.7(webpack@5.105.0)
       esbuild: 0.25.0
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
       react-refresh: 0.9.0
       remotion: 4.0.421(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       source-map: 0.7.3
-      style-loader: 4.0.0(webpack@5.105.0(esbuild@0.25.0))
+      style-loader: 4.0.0(webpack@5.105.0)
       webpack: 5.105.0(esbuild@0.25.0)
     transitivePeerDependencies:
       - '@swc/core'
@@ -7341,6 +7409,51 @@ snapshots:
       postcss: 8.5.6
       tailwindcss: 4.1.18
 
+  '@takumi-rs/core-darwin-arm64@0.69.4':
+    optional: true
+
+  '@takumi-rs/core-darwin-x64@0.69.4':
+    optional: true
+
+  '@takumi-rs/core-linux-arm64-gnu@0.69.4':
+    optional: true
+
+  '@takumi-rs/core-linux-arm64-musl@0.69.4':
+    optional: true
+
+  '@takumi-rs/core-linux-x64-gnu@0.69.4':
+    optional: true
+
+  '@takumi-rs/core-linux-x64-musl@0.69.4':
+    optional: true
+
+  '@takumi-rs/core-win32-arm64-msvc@0.69.4':
+    optional: true
+
+  '@takumi-rs/core-win32-x64-msvc@0.69.4':
+    optional: true
+
+  '@takumi-rs/core@0.69.4':
+    optionalDependencies:
+      '@takumi-rs/core-darwin-arm64': 0.69.4
+      '@takumi-rs/core-darwin-x64': 0.69.4
+      '@takumi-rs/core-linux-arm64-gnu': 0.69.4
+      '@takumi-rs/core-linux-arm64-musl': 0.69.4
+      '@takumi-rs/core-linux-x64-gnu': 0.69.4
+      '@takumi-rs/core-linux-x64-musl': 0.69.4
+      '@takumi-rs/core-win32-arm64-msvc': 0.69.4
+      '@takumi-rs/core-win32-x64-msvc': 0.69.4
+
+  '@takumi-rs/helpers@0.69.4': {}
+
+  '@takumi-rs/image-response@0.69.4':
+    dependencies:
+      '@takumi-rs/core': 0.69.4
+      '@takumi-rs/helpers': 0.69.4
+      '@takumi-rs/wasm': 0.69.4
+
+  '@takumi-rs/wasm@0.69.4': {}
+
   '@tybys/wasm-util@0.10.1':
     dependencies:
       tslib: 2.8.1
@@ -7755,7 +7868,7 @@ snapshots:
       shebang-command: 2.0.0
       which: 2.0.2
 
-  css-loader@5.2.7(webpack@5.105.0(esbuild@0.25.0)):
+  css-loader@5.2.7(webpack@5.105.0):
     dependencies:
       icss-utils: 5.1.0(postcss@8.5.6)
       loader-utils: 2.0.4
@@ -9990,7 +10103,7 @@ snapshots:
 
   strip-json-comments@5.0.3: {}
 
-  style-loader@4.0.0(webpack@5.105.0(esbuild@0.25.0)):
+  style-loader@4.0.0(webpack@5.105.0):
     dependencies:
       webpack: 5.105.0(esbuild@0.25.0)
 

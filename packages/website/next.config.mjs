@@ -5,6 +5,7 @@ const withMDX = createMDX();
 /** @type {import('next').NextConfig} */
 const config = {
   reactStrictMode: true,
+  serverExternalPackages: ["@takumi-rs/image-response"],
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "unavatar.io" },
