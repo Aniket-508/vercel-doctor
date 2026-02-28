@@ -1,4 +1,3 @@
-import type { Language } from "@/lib/i18n";
 import { en } from "./en";
 import { es } from "./es";
 import { zh } from "./zh";
@@ -16,6 +15,7 @@ import { tr } from "./tr";
 import { ru } from "./ru";
 import { da } from "./da";
 import { uk } from "./uk";
+import { i18n } from "@/lib/i18n";
 
 export interface Translation {
   nav: {
@@ -106,7 +106,7 @@ export interface Translation {
   };
 }
 
-const translations: Record<Language, Translation> = {
+const translations: Record<string, Translation> = {
   en,
   es,
   zh,
@@ -127,9 +127,9 @@ const translations: Record<Language, Translation> = {
 };
 
 export const getTranslation = (locale: string): Translation =>
-  translations[locale as Language] ?? en;
+  translations[locale] ?? translations[i18n.defaultLanguage];
 
 export const getLocalizedPath = (locale: string, path: string): string => {
-  if (locale === "en") return path;
+  if (locale === i18n.defaultLanguage) return path;
   return `/${locale}${path}`;
 };
