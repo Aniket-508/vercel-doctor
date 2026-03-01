@@ -212,8 +212,9 @@ const generateAIPrompt = (context: AIPromptContext): string => {
 **Fix Strategy:**
 ${fixStrategy?.explanation || context.fixStrategy}
 
-${fixStrategy
-      ? `**Example:**
+${
+  fixStrategy
+    ? `**Example:**
 \`\`\`
 // Before:
 ${fixStrategy.before}
@@ -221,8 +222,8 @@ ${fixStrategy.before}
 // After:
 ${fixStrategy.after}
 \`\`\``
-      : ""
-    }
+    : ""
+}
 
 Instructions:
 1. Locate the issue in the specified file
@@ -366,7 +367,6 @@ export const generateAIPrompts = (diagnostics: Diagnostic[]): AIPromptEntry[] =>
     };
   });
 };
-
 
 export const generateMarkdownReport = (
   diagnostics: Diagnostic[],
