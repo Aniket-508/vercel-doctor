@@ -42,7 +42,8 @@ const CATEGORY_DESCRIPTIONS: Record<string, { description: string; impact: strin
   },
 };
 
-const RULE_FIX_STRATEGIES: Record<string, FixSuggestion> = {
+// Exported so tests can verify these keys stay in sync with registered rule names (#5)
+export const RULE_FIX_STRATEGIES: Record<string, FixSuggestion> = {
   "vercel-no-force-dynamic": {
     title: "Replace force-dynamic with revalidate",
     before: "export const dynamic = 'force-dynamic'",
@@ -211,9 +212,8 @@ const generateAIPrompt = (context: AIPromptContext): string => {
 **Fix Strategy:**
 ${fixStrategy?.explanation || context.fixStrategy}
 
-${
-  fixStrategy
-    ? `**Example:**
+${fixStrategy
+      ? `**Example:**
 \`\`\`
 // Before:
 ${fixStrategy.before}
@@ -221,8 +221,8 @@ ${fixStrategy.before}
 // After:
 ${fixStrategy.after}
 \`\`\``
-    : ""
-}
+      : ""
+    }
 
 Instructions:
 1. Locate the issue in the specified file
@@ -300,7 +300,11 @@ Summary: ${errorCount} errors, ${warningCount} warnings across ${diagnostics.len
   return report;
 };
 
-export const generateAIPromptsMarkdown = (diagnostics: Diagnostic[]): string => {
+export const generateAIPromptsMarkdown = (
+  diagnostics: Diagnostic[],
+  // #9: optional timestamp param for deterministic snapshot testing
+  timestamp = new Date().toISOString(),
+): string => {
   const fixableDiagnostics = diagnostics.filter((d) => RULE_FIX_STRATEGIES[d.rule]);
 
   if (fixableDiagnostics.length === 0) {
@@ -308,7 +312,7 @@ export const generateAIPromptsMarkdown = (diagnostics: Diagnostic[]): string => 
   }
 
   let report = `# AI Fix Prompts for Vercel Doctor Issues\n\n`;
-  report += `**Generated:** ${new Date().toISOString()}\n\n`;
+  report += `**Generated:** ${timestamp}\n\n`;
   report += `> Copy any section below and paste it into Cursor, Claude, Windsurf, or other AI coding tools.\n\n`;
   report += `---\n\n`;
 
@@ -339,11 +343,15 @@ export const generateAIPromptsMarkdown = (diagnostics: Diagnostic[]): string => 
   return report;
 };
 
-export const generateAIPrompts = (diagnostics: Diagnostic[]): Map<string, string> => {
-  const prompts = new Map<string, string>();
+// #10: Array of objects instead of Map — prevents silent key collisions when multiple
+// diagnostics share the same plugin/rule::filePath:line key.
+export interface AIPromptEntry {
+  key: string;
+  prompt: string;
+}
 
-  for (const diagnostic of diagnostics) {
-    const key = `${diagnostic.plugin}/${diagnostic.rule}`;
+export const generateAIPrompts = (diagnostics: Diagnostic[]): AIPromptEntry[] => {
+  return diagnostics.map((diagnostic) => {
     const context: AIPromptContext = {
       rule: diagnostic.rule,
       issue: diagnostic.message,
@@ -352,50 +360,26 @@ export const generateAIPrompts = (diagnostics: Diagnostic[]): Map<string, string
       severity: diagnostic.severity,
       fixStrategy: diagnostic.help,
     };
-
-    const prompt = generateAIPrompt(context);
-    prompts.set(`${key}::${diagnostic.filePath}:${diagnostic.line}`, prompt);
-  }
-
-  return prompts;
+    return {
+      key: `${diagnostic.plugin}/${diagnostic.rule}::${diagnostic.filePath}:${diagnostic.line}`,
+      prompt: generateAIPrompt(context),
+    };
+  });
 };
 
-export const generateFixableIssuesReport = (diagnostics: Diagnostic[]): string => {
-  const fixableDiagnostics = diagnostics.filter((d) => RULE_FIX_STRATEGIES[d.rule]);
 
-  if (fixableDiagnostics.length === 0) {
-    return "\nNo auto-fixable issues detected.\n";
-  }
-
-  let report = `
-🔧 Auto-Fixable Issues (${fixableDiagnostics.length} issues)
-═══════════════════════════════════════════════════════════════
-
-These issues have known fix patterns that can be applied automatically:\n`;
-
-  for (const diagnostic of fixableDiagnostics) {
-    const fix = RULE_FIX_STRATEGIES[diagnostic.rule];
-    if (!fix) continue;
-
-    report += `\n${fix.title}\n`;
-    report += `${"─".repeat(fix.title.length)}\n`;
-    report += `File: ${diagnostic.filePath}:${diagnostic.line}\n`;
-    report += `Issue: ${diagnostic.message}\n\n`;
-    report += `Suggested change:\n`;
-    report += `  Before: ${fix.before}\n`;
-    report += `  After:  ${fix.after}\n`;
-  }
-
-  return report;
-};
-
-export const generateMarkdownReport = (diagnostics: Diagnostic[], projectName: string): string => {
+export const generateMarkdownReport = (
+  diagnostics: Diagnostic[],
+  projectName: string,
+  // #9: optional timestamp param for deterministic snapshot testing
+  timestamp = new Date().toISOString(),
+): string => {
   const sections = groupDiagnosticsByCategory(diagnostics);
   const errorCount = diagnostics.filter((d) => d.severity === "error").length;
   const warningCount = diagnostics.filter((d) => d.severity === "warning").length;
 
   let report = `# Vercel Doctor Report: ${projectName}\n\n`;
-  report += `**Generated:** ${new Date().toISOString()}\n\n`;
+  report += `**Generated:** ${timestamp}\n\n`;
   report += `## Summary\n\n`;
   report += `- **Total Issues:** ${diagnostics.length}\n`;
   report += `- **Errors:** ${errorCount}\n`;

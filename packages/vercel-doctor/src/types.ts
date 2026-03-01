@@ -103,8 +103,6 @@ export interface ScanOptions {
   offline?: boolean;
   includePaths?: string[];
   output?: "human" | "json" | "markdown";
-  reportFile?: string;
-  aiPromptsFile?: string;
 }
 
 export interface DiffInfo {

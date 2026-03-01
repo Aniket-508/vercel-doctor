@@ -19,12 +19,7 @@ import { calculateScore } from "./utils/calculate-score.js";
 import { discoverProject, formatFrameworkName } from "./utils/discover-project.js";
 import { filterIgnoredDiagnostics } from "./utils/filter-diagnostics.js";
 import { type FramedLine, createFramedLine, printFramedBox } from "./utils/framed-box.js";
-import {
-  generateAIPrompts,
-  generateAIPromptsMarkdown,
-  generateHumanReadableReport,
-  generateMarkdownReport,
-} from "./utils/generate-report.js";
+import { generateMarkdownReport } from "./utils/generate-report.js";
 import { groupBy } from "./utils/group-by.js";
 import { highlighter } from "./utils/highlighter.js";
 import { indentMultilineText } from "./utils/indent-multiline-text.js";
@@ -339,8 +334,6 @@ export const scan = async (
     offline: inputOptions.offline ?? false,
     includePaths: inputOptions.includePaths,
     output: inputOptions.output ?? "human",
-    reportFile: inputOptions.reportFile,
-    aiPromptsFile: inputOptions.aiPromptsFile,
   };
 
   const includePaths = options.includePaths ?? [];
@@ -467,6 +460,12 @@ export const scan = async (
     return { diagnostics, scoreResult };
   }
 
+  // #2: JSON output — emit structured data and return early (no terminal UI)
+  if (options.output === "json") {
+    logger.log(JSON.stringify({ diagnostics, scoreResult }, null, 2));
+    return { diagnostics, scoreResult };
+  }
+
   if (diagnostics.length === 0) {
     logger.success("No issues found!");
     logger.break();
@@ -479,55 +478,25 @@ export const scan = async (
     return { diagnostics, scoreResult };
   }
 
-  printDiagnostics(diagnostics, options.verbose);
-
   const displayedSourceFileCount = isDiffMode ? includePaths.length : projectInfo.sourceFileCount;
 
-  printSummary(
-    diagnostics,
-    elapsedMilliseconds,
-    scoreResult,
-    projectInfo.projectName,
-    displayedSourceFileCount,
-    noScoreMessage,
-  );
-
-  if (options.output === "markdown" || options.reportFile) {
-    const markdownReport = generateMarkdownReport(diagnostics, projectInfo.projectName);
-    if (options.reportFile) {
-      writeFileSync(options.reportFile, markdownReport);
-      logger.break();
-      logger.success(`Report written to ${options.reportFile}`);
-    } else if (options.output === "markdown") {
-      logger.break();
-      logger.log(markdownReport);
-    }
-  }
-
+  // #1: "human" is the sole terminal format — printDiagnostics/printSummary only run here.
+  // "markdown" to stdout is handled by cli.ts after scan() returns.
   if (options.output === "human") {
-    const humanReport = generateHumanReadableReport(diagnostics);
+    printDiagnostics(diagnostics, options.verbose);
+    printSummary(
+      diagnostics,
+      elapsedMilliseconds,
+      scoreResult,
+      projectInfo.projectName,
+      displayedSourceFileCount,
+      noScoreMessage,
+    );
+  } else if (options.output === "markdown") {
+    // Markdown to stdout — #4: file writes are handled by cli.ts
+    const markdownReport = generateMarkdownReport(diagnostics, projectInfo.projectName);
     logger.break();
-    logger.log(humanReport);
-  }
-
-  if (options.aiPromptsFile) {
-    const isMarkdown =
-      options.aiPromptsFile.endsWith(".md") || options.aiPromptsFile.endsWith(".markdown");
-
-    if (isMarkdown) {
-      const markdownContent = generateAIPromptsMarkdown(diagnostics);
-      writeFileSync(options.aiPromptsFile, markdownContent);
-      logger.break();
-      logger.success(`AI prompts (Markdown) written to ${options.aiPromptsFile}`);
-      logger.dim(`Open this file and copy any prompt to paste into Cursor, Claude, or Windsurf.`);
-    } else {
-      const aiPrompts = generateAIPrompts(diagnostics);
-      const promptsObject = Object.fromEntries(aiPrompts.entries());
-      writeFileSync(options.aiPromptsFile, JSON.stringify(promptsObject, null, 2));
-      logger.break();
-      logger.success(`AI prompts (JSON) written to ${options.aiPromptsFile}`);
-      logger.dim(`Use these prompts with Cursor, Claude, Windsurf, or other AI coding tools.`);
-    }
+    logger.log(markdownReport);
   }
 
   return { diagnostics, scoreResult };
