@@ -102,6 +102,7 @@ export interface ScanOptions {
   scoreOnly?: boolean;
   offline?: boolean;
   includePaths?: string[];
+  output?: "human" | "json" | "markdown";
 }
 
 export interface DiffInfo {
