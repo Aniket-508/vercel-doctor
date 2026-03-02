@@ -13,9 +13,17 @@ import {
   SCORE_GOOD_THRESHOLD,
   SCORE_OK_THRESHOLD,
   SHARE_BASE_URL,
+  VERCEL_DOCTOR_BRAND_LABEL,
+  VERCEL_DOCTOR_BRAND_NAME,
+  VERCEL_DOCTOR_WEBSITE_LABEL,
 } from "./constants.js";
 import type { Diagnostic, ScanOptions, ScanResult, ScoreResult } from "./types.js";
 import { calculateScore } from "./utils/calculate-score.js";
+import {
+  colorizeDiagnosticSeverity,
+  DIAGNOSTIC_SEVERITY_ORDER,
+  DIAGNOSTIC_SEVERITY_SYMBOLS,
+} from "./utils/diagnostic-severity.js";
 import { discoverProject, formatFrameworkName } from "./utils/discover-project.js";
 import { filterIgnoredDiagnostics } from "./utils/filter-diagnostics.js";
 import { type FramedLine, createFramedLine, printFramedBox } from "./utils/framed-box.js";
@@ -28,6 +36,7 @@ import { logger } from "./utils/logger.js";
 import { runKnip } from "./utils/run-knip.js";
 import { runOxlint } from "./utils/run-oxlint.js";
 import { runVercelChecks } from "./utils/run-vercel-checks.js";
+import { summarizeDiagnostics } from "./utils/summarize-diagnostics.js";
 import { spinner } from "./utils/spinner.js";
 
 interface ScoreBarSegments {
@@ -35,23 +44,17 @@ interface ScoreBarSegments {
   emptySegment: string;
 }
 
-const SEVERITY_ORDER: Record<Diagnostic["severity"], number> = {
-  error: 0,
-  warning: 1,
-};
-
-const colorizeBySeverity = (text: string, severity: Diagnostic["severity"]): string =>
-  severity === "error" ? highlighter.error(text) : highlighter.warn(text);
-
 const sortBySeverity = (diagnosticGroups: [string, Diagnostic[]][]): [string, Diagnostic[]][] =>
   diagnosticGroups.toSorted(([, diagnosticsA], [, diagnosticsB]) => {
-    const severityA = SEVERITY_ORDER[diagnosticsA[0].severity];
-    const severityB = SEVERITY_ORDER[diagnosticsB[0].severity];
+    const severityA = DIAGNOSTIC_SEVERITY_ORDER[diagnosticsA[0].severity];
+    const severityB = DIAGNOSTIC_SEVERITY_ORDER[diagnosticsB[0].severity];
     return severityA - severityB;
   });
 
-const collectAffectedFiles = (diagnostics: Diagnostic[]): Set<string> =>
-  new Set(diagnostics.map((diagnostic) => diagnostic.filePath));
+const getSortedRuleGroups = (diagnostics: Diagnostic[]): [string, Diagnostic[]][] =>
+  sortBySeverity([
+    ...groupBy(diagnostics, (diagnostic) => `${diagnostic.plugin}/${diagnostic.rule}`).entries(),
+  ]);
 
 const buildFileLineMap = (diagnostics: Diagnostic[]): Map<string, number[]> => {
   const fileLines = new Map<string, number[]>();
@@ -66,19 +69,13 @@ const buildFileLineMap = (diagnostics: Diagnostic[]): Map<string, number[]> => {
 };
 
 const printDiagnostics = (diagnostics: Diagnostic[], isVerbose: boolean): void => {
-  const ruleGroups = groupBy(
-    diagnostics,
-    (diagnostic) => `${diagnostic.plugin}/${diagnostic.rule}`,
-  );
-
-  const sortedRuleGroups = sortBySeverity([...ruleGroups.entries()]);
-
-  for (const [, ruleDiagnostics] of sortedRuleGroups) {
+  for (const [, ruleDiagnostics] of getSortedRuleGroups(diagnostics)) {
     const firstDiagnostic = ruleDiagnostics[0];
-    const severitySymbol = firstDiagnostic.severity === "error" ? "✗" : "⚠";
-    const icon = colorizeBySeverity(severitySymbol, firstDiagnostic.severity);
+    const severitySymbol = DIAGNOSTIC_SEVERITY_SYMBOLS[firstDiagnostic.severity];
+    const icon = colorizeDiagnosticSeverity(severitySymbol, firstDiagnostic.severity);
     const count = ruleDiagnostics.length;
-    const countLabel = count > 1 ? colorizeBySeverity(` (${count})`, firstDiagnostic.severity) : "";
+    const countLabel =
+      count > 1 ? colorizeDiagnosticSeverity(` (${count})`, firstDiagnostic.severity) : "";
 
     logger.log(`  ${icon} ${firstDiagnostic.message}${countLabel}`);
     if (firstDiagnostic.help) {
@@ -135,13 +132,7 @@ const writeDiagnosticsDirectory = (diagnostics: Diagnostic[]): string => {
   const outputDirectory = join(tmpdir(), `vercel-doctor-${randomUUID()}`);
   mkdirSync(outputDirectory);
 
-  const ruleGroups = groupBy(
-    diagnostics,
-    (diagnostic) => `${diagnostic.plugin}/${diagnostic.rule}`,
-  );
-  const sortedRuleGroups = sortBySeverity([...ruleGroups.entries()]);
-
-  for (const [ruleKey, ruleDiagnostics] of sortedRuleGroups) {
+  for (const [ruleKey, ruleDiagnostics] of getSortedRuleGroups(diagnostics)) {
     const fileName = ruleKey.replace(/\//g, "--") + ".txt";
     writeFileSync(join(outputDirectory, fileName), formatRuleSummary(ruleKey, ruleDiagnostics));
   }
@@ -192,6 +183,57 @@ const getDoctorFace = (score: number): string[] => {
   return ["x x", " ▽ "];
 };
 
+const renderBrandLabel = (): string =>
+  `${VERCEL_DOCTOR_BRAND_NAME} ${highlighter.dim(VERCEL_DOCTOR_WEBSITE_LABEL)}`;
+
+const printCompletedSteps = (messages: string[]): void => {
+  for (const message of messages) {
+    spinner(message).start().succeed(message);
+  }
+
+  logger.break();
+};
+
+const logTaskError = (error: unknown, shouldIncludeStack: boolean): void => {
+  if (error instanceof Error) {
+    logger.error(error.message);
+
+    if (shouldIncludeStack && error.stack) {
+      logger.dim(error.stack);
+    }
+
+    return;
+  }
+
+  logger.error(String(error));
+};
+
+const runDiagnosticTask = async (
+  isEnabled: boolean,
+  shouldRenderSpinner: boolean,
+  startMessage: string,
+  successMessage: string,
+  failureMessage: string,
+  runTask: () => Promise<Diagnostic[]> | Diagnostic[],
+  shouldIncludeStack = false,
+): Promise<Diagnostic[]> => {
+  if (!isEnabled) {
+    return [];
+  }
+
+  const taskSpinner = shouldRenderSpinner ? spinner(startMessage).start() : null;
+
+  try {
+    const diagnostics = await runTask();
+    taskSpinner?.succeed(successMessage);
+    return diagnostics;
+  } catch (error) {
+    taskSpinner?.fail(failureMessage);
+    logTaskError(error, shouldIncludeStack);
+    return [];
+  }
+};
+
 const printBranding = (score?: number): void => {
   if (score !== undefined) {
     const [eyes, mouth] = getDoctorFace(score);
@@ -201,7 +243,7 @@ const printBranding = (score?: number): void => {
     logger.log(colorize(`  │ ${mouth} │`));
     logger.log(colorize("  └─────┘"));
   }
-  logger.log(`  Vercel Doctor ${highlighter.dim("(www.vercel-doctor.com)")}`);
+  logger.log(`  ${renderBrandLabel()}`);
   logger.break();
 };
 
@@ -210,16 +252,18 @@ const buildShareUrl = (
   scoreResult: ScoreResult | null,
   projectName: string,
 ): string => {
-  const errorCount = diagnostics.filter((diagnostic) => diagnostic.severity === "error").length;
-  const warningCount = diagnostics.filter((diagnostic) => diagnostic.severity === "warning").length;
-  const affectedFileCount = collectAffectedFiles(diagnostics).size;
+  const diagnosticSummary = summarizeDiagnostics(diagnostics);
 
   const params = new URLSearchParams();
   params.set("p", projectName);
   if (scoreResult) params.set("s", String(scoreResult.score));
-  if (errorCount > 0) params.set("e", String(errorCount));
-  if (warningCount > 0) params.set("w", String(warningCount));
-  if (affectedFileCount > 0) params.set("f", String(affectedFileCount));
+  if (diagnosticSummary.errorCount > 0) params.set("e", String(diagnosticSummary.errorCount));
+  if (diagnosticSummary.warningCount > 0) {
+    params.set("w", String(diagnosticSummary.warningCount));
+  }
+  if (diagnosticSummary.affectedFileCount > 0) {
+    params.set("f", String(diagnosticSummary.affectedFileCount));
+  }
 
   return `${SHARE_BASE_URL}?${params.toString()}`;
 };
@@ -232,27 +276,25 @@ const printSummary = (
   totalSourceFileCount: number,
   noScoreMessage: string,
 ): void => {
-  const errorCount = diagnostics.filter((diagnostic) => diagnostic.severity === "error").length;
-  const warningCount = diagnostics.filter((diagnostic) => diagnostic.severity === "warning").length;
-  const affectedFileCount = collectAffectedFiles(diagnostics).size;
+  const diagnosticSummary = summarizeDiagnostics(diagnostics);
   const elapsed = formatElapsedTime(elapsedMilliseconds);
 
   const summaryLineParts: string[] = [];
   const summaryLinePartsPlain: string[] = [];
-  if (errorCount > 0) {
-    const errorText = `✗ ${errorCount} error${errorCount === 1 ? "" : "s"}`;
+  if (diagnosticSummary.errorCount > 0) {
+    const errorText = `✗ ${diagnosticSummary.errorCount} error${diagnosticSummary.errorCount === 1 ? "" : "s"}`;
     summaryLinePartsPlain.push(errorText);
     summaryLineParts.push(highlighter.error(errorText));
   }
-  if (warningCount > 0) {
-    const warningText = `⚠ ${warningCount} warning${warningCount === 1 ? "" : "s"}`;
+  if (diagnosticSummary.warningCount > 0) {
+    const warningText = `⚠ ${diagnosticSummary.warningCount} warning${diagnosticSummary.warningCount === 1 ? "" : "s"}`;
     summaryLinePartsPlain.push(warningText);
     summaryLineParts.push(highlighter.warn(warningText));
   }
   const fileCountText =
     totalSourceFileCount > 0
-      ? `across ${affectedFileCount}/${totalSourceFileCount} files`
-      : `across ${affectedFileCount} file${affectedFileCount === 1 ? "" : "s"}`;
+      ? `across ${diagnosticSummary.affectedFileCount}/${totalSourceFileCount} files`
+      : `across ${diagnosticSummary.affectedFileCount} file${diagnosticSummary.affectedFileCount === 1 ? "" : "s"}`;
   const elapsedTimeText = `in ${elapsed}`;
 
   summaryLinePartsPlain.push(fileCountText);
@@ -269,12 +311,7 @@ const printSummary = (
     summaryFramedLines.push(createFramedLine(`│ ${eyes} │`, scoreColorizer(`│ ${eyes} │`)));
     summaryFramedLines.push(createFramedLine(`│ ${mouth} │`, scoreColorizer(`│ ${mouth} │`)));
     summaryFramedLines.push(createFramedLine("└─────┘", scoreColorizer("└─────┘")));
-    summaryFramedLines.push(
-      createFramedLine(
-        "Vercel Doctor (www.vercel-doctor.com)",
-        `Vercel Doctor ${highlighter.dim("(www.vercel-doctor.com)")}`,
-      ),
-    );
+    summaryFramedLines.push(createFramedLine(VERCEL_DOCTOR_BRAND_LABEL, renderBrandLabel()));
     summaryFramedLines.push(createFramedLine(""));
 
     const scoreLinePlainText = `${scoreResult.score} / ${PERFECT_SCORE}  ${scoreResult.label}`;
@@ -289,12 +326,7 @@ const printSummary = (
     );
     summaryFramedLines.push(createFramedLine(""));
   } else {
-    summaryFramedLines.push(
-      createFramedLine(
-        "Vercel Doctor (www.vercel-doctor.com)",
-        `Vercel Doctor ${highlighter.dim("(www.vercel-doctor.com)")}`,
-      ),
-    );
+    summaryFramedLines.push(createFramedLine(VERCEL_DOCTOR_BRAND_LABEL, renderBrandLabel()));
     summaryFramedLines.push(createFramedLine(""));
     summaryFramedLines.push(createFramedLine(noScoreMessage, highlighter.dim(noScoreMessage)));
     summaryFramedLines.push(createFramedLine(""));
@@ -346,95 +378,53 @@ export const scan = async (
   if (!options.scoreOnly) {
     const frameworkLabel = formatFrameworkName(projectInfo.framework);
     const languageLabel = projectInfo.hasTypeScript ? "TypeScript" : "JavaScript";
-
-    const completeStep = (message: string) => {
-      spinner(message).start().succeed(message);
-    };
-
-    completeStep(`Detecting framework. Found ${highlighter.info(frameworkLabel)}.`);
-    completeStep(
+    const projectStepMessages = [
+      `Detecting framework. Found ${highlighter.info(frameworkLabel)}.`,
       `Detecting React version. Found ${highlighter.info(`React ${projectInfo.reactVersion}`)}.`,
-    );
-    completeStep(`Detecting language. Found ${highlighter.info(languageLabel)}.`);
+      `Detecting language. Found ${highlighter.info(languageLabel)}.`,
+      isDiffMode
+        ? `Scanning ${highlighter.info(`${includePaths.length}`)} changed source files.`
+        : `Found ${highlighter.info(`${projectInfo.sourceFileCount}`)} source files.`,
+      ...(userConfig ? [`Loaded ${highlighter.info("vercel-doctor config")}.`] : []),
+    ];
 
-    if (isDiffMode) {
-      completeStep(`Scanning ${highlighter.info(`${includePaths.length}`)} changed source files.`);
-    } else {
-      completeStep(`Found ${highlighter.info(`${projectInfo.sourceFileCount}`)} source files.`);
-    }
-
-    if (userConfig) {
-      completeStep(`Loaded ${highlighter.info("vercel-doctor config")}.`);
-    }
-
-    logger.break();
+    printCompletedSteps(projectStepMessages);
   }
 
   const jsxIncludePaths = isDiffMode
     ? includePaths.filter((filePath) => JSX_FILE_PATTERN.test(filePath))
     : undefined;
 
-  const lintPromise = options.lint
-    ? (async () => {
-        const lintSpinner = options.scoreOnly ? null : spinner("Running lint checks...").start();
-        try {
-          const lintDiagnostics = await runOxlint(
-            directory,
-            projectInfo.hasTypeScript,
-            projectInfo.framework,
-            jsxIncludePaths,
-          );
-          lintSpinner?.succeed("Running lint checks.");
-          return lintDiagnostics;
-        } catch (error) {
-          lintSpinner?.fail("Lint checks failed (non-fatal, skipping).");
-          if (error instanceof Error) {
-            logger.error(error.message);
-            if (error.stack) {
-              logger.dim(error.stack);
-            }
-          } else {
-            logger.error(String(error));
-          }
-          return [];
-        }
-      })()
-    : Promise.resolve<Diagnostic[]>([]);
+  const lintPromise = runDiagnosticTask(
+    options.lint,
+    !options.scoreOnly,
+    "Running lint checks...",
+    "Running lint checks.",
+    "Lint checks failed (non-fatal, skipping).",
+    () => runOxlint(directory, projectInfo.hasTypeScript, projectInfo.framework, jsxIncludePaths),
+    true,
+  );
 
-  const deadCodePromise =
-    options.deadCode && !isDiffMode
-      ? (async () => {
-          const deadCodeSpinner = options.scoreOnly
-            ? null
-            : spinner("Detecting dead code...").start();
-          try {
-            const knipDiagnostics = await runKnip(directory);
-            deadCodeSpinner?.succeed("Detecting dead code.");
-            return knipDiagnostics;
-          } catch (error) {
-            deadCodeSpinner?.fail("Dead code detection failed (non-fatal, skipping).");
-            logger.error(String(error));
-            return [];
-          }
-        })()
-      : Promise.resolve<Diagnostic[]>([]);
+  const deadCodePromise = runDiagnosticTask(
+    options.deadCode && !isDiffMode,
+    !options.scoreOnly,
+    "Detecting dead code...",
+    "Detecting dead code.",
+    "Dead code detection failed (non-fatal, skipping).",
+    () => runKnip(directory),
+  );
 
-  const vercelChecksPromise = (async () => {
-    const vercelChecksSpinner = options.scoreOnly
-      ? null
-      : spinner("Running Vercel optimization checks...").start();
-    try {
-      const vercelDiagnostics = runVercelChecks(directory, {
+  const vercelChecksPromise = runDiagnosticTask(
+    true,
+    !options.scoreOnly,
+    "Running Vercel optimization checks...",
+    "Running Vercel optimization checks.",
+    "Vercel optimization checks failed (non-fatal, skipping).",
+    () =>
+      runVercelChecks(directory, {
         includePaths: isDiffMode ? includePaths : undefined,
-      });
-      vercelChecksSpinner?.succeed("Running Vercel optimization checks.");
-      return vercelDiagnostics;
-    } catch (error) {
-      vercelChecksSpinner?.fail("Vercel optimization checks failed (non-fatal, skipping).");
-      logger.error(String(error));
-      return [];
-    }
-  })();
+      }),
+  );
 
   const [lintDiagnostics, deadCodeDiagnostics, vercelDiagnostics] = await Promise.all([
     lintPromise,

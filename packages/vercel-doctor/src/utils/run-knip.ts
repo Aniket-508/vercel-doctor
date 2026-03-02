@@ -2,27 +2,68 @@ import fs from "node:fs";
 import path from "node:path";
 import { main } from "knip";
 import { createOptions } from "knip/session";
+import { RULE_CATEGORY_NAMES } from "../rule-metadata.js";
 import type { Diagnostic, KnipIssueRecords, KnipResults } from "../types.js";
 
-const KNIP_CATEGORY_MAP: Record<string, string> = {
-  files: "Dead Code",
-  exports: "Dead Code",
-  types: "Dead Code",
-  duplicates: "Dead Code",
+const KNIP_DEFAULT_CATEGORY = RULE_CATEGORY_NAMES.DEAD_CODE;
+
+const KNIP_DEFAULT_SEVERITY: Diagnostic["severity"] = "warning";
+
+const KNIP_ISSUE_DETAILS: Record<
+  string,
+  { category: string; message: string; severity: Diagnostic["severity"]; help: string }
+> = {
+  files: {
+    category: KNIP_DEFAULT_CATEGORY,
+    message: "Unused file",
+    severity: KNIP_DEFAULT_SEVERITY,
+    help: "This file is not imported by any other file in the project.",
+  },
+  exports: {
+    category: KNIP_DEFAULT_CATEGORY,
+    message: "Unused export",
+    severity: KNIP_DEFAULT_SEVERITY,
+    help: "",
+  },
+  types: {
+    category: KNIP_DEFAULT_CATEGORY,
+    message: "Unused type",
+    severity: KNIP_DEFAULT_SEVERITY,
+    help: "",
+  },
+  duplicates: {
+    category: KNIP_DEFAULT_CATEGORY,
+    message: "Duplicate export",
+    severity: KNIP_DEFAULT_SEVERITY,
+    help: "",
+  },
 };
 
-const KNIP_MESSAGE_MAP: Record<string, string> = {
-  files: "Unused file",
-  exports: "Unused export",
-  types: "Unused type",
-  duplicates: "Duplicate export",
-};
+const createKnipDiagnostic = (
+  rootDirectory: string,
+  issueType: string,
+  filePath: string,
+  symbol?: string,
+): Diagnostic => {
+  const issueDetails = KNIP_ISSUE_DETAILS[issueType] ?? {
+    category: KNIP_DEFAULT_CATEGORY,
+    message: "Unused code",
+    severity: KNIP_DEFAULT_SEVERITY,
+    help: "",
+  };
 
-const KNIP_SEVERITY_MAP: Record<string, "error" | "warning"> = {
-  files: "warning",
-  exports: "warning",
-  types: "warning",
-  duplicates: "warning",
+  return {
+    filePath: path.relative(rootDirectory, filePath),
+    plugin: "knip",
+    rule: issueType,
+    severity: issueDetails.severity,
+    message: symbol ? `${issueDetails.message}: ${symbol}` : issueDetails.message,
+    help: issueDetails.help,
+    line: 0,
+    column: 0,
+    category: issueDetails.category,
+    weight: 1,
+  };
 };
 
 const collectIssueRecords = (
@@ -34,18 +75,9 @@ const collectIssueRecords = (
 
   for (const issues of Object.values(records)) {
     for (const issue of Object.values(issues)) {
-      diagnostics.push({
-        filePath: path.relative(rootDirectory, issue.filePath),
-        plugin: "knip",
-        rule: issueType,
-        severity: KNIP_SEVERITY_MAP[issueType] ?? "warning",
-        message: `${KNIP_MESSAGE_MAP[issueType]}: ${issue.symbol}`,
-        help: "",
-        line: 0,
-        column: 0,
-        category: KNIP_CATEGORY_MAP[issueType] ?? "Dead Code",
-        weight: 1,
-      });
+      diagnostics.push(
+        createKnipDiagnostic(rootDirectory, issueType, issue.filePath, issue.symbol),
+      );
     }
   }
 
@@ -166,18 +198,7 @@ export const runKnip = async (rootDirectory: string): Promise<Diagnostic[]> => {
   const diagnostics: Diagnostic[] = [];
 
   for (const unusedFile of issues.files) {
-    diagnostics.push({
-      filePath: path.relative(rootDirectory, unusedFile),
-      plugin: "knip",
-      rule: "files",
-      severity: KNIP_SEVERITY_MAP["files"],
-      message: KNIP_MESSAGE_MAP["files"],
-      help: "This file is not imported by any other file in the project.",
-      line: 0,
-      column: 0,
-      category: KNIP_CATEGORY_MAP["files"],
-      weight: 1,
-    });
+    diagnostics.push(createKnipDiagnostic(rootDirectory, "files", unusedFile));
   }
 
   const recordTypes = ["exports", "types", "duplicates"] as const;

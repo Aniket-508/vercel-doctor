@@ -188,3 +188,21 @@ export interface StaticAssetCandidate {
   filePath: string;
   sizeBytes: number;
 }
+
+export interface RuleCategoryDetails {
+  description: string;
+  impact: string;
+}
+
+export interface RuleFixStrategy {
+  title: string;
+  before: string;
+  after: string;
+  explanation: string;
+}
+
+export interface PluginRuleMetadata {
+  category: string;
+  help: string;
+  severity: "warn" | "error";
+}

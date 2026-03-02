@@ -11,6 +11,8 @@ import {
   STATIC_ASSET_CDN_WARNING_THRESHOLD_BYTES,
   STATIC_ASSET_SIZE_DECIMAL_PLACES_COUNT,
 } from "../constants.js";
+import { OXLINT_PLUGIN_NAME, VERCEL_RULE_IDS } from "../rule-ids.js";
+import { RULE_CATEGORY_NAMES } from "../rule-metadata.js";
 import type {
   Diagnostic,
   StaticAssetCandidate,
@@ -216,14 +218,14 @@ const createVercelWarningDiagnostic = (
   line = 0,
 ): Diagnostic => ({
   filePath,
-  plugin: "vercel-doctor",
+  plugin: OXLINT_PLUGIN_NAME,
   rule,
   severity: "warning",
   message,
   help,
   line,
   column: 0,
-  category: "Vercel",
+  category: RULE_CATEGORY_NAMES.VERCEL,
 });
 
 const readVercelConfig = (rootDirectory: string): VercelConfig | null => {
@@ -325,7 +327,7 @@ const collectSsgDiagnostics = (
       diagnostics.push(
         createVercelWarningDiagnostic(
           relativeFilePath,
-          "vercel-no-force-dynamic",
+          VERCEL_RULE_IDS.NO_FORCE_DYNAMIC,
           'Page sets `dynamic = "force-dynamic"` — this forces SSR and bypasses full-page caching',
           "Use static rendering where possible. Prefer `revalidate` or cacheable fetches for routes that do not require per-request rendering.",
           getLineNumberForPattern(fileContent, FORCE_DYNAMIC_EXPORT_PATTERN),
@@ -340,7 +342,7 @@ const collectSsgDiagnostics = (
       diagnostics.push(
         createVercelWarningDiagnostic(
           relativeFilePath,
-          "vercel-no-no-store-fetch",
+          VERCEL_RULE_IDS.NO_NO_STORE_FETCH,
           "Server fetch disables caching with `no-store` or `revalidate: 0` — this increases uncached bandwidth and compute costs",
           "Use cacheable fetches (`force-cache`) or incremental revalidation when real-time data is not required.",
           getLineNumberForPattern(
@@ -359,7 +361,7 @@ const collectSsgDiagnostics = (
     diagnostics.push(
       createVercelWarningDiagnostic(
         relativeFilePath,
-        "vercel-prefer-get-static-props",
+        VERCEL_RULE_IDS.PREFER_GET_STATIC_PROPS,
         "Page uses `getServerSideProps` — consider static generation to improve cache hit rate and reduce server bandwidth",
         "Switch to `getStaticProps` (and optional ISR) when data can be cached safely.",
         getLineNumberForPattern(fileContent, GET_SERVER_SIDE_PROPS_PATTERN),
@@ -375,7 +377,7 @@ const collectSsgDiagnostics = (
     diagnostics.push(
       createVercelWarningDiagnostic(
         relativeFilePath,
-        "vercel-get-static-props-consider-isr",
+        VERCEL_RULE_IDS.GET_STATIC_PROPS_CONSIDER_ISR,
         "`getStaticProps` without `revalidate` — all pages build at deploy time, which can slow builds for large sites",
         "Add `revalidate: 3600` (or similar) to enable ISR — pages generate on-demand and cache, reducing build time significantly.",
         getLineNumberForPattern(fileContent, GET_STATIC_PROPS_PATTERN),
@@ -395,7 +397,7 @@ const collectEdgeDiagnostics = (
     diagnostics.push(
       createVercelWarningDiagnostic(
         relativeFilePath,
-        "vercel-edge-heavy-import",
+        VERCEL_RULE_IDS.EDGE_HEAVY_IMPORT,
         "Edge runtime imports heavy or Node-centric dependencies — this can increase edge execution latency",
         "Move heavy logic to Node runtime functions or background jobs, and keep edge handlers lightweight.",
         getLineNumberForPattern(fileContent, EDGE_HEAVY_IMPORT_PATTERN),
@@ -411,7 +413,7 @@ const collectEdgeDiagnostics = (
     diagnostics.push(
       createVercelWarningDiagnostic(
         relativeFilePath,
-        "vercel-edge-sequential-await",
+        VERCEL_RULE_IDS.EDGE_SEQUENTIAL_AWAIT,
         "Edge handler appears to run async calls sequentially — parallelizing independent work reduces billed execution time",
         "Use `Promise.all()` for independent I/O operations in edge handlers.",
         getLineNumberForPattern(fileContent, AWAIT_LINE_PATTERN),
@@ -441,7 +443,7 @@ const collectCachingDiagnostics = (
     diagnostics.push(
       createVercelWarningDiagnostic(
         relativeFilePath,
-        "vercel-missing-cache-policy",
+        VERCEL_RULE_IDS.MISSING_CACHE_POLICY,
         "GET route handler has no explicit cache policy — responses may miss CDN caching opportunities",
         "Add `Cache-Control` headers or `revalidate` directives for cacheable GET responses.",
         getLineNumberForPattern(fileContent, APP_ROUTE_GET_HANDLER_PATTERN),
@@ -457,7 +459,7 @@ const collectCachingDiagnostics = (
     diagnostics.push(
       createVercelWarningDiagnostic(
         relativeFilePath,
-        "vercel-missing-cache-policy",
+        VERCEL_RULE_IDS.MISSING_CACHE_POLICY,
         "API route has no `Cache-Control` header — cacheable responses should declare caching to reduce repeated origin work",
         'Set `res.setHeader("Cache-Control", "s-maxage=..., stale-while-revalidate=...")` for cacheable responses.',
         getLineNumberForPattern(fileContent, PAGES_API_HANDLER_PATTERN),
@@ -479,7 +481,7 @@ const collectBuildOptimizationDiagnostics = (
     diagnostics.push(
       createVercelWarningDiagnostic(
         relativeFilePath,
-        "vercel-suggest-turbopack-build-cache",
+        VERCEL_RULE_IDS.SUGGEST_TURBOPACK_BUILD_CACHE,
         "Next.js 16+ supports Turbopack build cache — can reduce build time",
         "Add `turbopackFileSystemCacheForBuild: true` inside `experimental` in next.config. Requires Next.js 16+.",
         getLineNumberForPattern(fileContent, /\bexperimental\s*:/),
@@ -500,7 +502,7 @@ const collectImageOptimizationDiagnostics = (
     diagnostics.push(
       createVercelWarningDiagnostic(
         relativeFilePath,
-        "vercel-image-global-unoptimized",
+        VERCEL_RULE_IDS.IMAGE_GLOBAL_UNOPTIMIZED,
         "next.config enables `images.unoptimized: true` — this disables Vercel Image Optimization globally",
         "Keep optimization enabled and configure image domains/remotePatterns as needed: https://vercel.com/docs/image-optimization",
         getLineNumberForPattern(fileContent, NEXT_CONFIG_UNOPTIMIZED_IMAGE_PATTERN),
@@ -534,7 +536,7 @@ const collectImageOptimizationDiagnostics = (
           diagnostics.push(
             createVercelWarningDiagnostic(
               relativeFilePath,
-              "vercel-image-remote-pattern-too-broad",
+              VERCEL_RULE_IDS.IMAGE_REMOTE_PATTERN_TOO_BROAD,
               "next.config image remotePatterns is too broad — unrestricted remote image paths can drive unexpected optimization usage",
               "Restrict `images.remotePatterns.pathname` to app-specific prefixes instead of `/**`, and avoid patterns that omit pathname entirely: https://vercel.com/docs/image-optimization",
               getLineNumberForCharacterIndex(
@@ -564,7 +566,7 @@ const collectImageOptimizationDiagnostics = (
       diagnostics.push(
         createVercelWarningDiagnostic(
           relativeFilePath,
-          "vercel-image-svg-without-unoptimized",
+          VERCEL_RULE_IDS.IMAGE_SVG_WITHOUT_UNOPTIMIZED,
           "next/image with SVG src should use the `unoptimized` prop — SVGs are not optimized by the pipeline",
           "Add unoptimized to the Image component when using SVG sources: https://vercel.com/docs/image-optimization",
           getLineNumberForCharacterIndex(fileContent, matchIndex),
@@ -589,7 +591,7 @@ const collectDatabaseAwaitDiagnostics = (
   diagnostics.push(
     createVercelWarningDiagnostic(
       relativeFilePath,
-      "vercel-sequential-database-await",
+      VERCEL_RULE_IDS.SEQUENTIAL_DATABASE_AWAIT,
       "API route appears to run multiple database calls sequentially — this can inflate function duration and cost",
       "Use `Promise.all()` for independent queries, or consolidate related Prisma reads into a single relational query.",
       getLineNumberForPattern(fileContent, SEQUENTIAL_DATABASE_AWAIT_LINE_PATTERN),
@@ -634,7 +636,7 @@ const collectBunDiagnostic = (
   diagnostics.push(
     createVercelWarningDiagnostic(
       PACKAGE_JSON_PATH,
-      "vercel-consider-bun-runtime",
+      VERCEL_RULE_IDS.CONSIDER_BUN_RUNTIME,
       "Project is not configured for Bun — Bun runtime can reduce install and build overhead on Vercel",
       "Review Bun runtime guidance: https://vercel.com/docs/functions/runtimes/bun",
     ),
@@ -652,7 +654,7 @@ const collectCronDiagnostic = (
   diagnostics.push(
     createVercelWarningDiagnostic(
       VERCEL_JSON_PATH,
-      "vercel-avoid-platform-cron",
+      VERCEL_RULE_IDS.AVOID_PLATFORM_CRON,
       "Vercel cron jobs are configured in vercel.json — scheduled workloads can often run cheaper outside request runtime billing",
       "Consider GitHub Actions or Cloudflare Workers Cron Triggers for recurring jobs with predictable schedules.",
       1,
@@ -671,7 +673,7 @@ const collectFluidComputeDiagnostic = (
   diagnostics.push(
     createVercelWarningDiagnostic(
       referenceFilePath,
-      "vercel-consider-fluid-compute",
+      VERCEL_RULE_IDS.CONSIDER_FLUID_COMPUTE,
       `Detected ${apiRouteCount} server/API routes — evaluate Fluid Compute for better concurrency and lower execution overhead on long-running handlers`,
       "Use Fluid Compute for workloads with variable latency or bursty traffic where it improves runtime efficiency.",
     ),
@@ -695,7 +697,7 @@ export const runVercelChecks = (
     diagnostics.push(
       createVercelWarningDiagnostic(
         largeStaticAssetCandidate.filePath,
-        "vercel-large-static-asset",
+        VERCEL_RULE_IDS.LARGE_STATIC_ASSET,
         `Large static asset (${formatFileSize(largeStaticAssetCandidate.sizeBytes)}) is served from the app repository — this can consume Vercel bandwidth quickly`,
         "Move large static assets to a CDN/object storage provider (Cloudflare R2, S3, or media CDN) and serve optimized variants.",
       ),
@@ -732,7 +734,7 @@ export const runVercelChecks = (
     diagnostics.push(
       createVercelWarningDiagnostic(
         "package.json",
-        "vercel-suggest-deploy-archive",
+        VERCEL_RULE_IDS.SUGGEST_DEPLOY_ARCHIVE,
         `Large project (${projectFilePaths.length.toLocaleString()} files) — deployment may hit API rate limits`,
         "Use `vercel deploy --archive=tgz` in CI to upload a single archive instead of many files. Cuts deployment time ~50% and avoids rate limits.",
         0,

@@ -6,46 +6,28 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { ERROR_PREVIEW_LENGTH_CHARS, JSX_FILE_PATTERN } from "../constants.js";
 import { createOxlintConfig } from "../oxlint-config.js";
+import { RULE_CATEGORY_NAMES, QUALIFIED_PLUGIN_RULE_METADATA } from "../rule-metadata.js";
 import type { CleanedDiagnostic, Diagnostic, Framework, OxlintOutput } from "../types.js";
 import { neutralizeDisableDirectives } from "./neutralize-disable-directives.js";
 
 const esmRequire = createRequire(import.meta.url);
 
-const PLUGIN_CATEGORY_MAP: Record<string, string> = {};
-
-const RULE_CATEGORY_MAP: Record<string, string> = {
-  "vercel-doctor/nextjs-no-client-fetch-for-server-data": "Invocations",
-  "vercel-doctor/nextjs-image-missing-sizes": "Image Optimization",
-  "vercel-doctor/nextjs-link-prefetch-default": "Invocations",
-  "vercel-doctor/nextjs-no-side-effect-in-get-handler": "Caching",
-
-  "vercel-doctor/server-after-nonblocking": "Function Duration",
-
-  "vercel-doctor/async-parallel": "Function Duration",
-};
-
-const RULE_HELP_MAP: Record<string, string> = {
-  "nextjs-no-client-fetch-for-server-data":
-    "Remove 'use client' and fetch directly in the Server Component — no API round-trip, secrets stay on server",
-  "nextjs-link-prefetch-default":
-    "Add prefetch={false} to Link, or disable globally in next.config. Add prefetch={true} only to critical links — reduces compute",
-  "nextjs-image-missing-sizes":
-    'Add sizes for responsive behavior: `sizes="(max-width: 768px) 100vw, 50vw"` matching your layout breakpoints',
-  "nextjs-no-side-effect-in-get-handler":
-    "Move the side effect to a POST handler and use a <form> or fetch with method POST — GET requests can be triggered by prefetching and are vulnerable to CSRF",
-
-  "server-after-nonblocking":
-    "`import { after } from 'next/server'` then wrap: `after(() => analytics.track(...))` — response isn't blocked",
-
-  "async-parallel":
-    "Use `const [a, b] = await Promise.all([fetchA(), fetchB()])` to run independent operations concurrently",
-};
-
 const FILEPATH_WITH_LOCATION_PATTERN = /\S+\.\w+:\d+:\d+[\s\S]*$/;
 
-const cleanDiagnosticMessage = (message: string, help: string, rule: string): CleanedDiagnostic => {
+const getRuleDetails = (plugin: string, rule: string) =>
+  QUALIFIED_PLUGIN_RULE_METADATA[`${plugin}/${rule}`];
+
+const cleanDiagnosticMessage = (
+  message: string,
+  help: string,
+  plugin: string,
+  rule: string,
+): CleanedDiagnostic => {
   const cleaned = message.replace(FILEPATH_WITH_LOCATION_PATTERN, "").trim();
-  return { message: cleaned || message, help: help || RULE_HELP_MAP[rule] || "" };
+  return {
+    message: cleaned || message,
+    help: help || getRuleDetails(plugin, rule)?.help || "",
+  };
 };
 
 const parseRuleCode = (code: string): { plugin: string; rule: string } => {
@@ -72,8 +54,7 @@ const resolvePluginPath = (): string => {
 };
 
 const resolveDiagnosticCategory = (plugin: string, rule: string): string => {
-  const ruleKey = `${plugin}/${rule}`;
-  return RULE_CATEGORY_MAP[ruleKey] ?? PLUGIN_CATEGORY_MAP[plugin] ?? "Other";
+  return getRuleDetails(plugin, rule)?.category ?? RULE_CATEGORY_NAMES.OTHER;
 };
 
 export const runOxlint = async (
@@ -151,7 +132,7 @@ export const runOxlint = async (
         const { plugin, rule } = parseRuleCode(diagnostic.code);
         const primaryLabel = diagnostic.labels[0];
 
-        const cleaned = cleanDiagnosticMessage(diagnostic.message, diagnostic.help, rule);
+        const cleaned = cleanDiagnosticMessage(diagnostic.message, diagnostic.help, plugin, rule);
 
         return {
           filePath: diagnostic.filename,

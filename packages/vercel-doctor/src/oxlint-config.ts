@@ -1,11 +1,28 @@
+import {
+  BASE_PLUGIN_RULE_ID_LIST,
+  getQualifiedPluginRuleId,
+  NEXTJS_PLUGIN_RULE_ID_LIST,
+} from "./rule-ids.js";
+import { PLUGIN_RULE_METADATA } from "./rule-metadata.js";
 import type { Framework } from "./types.js";
 
-const NEXTJS_RULES: Record<string, string> = {
-  "vercel-doctor/nextjs-no-client-fetch-for-server-data": "warn",
-  "vercel-doctor/nextjs-image-missing-sizes": "warn",
-  "vercel-doctor/nextjs-link-prefetch-default": "warn",
-  "vercel-doctor/nextjs-no-side-effect-in-get-handler": "error",
+const createPluginRuleConfig = (ruleIds: string[]): Record<string, string> => {
+  const pluginRuleConfig: Record<string, string> = {};
+
+  for (const ruleId of ruleIds) {
+    const ruleMetadata = PLUGIN_RULE_METADATA[ruleId];
+
+    if (ruleMetadata) {
+      pluginRuleConfig[getQualifiedPluginRuleId(ruleId)] = ruleMetadata.severity;
+    }
+  }
+
+  return pluginRuleConfig;
 };
+
+const BASE_PLUGIN_RULES = createPluginRuleConfig(BASE_PLUGIN_RULE_ID_LIST);
+
+const NEXTJS_RULES = createPluginRuleConfig(NEXTJS_PLUGIN_RULE_ID_LIST);
 
 interface OxlintConfigOptions {
   pluginPath: string;
@@ -25,9 +42,7 @@ export const createOxlintConfig = ({ pluginPath, framework }: OxlintConfigOption
   plugins: [],
   jsPlugins: [pluginPath],
   rules: {
-    "vercel-doctor/server-after-nonblocking": "warn",
-
-    "vercel-doctor/async-parallel": "warn",
+    ...BASE_PLUGIN_RULES,
     ...(framework === "nextjs" ? NEXTJS_RULES : {}),
   },
 });

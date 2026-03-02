@@ -1,3 +1,4 @@
+import { OXLINT_PLUGIN_NAME, PLUGIN_RULE_IDS } from "../rule-ids.js";
 import { asyncParallel } from "./rules/js-performance.js";
 import {
   nextjsImageMissingSizes,
@@ -9,16 +10,14 @@ import { serverAfterNonblocking } from "./rules/server.js";
 import type { RulePlugin } from "./types.js";
 
 const plugin: RulePlugin = {
-  meta: { name: "vercel-doctor" },
+  meta: { name: OXLINT_PLUGIN_NAME },
   rules: {
-    "nextjs-no-client-fetch-for-server-data": nextjsNoClientFetchForServerData,
-    "nextjs-image-missing-sizes": nextjsImageMissingSizes,
-    "nextjs-link-prefetch-default": nextjsLinkPrefetchDefault,
-    "nextjs-no-side-effect-in-get-handler": nextjsNoSideEffectInGetHandler,
-
-    "server-after-nonblocking": serverAfterNonblocking,
-
-    "async-parallel": asyncParallel,
+    [PLUGIN_RULE_IDS.NEXTJS_NO_CLIENT_FETCH_FOR_SERVER_DATA]: nextjsNoClientFetchForServerData,
+    [PLUGIN_RULE_IDS.NEXTJS_IMAGE_MISSING_SIZES]: nextjsImageMissingSizes,
+    [PLUGIN_RULE_IDS.NEXTJS_LINK_PREFETCH_DEFAULT]: nextjsLinkPrefetchDefault,
+    [PLUGIN_RULE_IDS.NEXTJS_NO_SIDE_EFFECT_IN_GET_HANDLER]: nextjsNoSideEffectInGetHandler,
+    [PLUGIN_RULE_IDS.SERVER_AFTER_NONBLOCKING]: serverAfterNonblocking,
+    [PLUGIN_RULE_IDS.ASYNC_PARALLEL]: asyncParallel,
   },
 };
 

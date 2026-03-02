@@ -18,13 +18,23 @@ export const SUMMARY_BOX_HORIZONTAL_PADDING_CHARS = 1;
 
 export const SUMMARY_BOX_OUTER_INDENT_CHARS = 2;
 
-export const SCORE_API_URL = "https://www.vercel-doctor.com/api/score";
+export const VERCEL_DOCTOR_BRAND_NAME = "Vercel Doctor";
 
-export const ESTIMATE_SCORE_API_URL = "https://www.vercel-doctor.com/api/estimate-score";
+export const VERCEL_DOCTOR_HOSTNAME = "www.vercel-doctor.com";
 
-export const SHARE_BASE_URL = "https://www.vercel-doctor.com/share";
+export const VERCEL_DOCTOR_BASE_URL = `https://${VERCEL_DOCTOR_HOSTNAME}`;
 
-export const INSTALL_SKILL_URL = "https://www.vercel-doctor.com/install-skill";
+export const VERCEL_DOCTOR_WEBSITE_LABEL = `(${VERCEL_DOCTOR_HOSTNAME})`;
+
+export const VERCEL_DOCTOR_BRAND_LABEL = `${VERCEL_DOCTOR_BRAND_NAME} ${VERCEL_DOCTOR_WEBSITE_LABEL}`;
+
+export const SCORE_API_URL = `${VERCEL_DOCTOR_BASE_URL}/api/score`;
+
+export const ESTIMATE_SCORE_API_URL = `${VERCEL_DOCTOR_BASE_URL}/api/estimate-score`;
+
+export const SHARE_BASE_URL = `${VERCEL_DOCTOR_BASE_URL}/share`;
+
+export const INSTALL_SKILL_URL = `${VERCEL_DOCTOR_BASE_URL}/install-skill`;
 
 export const GIT_LS_FILES_MAX_BUFFER_BYTES = 50 * 1024 * 1024;
 

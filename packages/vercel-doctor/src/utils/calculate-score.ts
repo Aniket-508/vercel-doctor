@@ -6,6 +6,7 @@ import {
   SCORE_OK_THRESHOLD,
 } from "../constants.js";
 import type { Diagnostic, EstimatedScoreResult, ScoreResult } from "../types.js";
+import { isErrorDiagnostic } from "./diagnostic-severity.js";
 
 const ERROR_RULE_PENALTY = 1.5;
 const WARNING_RULE_PENALTY = 0.75;
@@ -18,6 +19,22 @@ const getScoreLabel = (score: number): string => {
   return "Critical";
 };
 
+const postDiagnostics = async <T>(url: string, diagnostics: Diagnostic[]): Promise<T | null> => {
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ diagnostics }),
+    });
+
+    if (!response.ok) return null;
+
+    return await response.json();
+  } catch {
+    return null;
+  }
+};
+
 const countUniqueRules = (
   diagnostics: Diagnostic[],
 ): { errorRuleCount: number; warningRuleCount: number } => {
@@ -26,7 +43,7 @@ const countUniqueRules = (
 
   for (const diagnostic of diagnostics) {
     const ruleKey = `${diagnostic.plugin}/${diagnostic.rule}`;
-    if (diagnostic.severity === "error") {
+    if (isErrorDiagnostic(diagnostic)) {
       errorRules.add(ruleKey);
     } else {
       warningRules.add(ruleKey);
@@ -65,35 +82,16 @@ const estimateScoreLocally = (diagnostics: Diagnostic[]): EstimatedScoreResult =
 };
 
 export const calculateScore = async (diagnostics: Diagnostic[]): Promise<ScoreResult | null> => {
-  try {
-    const response = await fetch(SCORE_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ diagnostics }),
-    });
-
-    if (!response.ok) return null;
-
-    return (await response.json()) as ScoreResult;
-  } catch {
-    return null;
-  }
+  return postDiagnostics<ScoreResult>(SCORE_API_URL, diagnostics);
 };
 
 export const fetchEstimatedScore = async (
   diagnostics: Diagnostic[],
 ): Promise<EstimatedScoreResult | null> => {
-  try {
-    const response = await fetch(ESTIMATE_SCORE_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ diagnostics }),
-    });
+  const estimatedScoreResult = await postDiagnostics<EstimatedScoreResult>(
+    ESTIMATE_SCORE_API_URL,
+    diagnostics,
+  );
 
-    if (!response.ok) return estimateScoreLocally(diagnostics);
-
-    return (await response.json()) as EstimatedScoreResult;
-  } catch {
-    return estimateScoreLocally(diagnostics);
-  }
+  return estimatedScoreResult ?? estimateScoreLocally(diagnostics);
 };
