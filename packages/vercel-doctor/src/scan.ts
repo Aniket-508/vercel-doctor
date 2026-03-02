@@ -19,6 +19,7 @@ import { calculateScore } from "./utils/calculate-score.js";
 import { discoverProject, formatFrameworkName } from "./utils/discover-project.js";
 import { filterIgnoredDiagnostics } from "./utils/filter-diagnostics.js";
 import { type FramedLine, createFramedLine, printFramedBox } from "./utils/framed-box.js";
+import { generateMarkdownReport } from "./utils/generate-report.js";
 import { groupBy } from "./utils/group-by.js";
 import { highlighter } from "./utils/highlighter.js";
 import { indentMultilineText } from "./utils/indent-multiline-text.js";
@@ -332,6 +333,7 @@ export const scan = async (
     scoreOnly: inputOptions.scoreOnly ?? false,
     offline: inputOptions.offline ?? false,
     includePaths: inputOptions.includePaths,
+    output: inputOptions.output ?? "human",
   };
 
   const includePaths = options.includePaths ?? [];
@@ -458,6 +460,12 @@ export const scan = async (
     return { diagnostics, scoreResult };
   }
 
+  // #2: JSON output — emit structured data and return early (no terminal UI)
+  if (options.output === "json") {
+    logger.log(JSON.stringify({ diagnostics, scoreResult }, null, 2));
+    return { diagnostics, scoreResult };
+  }
+
   if (diagnostics.length === 0) {
     logger.success("No issues found!");
     logger.break();
@@ -470,18 +478,26 @@ export const scan = async (
     return { diagnostics, scoreResult };
   }
 
-  printDiagnostics(diagnostics, options.verbose);
-
   const displayedSourceFileCount = isDiffMode ? includePaths.length : projectInfo.sourceFileCount;
 
-  printSummary(
-    diagnostics,
-    elapsedMilliseconds,
-    scoreResult,
-    projectInfo.projectName,
-    displayedSourceFileCount,
-    noScoreMessage,
-  );
+  // #1: "human" is the sole terminal format — printDiagnostics/printSummary only run here.
+  // "markdown" to stdout is handled by cli.ts after scan() returns.
+  if (options.output === "human") {
+    printDiagnostics(diagnostics, options.verbose);
+    printSummary(
+      diagnostics,
+      elapsedMilliseconds,
+      scoreResult,
+      projectInfo.projectName,
+      displayedSourceFileCount,
+      noScoreMessage,
+    );
+  } else if (options.output === "markdown") {
+    // Markdown to stdout — #4: file writes are handled by cli.ts
+    const markdownReport = generateMarkdownReport(diagnostics, projectInfo.projectName);
+    logger.break();
+    logger.log(markdownReport);
+  }
 
   return { diagnostics, scoreResult };
 };

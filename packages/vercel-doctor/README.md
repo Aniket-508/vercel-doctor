@@ -66,16 +66,19 @@ Supports Cursor, Claude Code, Amp Code, Codex, Gemini CLI, OpenCode, Windsurf, a
 Usage: vercel-doctor [directory] [options]
 
 Options:
-  -v, --version     display the version number
-  --no-lint         skip linting
-  --no-dead-code    skip dead code detection
-  --verbose         show file details per rule
-  --score           output only the score
-  -y, --yes         skip prompts, scan all workspace projects
-  --project <name>  select workspace project (comma-separated for multiple)
-  --diff [base]     scan only files changed vs base branch
-  --offline         skip telemetry (anonymous, not stored, only used to calculate score)
-  -h, --help        display help for command
+  -v, --version         display the version number
+  --no-lint             skip linting
+  --no-dead-code        skip dead code detection
+  --verbose             show file details per rule
+  --score               output only the score
+  -y, --yes             skip prompts, scan all workspace projects
+  --project <name>      select workspace project (comma-separated for multiple)
+  --diff [base]         scan only files changed vs base branch
+  --offline             skip telemetry (anonymous, not stored, only used to calculate score)
+  --output <format>     output format: "human" (default), "json", or "markdown"
+  --report <file>       write human-readable report to file
+  --ai-prompts <file>   write AI fix prompts to JSON file for use with Cursor/Claude/Windsurf
+  -h, --help            display help for command
 ```
 
 ## Configuration
@@ -117,6 +120,46 @@ If both exist, `vercel-doctor.config.json` takes precedence.
 | `diff`         | `boolean \| string` | —       | Force diff mode (`true`) or pin a base branch (`"main"`). Set to `false` to disable auto-detection.                                |
 
 CLI flags always override config values.
+
+## Report Generation & AI Prompts
+
+Generate detailed reports and AI-compatible fix prompts:
+
+```bash
+# Generate a markdown report
+npx vercel-doctor . --output markdown --report report.md
+
+# Export AI prompts for fixing issues (use with Cursor, Claude, Windsurf)
+npx vercel-doctor . --ai-prompts fixes.json
+```
+
+The `--ai-prompts` flag generates ready-to-use prompts for AI coding tools. The format is auto-detected from the file extension:
+
+- **`.json`** - Structured format for programmatic use and automation
+- **`.md` or `.markdown`** - Human-readable format, easy to copy-paste into AI chats
+
+```bash
+# Export as JSON (for scripts, automation)
+npx vercel-doctor . --ai-prompts fixes.json
+
+# Export as Markdown (for manual copy-paste into Cursor/Claude/Windsurf)
+npx vercel-doctor . --ai-prompts fixes.md
+```
+
+Each prompt includes:
+
+- The specific rule violation
+- File location and line number
+- Before/after code examples
+- Step-by-step fix instructions
+
+Example AI prompt output:
+
+```json
+{
+  "vercel-doctor/vercel-no-force-dynamic::src/app/page.tsx:15": "Fix this Vercel optimization issue..."
+}
+```
 
 ## Node.js API
 

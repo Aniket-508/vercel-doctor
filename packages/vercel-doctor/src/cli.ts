@@ -1,4 +1,5 @@
 import path from "node:path";
+import { writeFileSync } from "node:fs";
 import { Command } from "commander";
 import { scan } from "./scan.js";
 import type { Diagnostic, DiffInfo, ScanOptions } from "./types.js";
@@ -10,6 +11,11 @@ import { logger } from "./utils/logger.js";
 import { prompts } from "./utils/prompts.js";
 import { selectProjects } from "./utils/select-projects.js";
 import { maybePromptSkillInstall } from "./utils/skill-prompt.js";
+import {
+  generateMarkdownReport,
+  generateAIPrompts,
+  generateAIPromptsMarkdown,
+} from "./utils/generate-report.js";
 
 const VERSION = process.env.VERSION ?? "0.0.0";
 
@@ -22,6 +28,9 @@ interface CliFlags {
   offline: boolean;
   project?: string;
   diff?: boolean | string;
+  output?: "human" | "json" | "markdown";
+  report?: string;
+  aiPrompts?: string;
 }
 
 const exitWithFixHint = () => {
@@ -83,6 +92,12 @@ const program = new Command()
   .option("--project <name>", "select workspace project (comma-separated for multiple)")
   .option("--diff [base]", "scan only files changed vs base branch")
   .option("--offline", "skip telemetry (anonymous, not stored, only used to calculate score)")
+  .option("--output <format>", 'output format: "human" (default), "json", or "markdown"')
+  .option("--report <file>", "write human-readable report to file")
+  .option(
+    "--ai-prompts <file>",
+    "write AI fix prompts to JSON file for use with Cursor/Claude/Windsurf",
+  )
   .action(async (directory: string, flags: CliFlags) => {
     const isScoreOnly = flags.score;
 
@@ -106,6 +121,7 @@ const program = new Command()
         verbose: isCliOverride("verbose") ? Boolean(flags.verbose) : (userConfig?.verbose ?? false),
         scoreOnly: isScoreOnly,
         offline: flags.offline,
+        output: flags.output ?? "human",
       };
 
       const isAutomatedEnvironment = [
@@ -174,6 +190,51 @@ const program = new Command()
           includePaths,
         });
         allDiagnostics.push(...scanResult.diagnostics);
+
+        // #4: Report and AI-prompt file I/O belongs in the CLI layer, not in scan().
+        // #3: Wrapped in try-catch so a bad path doesn't crash after all the expensive scan work.
+        if (flags.report) {
+          const markdownReport = generateMarkdownReport(scanResult.diagnostics, projectDirectory);
+          try {
+            writeFileSync(flags.report, markdownReport);
+            logger.break();
+            logger.success(`Report written to ${flags.report}`);
+          } catch (error) {
+            logger.break();
+            logger.error(`Failed to write report to ${flags.report}: ${String(error)}`);
+          }
+        }
+
+        if (flags.aiPrompts) {
+          const isMarkdown =
+            flags.aiPrompts.endsWith(".md") || flags.aiPrompts.endsWith(".markdown");
+          try {
+            if (isMarkdown) {
+              const markdownContent = generateAIPromptsMarkdown(scanResult.diagnostics);
+              writeFileSync(flags.aiPrompts, markdownContent);
+              logger.break();
+              logger.success(`AI prompts (Markdown) written to ${flags.aiPrompts}`);
+              logger.dim(
+                `Open this file and copy any prompt to paste into Cursor, Claude, or Windsurf.`,
+              );
+            } else {
+              const aiPrompts = generateAIPrompts(scanResult.diagnostics);
+              const promptsObject = Object.fromEntries(
+                aiPrompts.map(({ key, prompt }) => [key, prompt]),
+              );
+              writeFileSync(flags.aiPrompts, JSON.stringify(promptsObject, null, 2));
+              logger.break();
+              logger.success(`AI prompts (JSON) written to ${flags.aiPrompts}`);
+              logger.dim(
+                `Use these prompts with Cursor, Claude, Windsurf, or other AI coding tools.`,
+              );
+            }
+          } catch (error) {
+            logger.break();
+            logger.error(`Failed to write AI prompts to ${flags.aiPrompts}: ${String(error)}`);
+          }
+        }
+
         if (!isScoreOnly) {
           logger.break();
         }
