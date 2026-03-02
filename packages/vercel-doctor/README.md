@@ -133,7 +133,7 @@ npx vercel-doctor . --output markdown --report report.md
 npx vercel-doctor . --ai-prompts fixes.json
 ```
 
-The `--ai-prompts` flag generates ready-to-use prompts for AI coding tools. The format is auto-detected from the file extension:
+The `--ai-prompts` flag generates ready-to-use prompts for AI coding tools. It only exports issues that have a known fix strategy. The format is auto-detected from the file extension:
 
 - **`.json`** - Structured format for programmatic use and automation
 - **`.md` or `.markdown`** - Human-readable format, easy to copy-paste into AI chats
@@ -149,7 +149,7 @@ npx vercel-doctor . --ai-prompts fixes.md
 Each prompt includes:
 
 - The specific rule violation
-- File location and line number
+- File location, line, and column number
 - Before/after code examples
 - Step-by-step fix instructions
 
@@ -157,7 +157,7 @@ Example AI prompt output:
 
 ```json
 {
-  "vercel-doctor/vercel-no-force-dynamic::src/app/page.tsx:15": "Fix this Vercel optimization issue..."
+  "vercel-doctor/vercel-no-force-dynamic::src/app/page.tsx:15:1": "Fix this Vercel optimization issue..."
 }
 ```
 
