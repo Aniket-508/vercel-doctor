@@ -1,4 +1,5 @@
 import { RULE_CATEGORY_DETAILS, RULE_FIX_STRATEGIES } from "../rule-metadata.js";
+import { PLUGIN_RULE_IDS, VERCEL_RULE_IDS } from "../rule-ids.js";
 import type { Diagnostic } from "../types.js";
 import {
   DIAGNOSTIC_SEVERITY_MARKDOWN_SYMBOLS,
@@ -24,6 +25,32 @@ export interface AIPromptContext {
 }
 
 export { RULE_FIX_STRATEGIES } from "../rule-metadata.js";
+
+const BETTER_ALL_CODEMOD_PROMPT_KEY = "vercel-doctor/better-all-codemod";
+const BETTER_ALL_CODEMOD_PROMPT_TITLE = "Codemod: Promise.all to better-all";
+const BETTER_ALL_CODEMOD_TRIGGER_RULE_IDS = new Set([
+  PLUGIN_RULE_IDS.ASYNC_PARALLEL,
+  VERCEL_RULE_IDS.EDGE_SEQUENTIAL_AWAIT,
+  VERCEL_RULE_IDS.SEQUENTIAL_DATABASE_AWAIT,
+]);
+
+const shouldIncludeBetterAllCodemodPrompt = (diagnostics: Diagnostic[]): boolean =>
+  diagnostics.some((diagnostic) => BETTER_ALL_CODEMOD_TRIGGER_RULE_IDS.has(diagnostic.rule));
+
+const createBetterAllCodemodPrompt =
+  (): string => `Create a migration plan to replace Promise.all with better-all across the repository.
+
+Goals:
+1. Find all Promise.all usages and classify each one as safe/unsafe for codemod.
+2. Convert safe cases to \`all()\` from better-all using stable, descriptive object keys.
+3. Keep behavior equivalent, including error handling and return shapes.
+4. List skipped or ambiguous cases with exact file locations and reasons.
+
+Execution policy:
+1. Start with a dry-run patch and review it first.
+2. Run lint, typecheck, and tests on the reviewed patch.
+3. Only after checks pass, apply the codemod changes.
+4. Provide a final summary of migrated files and skipped cases.`;
 
 const formatDiagnosticForReport = (diagnostic: Diagnostic): string => {
   const severityIcon = DIAGNOSTIC_SEVERITY_SYMBOLS[diagnostic.severity];
@@ -144,8 +171,9 @@ export const generateAIPromptsMarkdown = (
   timestamp = new Date().toISOString(),
 ): string => {
   const fixableDiagnostics = diagnostics.filter((d) => RULE_FIX_STRATEGIES[d.rule]);
+  const shouldAddBetterAllCodemodPrompt = shouldIncludeBetterAllCodemodPrompt(diagnostics);
 
-  if (fixableDiagnostics.length === 0) {
+  if (fixableDiagnostics.length === 0 && !shouldAddBetterAllCodemodPrompt) {
     return "# AI Fix Prompts\n\nNo auto-fixable issues detected.\n";
   }
 
@@ -169,6 +197,17 @@ export const generateAIPromptsMarkdown = (
     report += `---\n\n`;
   }
 
+  if (shouldAddBetterAllCodemodPrompt) {
+    report += `## ${BETTER_ALL_CODEMOD_PROMPT_TITLE}\n\n`;
+    report += `- **Rule:** \`${BETTER_ALL_CODEMOD_PROMPT_KEY}\`\n`;
+    report += `- **Issue:** Replace Promise.all with better-all repository-wide after safe review.\n\n`;
+    report += `### Prompt\n\n`;
+    report += "```\n";
+    report += createBetterAllCodemodPrompt();
+    report += "\n```\n\n";
+    report += `---\n\n`;
+  }
+
   return report;
 };
 
@@ -180,12 +219,21 @@ export interface AIPromptEntry {
 }
 
 export const generateAIPrompts = (diagnostics: Diagnostic[]): AIPromptEntry[] => {
-  return diagnostics
+  const aiPromptEntries = diagnostics
     .filter((d) => RULE_FIX_STRATEGIES[d.rule])
     .map((diagnostic) => ({
       key: `${diagnostic.plugin}/${diagnostic.rule}::${diagnostic.filePath}:${diagnostic.line}:${diagnostic.column}`,
       prompt: generateAIPrompt(createAIPromptContext(diagnostic)),
     }));
+
+  if (shouldIncludeBetterAllCodemodPrompt(diagnostics)) {
+    aiPromptEntries.push({
+      key: BETTER_ALL_CODEMOD_PROMPT_KEY,
+      prompt: createBetterAllCodemodPrompt(),
+    });
+  }
+
+  return aiPromptEntries;
 };
 
 export const generateMarkdownReport = (

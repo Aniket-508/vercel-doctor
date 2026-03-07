@@ -14,7 +14,7 @@ npx vercel-doctor . --output markdown --report report.md
 npx vercel-doctor . --ai-prompts fixes.json
 ```
 
-The `--ai-prompts` flag generates ready-to-use prompts for AI coding tools. It only exports issues that have a known fix strategy. The format is auto-detected from the file extension:
+The `--ai-prompts` flag generates ready-to-use prompts for AI coding tools. It exports issues that have a known fix strategy, and for async parallelization findings it also adds a separate migration prompt to codemod `Promise.all` to `better-all` after review and checks. The format is auto-detected from the file extension:
 
 - **`.json`** — Structured format for programmatic use and automation
 - **`.md` or `.markdown`** — Human-readable format, easy to copy-paste into AI chats
@@ -33,3 +33,8 @@ Each prompt includes:
 - File location, line, and column number
 - Before/after code examples
 - Step-by-step fix instructions
+
+For async parallelization diagnostics, the output also includes:
+
+- A repository-wide `Promise.all` → `better-all` codemod planning prompt
+- A required sequence: review dry-run patch first, then run lint/typecheck/tests, then apply codemod changes

@@ -140,6 +140,15 @@ describe("generateAIPrompts", () => {
   it("returns empty array for empty input", () => {
     expect(generateAIPrompts([])).toEqual([]);
   });
+
+  it("adds better-all codemod prompt for async-parallel diagnostics", () => {
+    const diagnostics = [makeDiagnostic({ rule: "async-parallel" })];
+    const result = generateAIPrompts(diagnostics);
+    const codemodPrompt = result.find((entry) => entry.key === "vercel-doctor/better-all-codemod");
+
+    expect(codemodPrompt).toBeDefined();
+    expect(codemodPrompt?.prompt).toContain("Only after checks pass, apply the codemod changes.");
+  });
 });
 
 // ─── #8 + #9: Empty-state and deterministic timestamps ────────────────────────
@@ -192,5 +201,11 @@ describe("generateAIPromptsMarkdown", () => {
     const diag = makeDiagnostic({ rule: "vercel-no-force-dynamic" });
     const report = generateAIPromptsMarkdown([diag], ts);
     expect(report).toContain(ts);
+  });
+
+  it("includes better-all codemod section for async-parallel diagnostics", () => {
+    const report = generateAIPromptsMarkdown([makeDiagnostic({ rule: "async-parallel" })]);
+    expect(report).toContain("Codemod: Promise.all to better-all");
+    expect(report).toContain("Only after checks pass, apply the codemod changes.");
   });
 });
