@@ -5,13 +5,13 @@ description: 检测阻止在 Vercel 上有效缓存的规则。
 
 这些规则用于发现会绕过 Vercel CDN 和 ISR 缓存、强制不必要服务端渲染并增加计算成本的做法。
 
-## Version-aware behavior
+## 版本感知行为
 
-Caching diagnostics adapt to the detected Next.js major version:
+缓存诊断会根据检测到的 Next.js 主版本进行调整：
 
-- **Next.js 15**: warnings emphasize that fetch and GET handlers are uncached by default.
-- **Next.js 16+**: warnings prioritize Cache Components guidance (`"use cache"`, cache tags, targeted revalidation).
-- **Other/unknown versions**: warnings use framework-agnostic cache policy guidance.
+- **Next.js 15**：警告会强调 `fetch` 和 GET 处理器默认不缓存。
+- **Next.js 16+**：警告会优先给出 Cache Components 指导（`"use cache"`、缓存标签、定向重新验证）。
+- **其他/未知版本**：警告会使用与框架无关的缓存策略指导。
 
 ## nextjs-no-side-effect-in-get-handler
 

@@ -6,7 +6,7 @@ icon: CircleQuestionMark
 
 import { Step, Steps } from "fumadocs-ui/components/steps";
 
-Vercel Doctor는 Vercel에 배포된 Next.js 프로젝트를 위한 전문 헬스 체크 도구입니다. 함수 실행 시간, 캐시되지 않은 라우트, 최적화되지 않은 이미지 등 청구액을 늘리는 패턴을 코드베이스에서 찾아내고, 수정 가능한 진단과 함께 100점 만점의 점수를 제공합니다.
+Vercel Doctor는 Vercel에 배포된 Next.js 프로젝트를 위한 전문 헬스 체크 도구입니다. 함수 실행 시간, 캐시되지 않은 라우트, 최적화되지 않은 이미지 등 청구액을 늘리는 패턴을 코드베이스에서 찾아내고, 수정 가능한 진단과 함께 100점 만점의 점수를 제공합니다. 가이드는 감지된 Next.js 메이저 버전에 맞게 조정됩니다.
 
 ## 빠른 시작
 
@@ -70,13 +70,4 @@ Vercel Doctor는 두 가지 분석을 병렬로 실행합니다:
 - **CI 친화적** — 자동화된 파이프라인용 비대화형 모드
 - **설정 가능** — 설정 파일로 규칙 또는 파일 무시
 - **AI 스킬** — Claude Code, Cursor, Codex 등에 스킬로 설치 가능
-
-- **Version-aware guidance** — recommendations adjust to the detected Next.js major version
-
-## Version-aware checks
-
-Vercel Doctor detects your Next.js major version and adapts guidance automatically:
-
-- **Next.js 15**: highlights that fetch and GET handlers are uncached by default, so explicit cache policies matter more.
-- **Next.js 16+**: recommends Cache Components patterns (`"use cache"`, cache tags) and surfaces Turbopack build cache guidance.
-- **Unknown version**: falls back to generic caching guidance and asks for an explicit `next` semver range.
+- **버전별 가이드** — 권장 사항은 감지된 Next.js 메이저 버전에 맞게 조정됩니다

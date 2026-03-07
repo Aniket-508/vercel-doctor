@@ -5,13 +5,13 @@ description: Правила, що виявляють патерни, які пе
 
 Ці правила виявляють патерни, що обходять кешування CDN та ISR Vercel, змушуючи виконувати непотрібний серверний рендеринг і збільшуючи витрати на обчислення.
 
-## Version-aware behavior
+## Поведінка з урахуванням версії
 
-Caching diagnostics adapt to the detected Next.js major version:
+Діагностика кешування підлаштовується під виявлену мажорну версію Next.js:
 
-- **Next.js 15**: warnings emphasize that fetch and GET handlers are uncached by default.
-- **Next.js 16+**: warnings prioritize Cache Components guidance (`"use cache"`, cache tags, targeted revalidation).
-- **Other/unknown versions**: warnings use framework-agnostic cache policy guidance.
+- **Next.js 15**: попередження наголошують, що `fetch` і GET-обробники за замовчуванням не кешуються.
+- **Next.js 16+**: попередження надають пріоритет рекомендаціям щодо Cache Components (`"use cache"`, теги кешу, цільова ревалідація).
+- **Для інших/невідомих версій**: попередження використовують незалежні від фреймворку рекомендації щодо політик кешування.
 
 ## nextjs-no-side-effect-in-get-handler
 

@@ -6,7 +6,7 @@ icon: CircleQuestionMark
 
 import { Step, Steps } from "fumadocs-ui/components/steps";
 
-Vercel Doctor هو أداة فحص صحة متخصصة لمشاريع Next.js المُنشورة على Vercel. يفحص قاعدة الكود بحثاً عن أنماط تزيد فاتورتك — مدة تنفيذ الدوال، والمسارات غير المخزنة مؤقتاً، والصور غير المحسّنة، والمزيد — ثم يعطيك درجة من 100 مع إصلاحات قابلة للتطبيق.
+Vercel Doctor هو أداة فحص صحة متخصصة لمشاريع Next.js المُنشورة على Vercel. يفحص قاعدة الكود بحثاً عن أنماط تزيد فاتورتك — مدة تنفيذ الدوال، والمسارات غير المخزنة مؤقتاً، والصور غير المحسّنة، والمزيد — ثم يعطيك درجة من 100 مع إصلاحات قابلة للتطبيق. كما تتكيّف الإرشادات مع الإصدار الرئيسي المكتشف من Next.js.
 
 ## البدء السريع
 
@@ -70,13 +70,4 @@ npx -y vercel-doctor@latest . --diff
 - **متوافق مع CI** — وضع غير تفاعلي للأنابيب المؤتمتة
 - **قابل للتكوين** — تجاهل القواعد أو الملفات عبر ملف التكوين
 - **مهارة AI** — تثبيت ك skill لـ Claude Code و Cursor و Codex والمزيد
-
-- **Version-aware guidance** — recommendations adjust to the detected Next.js major version
-
-## Version-aware checks
-
-Vercel Doctor detects your Next.js major version and adapts guidance automatically:
-
-- **Next.js 15**: highlights that fetch and GET handlers are uncached by default, so explicit cache policies matter more.
-- **Next.js 16+**: recommends Cache Components patterns (`"use cache"`, cache tags) and surfaces Turbopack build cache guidance.
-- **Unknown version**: falls back to generic caching guidance and asks for an explicit `next` semver range.
+- **إرشادات واعية بالإصدار** — تتكيّف التوصيات مع الإصدار الرئيسي المكتشف من Next.js

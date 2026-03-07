@@ -5,13 +5,13 @@ description: Vercel'de etkili önbelleklemeyi engelleyen kalıpları tespit eden
 
 Bu kurallar, Vercel'in CDN ve ISR önbelleklemesini atlayan, gereksiz sunucu taraflı render'a zorlayan ve işlem maliyetlerini artıran kalıpları tespit eder.
 
-## Version-aware behavior
+## Sürüme göre davranış
 
-Caching diagnostics adapt to the detected Next.js major version:
+Önbellekleme tanıları algılanan Next.js major sürümüne göre uyarlanır:
 
-- **Next.js 15**: warnings emphasize that fetch and GET handlers are uncached by default.
-- **Next.js 16+**: warnings prioritize Cache Components guidance (`"use cache"`, cache tags, targeted revalidation).
-- **Other/unknown versions**: warnings use framework-agnostic cache policy guidance.
+- **Next.js 15**: uyarılar, `fetch` ve GET handler'larının varsayılan olarak önbelleğe alınmadığını vurgular.
+- **Next.js 16+**: uyarılar Cache Components rehberliğine (`"use cache"`, cache tag'leri, hedefli revalidation) öncelik verir.
+- **Diğer/bilinmeyen sürümler**: uyarılar framework bağımsız önbellek politikası rehberliği kullanır.
 
 ## nextjs-no-side-effect-in-get-handler
 

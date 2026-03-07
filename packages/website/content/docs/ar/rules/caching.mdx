@@ -5,13 +5,13 @@ description: قواعد تكشف الأنماط التي تمنع التخزين
 
 تكشف هذه القواعد الأنماط التي تتجاوز تخزين CDN و ISR المؤقت لـ Vercel، وتفرض عرضاً جانب الخادم غير ضروري وزيادة تكاليف الحوسبة.
 
-## Version-aware behavior
+## سلوك واعٍ بالإصدار
 
-Caching diagnostics adapt to the detected Next.js major version:
+تتكيف تشخيصات التخزين المؤقت مع الإصدار الرئيسي المكتشف من Next.js:
 
-- **Next.js 15**: warnings emphasize that fetch and GET handlers are uncached by default.
-- **Next.js 16+**: warnings prioritize Cache Components guidance (`"use cache"`, cache tags, targeted revalidation).
-- **Other/unknown versions**: warnings use framework-agnostic cache policy guidance.
+- **Next.js 15**: تؤكد التحذيرات أن `fetch` و GET handlers غير مخزنة مؤقتًا افتراضيًا.
+- **Next.js 16+**: تعطي التحذيرات الأولوية لإرشادات Cache Components (`"use cache"`، cache tags، targeted revalidation).
+- **الإصدارات الأخرى/غير المعروفة**: تستخدم التحذيرات إرشادات سياسات cache غير المرتبطة بإطار عمل معيّن.
 
 ## nextjs-no-side-effect-in-get-handler
 

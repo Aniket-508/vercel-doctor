@@ -5,13 +5,13 @@ description: Regeln, die Muster erkennen, die effektives Caching auf Vercel verh
 
 Diese Regeln identifizieren Muster, die den CDN- und ISR-Cache von Vercel umgehen und unnötiges Server-Side-Rendering sowie höhere Compute-Kosten erzwingen.
 
-## Version-aware behavior
+## Versionsabhängiges Verhalten
 
-Caching diagnostics adapt to the detected Next.js major version:
+Caching-Diagnosen passen sich an die erkannte Next.js-Hauptversion an:
 
-- **Next.js 15**: warnings emphasize that fetch and GET handlers are uncached by default.
-- **Next.js 16+**: warnings prioritize Cache Components guidance (`"use cache"`, cache tags, targeted revalidation).
-- **Other/unknown versions**: warnings use framework-agnostic cache policy guidance.
+- **Next.js 15**: Warnungen betonen, dass `fetch` und GET-Handler standardmäßig nicht gecacht sind.
+- **Next.js 16+**: Warnungen priorisieren Hinweise zu Cache Components (`"use cache"`, Cache-Tags, gezielte Revalidierung).
+- **Andere/unbekannte Versionen**: Warnungen verwenden framework-agnostische Hinweise zu Cache-Richtlinien.
 
 ## nextjs-no-side-effect-in-get-handler
 
