@@ -1,5 +1,13 @@
 # vercel-doctor
 
+## 1.2.0
+
+### Minor Changes
+
+- de59946: Add Next.js version-aware cost guidance and rule help for Next.js 15 and 16+ projects.
+
+  Add an additional AI prompt for planning a safe repository-wide `Promise.all` to `better-all` codemod with a review-and-test-first execution sequence.
+
 ## 1.1.1
 
 ### Patch Changes
