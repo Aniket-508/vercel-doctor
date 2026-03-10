@@ -1,9 +1,6 @@
 import type { ReactNode } from "react";
 import { LogoMark } from "@/components/logo";
 
-const PRIMARY_COLOR = "rgba(200, 130, 255, 0.35)";
-const PRIMARY_TEXT_COLOR = "rgb(220, 160, 255)";
-
 interface DocsOgImageProps {
   title: ReactNode;
   description?: ReactNode;
@@ -14,13 +11,12 @@ const DocsOgImage = ({ title, description }: DocsOgImageProps) => (
     style={{
       width: "100%",
       height: "100%",
-      backgroundColor: "#050505",
+      backgroundColor: "black",
       position: "relative",
       display: "flex",
       flexDirection: "column",
       overflow: "hidden",
       color: "white",
-      backgroundImage: `linear-gradient(to bottom right, ${PRIMARY_COLOR}, transparent)`,
     }}
   >
     <div
@@ -78,7 +74,7 @@ const DocsOgImage = ({ title, description }: DocsOgImageProps) => (
           gap: "20px",
         }}
       >
-        <LogoMark width={36} height={36} fill="white" />
+        <LogoMark width={36} height={36} />
         <span
           style={{
             fontSize: 28,
@@ -95,7 +91,8 @@ const DocsOgImage = ({ title, description }: DocsOgImageProps) => (
           style={{
             height: 4,
             width: 60,
-            backgroundColor: PRIMARY_COLOR,
+            backgroundColor: "grey",
+            opacity: 0.9,
             borderRadius: 2,
           }}
         />
@@ -105,8 +102,8 @@ const DocsOgImage = ({ title, description }: DocsOgImageProps) => (
             fontWeight: 700,
             textTransform: "uppercase",
             letterSpacing: "0.2em",
-            color: PRIMARY_TEXT_COLOR,
-            opacity: 0.8,
+            color: "grey",
+            opacity: 0.9,
           }}
         >
           Documentation
