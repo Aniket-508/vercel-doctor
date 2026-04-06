@@ -1,4 +1,3 @@
-/* eslint-disable react/no-danger -- JSON-LD requires injecting script body */
 import { LINK } from "@/constants/links";
 import { SITE } from "@/constants/site";
 import { i18n } from "@/i18n/config";
@@ -8,6 +7,14 @@ const LOCALE_TO_BCP47: Record<string, string> = {
   "pt-br": "pt-BR",
   zh: "zh-Hans",
 };
+
+const JsonLdScript = ({ data }: { data: Record<string, unknown> }) => (
+  <script
+    // oxlint-disable-next-line react/no-danger
+    dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+    type="application/ld+json"
+  />
+);
 
 const WebsiteJsonLd = () => {
   const inLanguage = i18n.languages.map(
@@ -23,13 +30,7 @@ const WebsiteJsonLd = () => {
     url: SITE.URL,
   };
 
-  return (
-    /* eslint-disable-next-line react/no-danger -- JSON-LD script content */
-    <script
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      type="application/ld+json"
-    />
-  );
+  return <JsonLdScript data={jsonLd} />;
 };
 
 const SoftwareSourceCodeJsonLd = () => {
@@ -42,10 +43,16 @@ const SoftwareSourceCodeJsonLd = () => {
       url: LINK.TWITTER,
     },
     codeRepository: LINK.GITHUB,
+    dateModified: new Date().toISOString().split("T")[0],
     description: SITE.DESCRIPTION.LONG,
     isAccessibleForFree: true,
-    keywords: SITE.KEYWORDS.join(", "),
+    keywords: SITE.KEYWORDS,
     license: LINK.LICENSE,
+    maintainer: {
+      "@type": "Person",
+      name: SITE.AUTHOR.NAME,
+      url: LINK.PORTFOLIO,
+    },
     name: SITE.NAME,
     offers: {
       "@type": "Offer",
@@ -53,37 +60,30 @@ const SoftwareSourceCodeJsonLd = () => {
       price: "0",
       priceCurrency: "USD",
     },
-    programmingLanguage: ["TypeScript", "JavaScript"],
+    programmingLanguage: ["TypeScript", "React", "JavaScript"],
     runtimePlatform: "Node.js",
     url: SITE.URL,
   };
 
-  return (
-    /* eslint-disable-next-line react/no-danger -- JSON-LD script content */
-    <script
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      type="application/ld+json"
-    />
-  );
+  return <JsonLdScript data={jsonLd} />;
 };
 
 const OrganizationJsonLd = () => {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
+    founder: {
+      "@type": "Person",
+      name: SITE.AUTHOR.NAME,
+      url: LINK.PORTFOLIO,
+    },
     logo: `${SITE.URL}${SITE.OG_IMAGE}`,
     name: SITE.NAME,
-    sameAs: [LINK.GITHUB, LINK.TWITTER],
+    sameAs: [LINK.GITHUB, LINK.TWITTER, LINK.PORTFOLIO],
     url: SITE.URL,
   };
 
-  return (
-    /* eslint-disable-next-line react/no-danger -- JSON-LD script content */
-    <script
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      type="application/ld+json"
-    />
-  );
+  return <JsonLdScript data={jsonLd} />;
 };
 
 const FAQJsonLd = () => {
@@ -116,13 +116,7 @@ const FAQJsonLd = () => {
     })),
   };
 
-  return (
-    /* eslint-disable-next-line react/no-danger -- JSON-LD script content */
-    <script
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      type="application/ld+json"
-    />
-  );
+  return <JsonLdScript data={jsonLd} />;
 };
 
 const JsonLdScripts = () => (
