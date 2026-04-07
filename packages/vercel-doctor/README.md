@@ -201,6 +201,10 @@ interface Diagnostic {
 }
 ```
 
+## Disclaimer
+
+Vercel Doctor is not affiliated with, endorsed by, or sponsored by Vercel Inc., Vercel and the Vercel logo are trademarks of Vercel Inc. This is an independent, open-source project that review Next.js project code to help optimize Vercel costs.
+
 ## Contributing
 
 Want to contribute? Check out the codebase and submit a PR.
