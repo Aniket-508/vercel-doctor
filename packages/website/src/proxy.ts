@@ -74,6 +74,6 @@ export const proxy = (request: NextRequest, event: NextFetchEvent) => {
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon\\.ico|favicon\\.svg|icon-light\\.svg|og\\.png|vercel-doctor-logo-(dark|light)\\.svg|robots\\.txt|sitemap\\.xml|og|share|llms\\.txt|llms-full\\.txt|llms\\.mdx|install-skill).*)",
+    "/((?!api|_next/static|_next/image|favicon\\.ico|favicon\\.svg|icon-light\\.svg|og\\.png|vercel-doctor-logo-dark\\.svg|vercel-doctor-logo-light\\.svg|robots\\.txt|sitemap\\.xml|og|share|llms\\.txt|llms-full\\.txt|llms\\.mdx|install-skill).*)",
   ],
 };
