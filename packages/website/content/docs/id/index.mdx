@@ -59,7 +59,7 @@ Vercel Doctor menjalankan dua tahap analisis secara paralel:
 | <DynamicLink href="/[lang]/docs/rules/function-duration">Durasi Fungsi</DynamicLink>    | 3      | Await berurutan, logging yang memblokir, I/O non-paralel                                      |
 | <DynamicLink href="/[lang]/docs/rules/caching">Caching</DynamicLink>                    | 6      | `force-dynamic`, kebijakan cache yang hilang, fetch `no-store`, efek samping pada handler GET |
 | <DynamicLink href="/[lang]/docs/rules/invocations">Invokasi</DynamicLink>               | 2      | Fetch sisi klien di halaman, prefetching link yang agresif                                    |
-| <DynamicLink href="/[lang]/docs/rules/image-optimization">Optimasi Gambar</DynamicLink> | 4      | `unoptimized` global, `sizes` yang hilang, pola remote terlalu luas, SVG tanpa `unoptimized`  |
+| <DynamicLink href="/[lang]/docs/rules/image-optimization">Optimasi Gambar</DynamicLink> | 3 | `unoptimized` global, `sizes` yang hilang, pola remote terlalu luas |
 | <DynamicLink href="/[lang]/docs/rules/platform">Platform</DynamicLink>                  | 8      | Import berat di Edge, cron job, runtime Bun, Fluid Compute, arsip deploy, cache Turbopack     |
 | <DynamicLink href="/[lang]/docs/rules/dead-code">Kode Mati</DynamicLink>                | 4      | File, export, tipe yang tidak digunakan, dan duplikat                                         |
 

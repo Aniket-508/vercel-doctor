@@ -2,12 +2,10 @@ import fs from "node:fs";
 import path from "node:path";
 
 import type { VercelDoctorConfig } from "../types.js";
+import { isVercelDoctorConfig } from "./is-vercel-doctor-config.js";
 
 const CONFIG_FILENAME = "vercel-doctor.config.json";
 const PACKAGE_JSON_CONFIG_KEY = "vercelDoctor";
-
-const isPlainObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 
 export const loadConfig = (
   rootDirectory: string,
@@ -18,13 +16,13 @@ export const loadConfig = (
     try {
       const fileContent = fs.readFileSync(configFilePath, "utf8");
       const parsed: unknown = JSON.parse(fileContent);
-      if (!isPlainObject(parsed)) {
+      if (!isVercelDoctorConfig(parsed)) {
         console.warn(
-          `Warning: ${CONFIG_FILENAME} must be a JSON object, ignoring.`,
+          `Warning: ${CONFIG_FILENAME} must be a JSON object with valid option values, ignoring.`,
         );
         return null;
       }
-      return parsed as VercelDoctorConfig;
+      return parsed;
     } catch (error) {
       console.warn(
         `Warning: Failed to parse ${CONFIG_FILENAME}: ${error instanceof Error ? error.message : String(error)}`,
@@ -39,8 +37,8 @@ export const loadConfig = (
       const fileContent = fs.readFileSync(packageJsonPath, "utf8");
       const packageJson = JSON.parse(fileContent);
       const embeddedConfig = packageJson[PACKAGE_JSON_CONFIG_KEY];
-      if (isPlainObject(embeddedConfig)) {
-        return embeddedConfig as VercelDoctorConfig;
+      if (isVercelDoctorConfig(embeddedConfig)) {
+        return embeddedConfig;
       }
     } catch {
       return null;

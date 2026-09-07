@@ -78,21 +78,3 @@ module.exports = {
   },
 };
 ```
-
----
-
-## vercel-image-svg-without-unoptimized
-
-<Callout type="warn">Warning · `vercel-doctor/vercel-image-svg-without-unoptimized`</Callout>
-
-`unoptimized` prop이 없는 SVG `src`를 가진 `<Image>` 컴포넌트를 감지합니다.
-
-**이유:** SVG는 벡터 그래픽이라 이미지 최적화 파이프라인의 이점을 받지 못합니다. 파이프라인을 통과시키면 이득 없이 최적화 할당량만 낭비됩니다.
-
-```tsx title="Bad"
-<Image src="/logo.svg" alt="Logo" width={100} height={40} />
-```
-
-```tsx title="Good"
-<Image src="/logo.svg" alt="Logo" width={100} height={40} unoptimized />
-```

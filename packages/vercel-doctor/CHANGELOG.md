@@ -1,5 +1,22 @@
 # vercel-doctor
 
+## Unreleased
+
+### Features
+
+- Add optional Rslint (`@rslint/core`) detection and CLI/API integration, including JSON Lines diagnostics, diff scopes, hoisted installations, and process failure handling.
+
+### Fixes
+
+- Prevent shell injection through diff base refs; preserve untracked and unusual filenames, workspace-relative paths, and detached checkouts.
+- Keep JSON and Markdown output free of progress text; preserve every workspace project in report exports and propagate write failures.
+- Respect empty diff scopes and non-JSX source files, validate configuration values, and preserve project-specific options.
+- Make lint scans read-only, isolate temporary configurations, retain parser errors, and reject failed or interrupted linter processes.
+- Correct workspace pattern matching and framework inheritance, Next.js route detection, and Nuxt/SvelteKit configuration checks.
+- Remove incorrect SVG optimization and SvelteKit anchor warnings; ignore generated framework output and type-only server imports.
+- Require Node.js 22.17.0 or newer and align the GitHub Action runtime with the APIs used by the scanner.
+- Fix action project selection and multiline scores, release gating and npm authentication, share query normalization, documentation aliases, and skill installation paths.
+
 ## 1.2.0
 
 ### Minor Changes

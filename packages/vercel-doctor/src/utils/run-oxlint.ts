@@ -5,7 +5,10 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { ERROR_PREVIEW_LENGTH_CHARS, JSX_FILE_PATTERN } from "../constants.js";
+import {
+  ERROR_PREVIEW_LENGTH_CHARS,
+  SOURCE_FILE_PATTERN,
+} from "../constants.js";
 import { createOxlintConfig } from "../oxlint-config.js";
 import {
   RULE_CATEGORY_NAMES,
@@ -17,7 +20,6 @@ import type {
   Framework,
   OxlintOutput,
 } from "../types.js";
-import { neutralizeDisableDirectives } from "./neutralize-disable-directives.js";
 
 const esmRequire = createRequire(import.meta.url);
 
@@ -87,15 +89,13 @@ export const runOxlint = async (
     return [];
   }
 
-  const configPath = path.join(
-    os.tmpdir(),
-    `vercel-doctor-oxlintrc-${process.pid}.json`,
+  const configDirectory = fs.mkdtempSync(
+    path.join(os.tmpdir(), "vercel-doctor-oxlint-"),
   );
-  const pluginPath = resolvePluginPath();
-  const config = createOxlintConfig({ framework, pluginPath });
-  const restoreDisableDirectives = neutralizeDisableDirectives(rootDirectory);
-
+  const configPath = path.join(configDirectory, "oxlintrc.json");
   try {
+    const pluginPath = resolvePluginPath();
+    const config = createOxlintConfig({ framework, pluginPath });
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 
     const oxlintBinary = resolveOxlintBinary();
@@ -105,6 +105,7 @@ export const runOxlint = async (
       args.push("--tsconfig", "./tsconfig.json");
     }
 
+    args.push("--");
     if (includePaths === undefined) {
       args.push(".");
     } else {
@@ -125,8 +126,23 @@ export const runOxlint = async (
     child.on("error", (error) =>
       reject(new Error(`Failed to run oxlint: ${error.message}`)),
     );
-    child.on("close", () => {
+    child.on("close", (exitCode, signal) => {
       const output = Buffer.concat(stdoutBuffers).toString("utf8").trim();
+      if (
+        signal ||
+        (exitCode !== 0 && exitCode !== 1) ||
+        (exitCode !== 0 && !output)
+      ) {
+        const stderrOutput = Buffer.concat(stderrBuffers)
+          .toString("utf8")
+          .trim();
+        reject(
+          new Error(
+            `Failed to run oxlint: ${stderrOutput || signal || `exit code ${exitCode}`}`,
+          ),
+        );
+        return;
+      }
       if (!output) {
         const stderrOutput = Buffer.concat(stderrBuffers)
           .toString("utf8")
@@ -157,7 +173,7 @@ export const runOxlint = async (
     return output.diagnostics
       .filter(
         (diagnostic) =>
-          diagnostic.code && JSX_FILE_PATTERN.test(diagnostic.filename),
+          diagnostic.code && SOURCE_FILE_PATTERN.test(diagnostic.filename),
       )
       .map((diagnostic) => {
         const { plugin, rule } = parseRuleCode(diagnostic.code);
@@ -183,9 +199,6 @@ export const runOxlint = async (
         };
       });
   } finally {
-    restoreDisableDirectives();
-    if (fs.existsSync(configPath)) {
-      fs.unlinkSync(configPath);
-    }
+    fs.rmSync(configDirectory, { force: true, recursive: true });
   }
 };

@@ -28,6 +28,17 @@ The `directory` argument defaults to `.` (current directory).
 | `--diff [base]`    | Scan only files changed vs the base branch            |
 | `--offline`        | Skip anonymous telemetry used for score calculation   |
 
+## Rslint
+
+Vercel Doctor automatically detects [`@rslint/core`](https://rslint.rs/guide/) or a
+project-root `rslint.config.js`, `.mjs`, `.ts`, or `.mts` file. Install Rslint in
+your project separately; Vercel Doctor uses its existing configuration without
+applying fixes.
+
+If several linters are configured, selection order is Oxlint, Rslint, ESLint, then
+Biome. `--diff` scopes Rslint to changed files, and `--no-lint` skips it. Rslint
+diagnostics use identifiers such as `rslint/no-debugger` for ignored rules.
+
 ## Examples
 
 ### Scan the current directory

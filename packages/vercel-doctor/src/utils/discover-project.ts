@@ -18,8 +18,10 @@ import { readPackageJson } from "./read-package-json.js";
 
 const FRAMEWORK_PACKAGES: Record<string, Framework> = {
   "@remix-run/react": "remix",
+  "@sveltejs/kit": "sveltekit",
   gatsby: "gatsby",
   next: "nextjs",
+  nuxt: "nuxt",
   "react-scripts": "cra",
   vite: "vite",
 };
@@ -28,8 +30,10 @@ const FRAMEWORK_DISPLAY_NAMES: Record<Framework, string> = {
   cra: "Create React App",
   gatsby: "Gatsby",
   nextjs: "Next.js",
+  nuxt: "Nuxt",
   remix: "Remix",
-  unknown: "React",
+  sveltekit: "SvelteKit",
+  unknown: "Unknown",
   vite: "Vite",
 };
 
@@ -39,7 +43,7 @@ export const formatFrameworkName = (framework: Framework): string =>
 const countSourceFiles = (rootDirectory: string): number => {
   const result = spawnSync(
     "git",
-    ["ls-files", "--cached", "--others", "--exclude-standard"],
+    ["ls-files", "-z", "--cached", "--others", "--exclude-standard"],
     {
       cwd: rootDirectory,
       encoding: "utf8",
@@ -52,7 +56,7 @@ const countSourceFiles = (rootDirectory: string): number => {
   }
 
   return result.stdout
-    .split("\n")
+    .split("\0")
     .filter(
       (filePath) => filePath.length > 0 && SOURCE_FILE_PATTERN.test(filePath),
     ).length;
@@ -85,6 +89,8 @@ const extractDependencyInfo = (packageJson: PackageJson): DependencyInfo => {
     nextMajorVersion: getSemverMajorVersion(nextVersion),
     nextVersion,
     reactVersion: allDependencies.react ?? null,
+    svelteVersion: allDependencies.svelte ?? null,
+    vueVersion: allDependencies.vue ?? null,
   };
 };
 
@@ -140,40 +146,25 @@ const getWorkspacePatterns = (
 
 const resolveWorkspaceDirectories = (
   rootDirectory: string,
-  pattern: string,
+  patterns: string[],
 ): string[] => {
-  const cleanPattern = pattern.replaceAll(/["']/g, "").replace(/\/\*\*$/, "/*");
-
-  if (!cleanPattern.includes("*")) {
-    const directoryPath = path.join(rootDirectory, cleanPattern);
-    if (
-      fs.existsSync(directoryPath) &&
-      fs.existsSync(path.join(directoryPath, "package.json"))
-    ) {
-      return [directoryPath];
-    }
-    return [];
-  }
-
-  const baseDirectory = path.join(
-    rootDirectory,
-    cleanPattern.slice(0, cleanPattern.indexOf("*")),
+  const includedPatterns = patterns.filter(
+    (pattern) => !pattern.startsWith("!"),
   );
-
-  if (
-    !fs.existsSync(baseDirectory) ||
-    !fs.statSync(baseDirectory).isDirectory()
-  ) {
-    return [];
-  }
+  const excludedPatterns = patterns
+    .filter((pattern) => pattern.startsWith("!"))
+    .map((pattern) => pattern.slice(1));
 
   return fs
-    .readdirSync(baseDirectory)
-    .map((entry) => path.join(baseDirectory, entry))
+    .globSync(includedPatterns, {
+      cwd: rootDirectory,
+      exclude: ["**/node_modules/**", "**/.git/**", ...excludedPatterns],
+    })
+    .map((directory) => path.resolve(rootDirectory, directory))
     .filter(
-      (entryPath) =>
-        fs.statSync(entryPath).isDirectory() &&
-        fs.existsSync(path.join(entryPath, "package.json")),
+      (directory) =>
+        fs.statSync(directory).isDirectory() &&
+        fs.existsSync(path.join(directory, "package.json")),
     );
 };
 
@@ -215,28 +206,26 @@ const findDependencyInfoFromMonorepoRoot = (
       nextMajorVersion: null,
       nextVersion: null,
       reactVersion: null,
+      svelteVersion: null,
+      vueVersion: null,
     };
   }
 
-  const rootPackageJson = readPackageJson(
-    path.join(monorepoRoot, "package.json"),
-  );
-  const rootInfo = extractDependencyInfo(rootPackageJson);
-  const workspaceInfo = findReactInWorkspaces(monorepoRoot, rootPackageJson);
-
-  return {
-    framework:
-      rootInfo.framework === "unknown"
-        ? workspaceInfo.framework
-        : rootInfo.framework,
-    nextMajorVersion:
-      rootInfo.nextMajorVersion ?? workspaceInfo.nextMajorVersion,
-    nextVersion: rootInfo.nextVersion ?? workspaceInfo.nextVersion,
-    reactVersion: rootInfo.reactVersion ?? workspaceInfo.reactVersion,
-  };
+  const rootPackageJsonPath = path.join(monorepoRoot, "package.json");
+  if (!fs.existsSync(rootPackageJsonPath)) {
+    return {
+      framework: "unknown",
+      nextMajorVersion: null,
+      nextVersion: null,
+      reactVersion: null,
+      svelteVersion: null,
+      vueVersion: null,
+    };
+  }
+  return extractDependencyInfo(readPackageJson(rootPackageJsonPath));
 };
 
-const findReactInWorkspaces = (
+const findDependencyInfoInWorkspaces = (
   rootDirectory: string,
   packageJson: PackageJson,
 ): DependencyInfo => {
@@ -246,52 +235,62 @@ const findReactInWorkspaces = (
     nextMajorVersion: null,
     nextVersion: null,
     reactVersion: null,
+    svelteVersion: null,
+    vueVersion: null,
   };
 
-  for (const pattern of patterns) {
-    const directories = resolveWorkspaceDirectories(rootDirectory, pattern);
+  const directories = resolveWorkspaceDirectories(rootDirectory, patterns);
+  for (const workspaceDirectory of directories) {
+    const workspacePackageJson = readPackageJson(
+      path.join(workspaceDirectory, "package.json"),
+    );
+    const info = extractDependencyInfo(workspacePackageJson);
 
-    for (const workspaceDirectory of directories) {
-      const workspacePackageJson = readPackageJson(
-        path.join(workspaceDirectory, "package.json"),
-      );
-      const info = extractDependencyInfo(workspacePackageJson);
+    if (info.reactVersion && !result.reactVersion) {
+      result.reactVersion = info.reactVersion;
+    }
+    if (info.vueVersion && !result.vueVersion) {
+      result.vueVersion = info.vueVersion;
+    }
+    if (info.svelteVersion && !result.svelteVersion) {
+      result.svelteVersion = info.svelteVersion;
+    }
+    if (info.framework !== "unknown" && result.framework === "unknown") {
+      result.framework = info.framework;
+    }
+    if (info.nextVersion && !result.nextVersion) {
+      result.nextVersion = info.nextVersion;
+    }
+    if (info.nextMajorVersion !== null && result.nextMajorVersion === null) {
+      result.nextMajorVersion = info.nextMajorVersion;
+    }
 
-      if (info.reactVersion && !result.reactVersion) {
-        result.reactVersion = info.reactVersion;
-      }
-      if (info.framework !== "unknown" && result.framework === "unknown") {
-        result.framework = info.framework;
-      }
-      if (info.nextVersion && !result.nextVersion) {
-        result.nextVersion = info.nextVersion;
-      }
-      if (info.nextMajorVersion !== null && result.nextMajorVersion === null) {
-        result.nextMajorVersion = info.nextMajorVersion;
-      }
-
-      if (
-        result.reactVersion &&
-        result.framework !== "unknown" &&
-        result.nextVersion &&
-        result.nextMajorVersion !== null
-      ) {
-        return result;
-      }
+    if (
+      result.framework !== "unknown" &&
+      result.nextVersion &&
+      result.nextMajorVersion !== null
+    ) {
+      return result;
     }
   }
 
   return result;
 };
 
-const hasReactDependency = (packageJson: PackageJson): boolean => {
+const hasFrameworkDependency = (packageJson: PackageJson): boolean => {
   const allDependencies = collectAllDependencies(packageJson);
   return Object.keys(allDependencies).some(
-    (packageName) => packageName === "next" || packageName.includes("react"),
+    (packageName) =>
+      packageName === "next" ||
+      packageName === "nuxt" ||
+      packageName === "@sveltejs/kit" ||
+      packageName.includes("react") ||
+      packageName.includes("vue") ||
+      packageName.includes("svelte"),
   );
 };
 
-export const discoverReactSubprojects = (
+export const discoverFrameworkSubprojects = (
   rootDirectory: string,
 ): WorkspacePackage[] => {
   if (
@@ -320,7 +319,7 @@ export const discoverReactSubprojects = (
     }
 
     const packageJson = readPackageJson(packageJsonPath);
-    if (!hasReactDependency(packageJson)) {
+    if (!hasFrameworkDependency(packageJson)) {
       continue;
     }
 
@@ -347,21 +346,18 @@ export const listWorkspacePackages = (
 
   const packages: WorkspacePackage[] = [];
 
-  for (const pattern of patterns) {
-    const directories = resolveWorkspaceDirectories(rootDirectory, pattern);
-    for (const workspaceDirectory of directories) {
-      const workspacePackageJson = readPackageJson(
-        path.join(workspaceDirectory, "package.json"),
-      );
+  const directories = resolveWorkspaceDirectories(rootDirectory, patterns);
+  for (const workspaceDirectory of directories) {
+    const workspacePackageJson = readPackageJson(
+      path.join(workspaceDirectory, "package.json"),
+    );
 
-      if (!hasReactDependency(workspacePackageJson)) {
-        continue;
-      }
-
-      const name =
-        workspacePackageJson.name ?? path.basename(workspaceDirectory);
-      packages.push({ directory: workspaceDirectory, name });
+    if (!hasFrameworkDependency(workspacePackageJson)) {
+      continue;
     }
+
+    const name = workspacePackageJson.name ?? path.basename(workspaceDirectory);
+    packages.push({ directory: workspaceDirectory, name });
   }
 
   return packages;
@@ -376,11 +372,13 @@ const mergeDependencyInfo = (
   nextMajorVersion: current.nextMajorVersion ?? source.nextMajorVersion ?? null,
   nextVersion: current.nextVersion ?? source.nextVersion ?? null,
   reactVersion: current.reactVersion ?? source.reactVersion ?? null,
+  svelteVersion: current.svelteVersion ?? source.svelteVersion ?? null,
+  vueVersion: current.vueVersion ?? source.vueVersion ?? null,
 });
 
 const isDependencyInfoComplete = (info: DependencyInfo): boolean =>
   Boolean(
-    info.reactVersion &&
+    (info.reactVersion || info.vueVersion || info.svelteVersion) &&
     info.framework !== "unknown" &&
     info.nextVersion &&
     info.nextMajorVersion !== null,
@@ -398,7 +396,7 @@ export const discoverProject = (directory: string): ProjectInfo => {
   if (!isDependencyInfoComplete(dependencyInfo)) {
     dependencyInfo = mergeDependencyInfo(
       dependencyInfo,
-      findReactInWorkspaces(directory, packageJson),
+      findDependencyInfoInWorkspaces(directory, packageJson),
     );
   }
 
@@ -409,8 +407,14 @@ export const discoverProject = (directory: string): ProjectInfo => {
     );
   }
 
-  const { framework, nextMajorVersion, nextVersion, reactVersion } =
-    dependencyInfo;
+  const {
+    framework,
+    nextMajorVersion,
+    nextVersion,
+    reactVersion,
+    svelteVersion,
+    vueVersion,
+  } = dependencyInfo;
   const projectName = packageJson.name ?? path.basename(directory);
   const hasTypeScript = fs.existsSync(path.join(directory, "tsconfig.json"));
   const sourceFileCount = countSourceFiles(directory);
@@ -424,5 +428,7 @@ export const discoverProject = (directory: string): ProjectInfo => {
     reactVersion,
     rootDirectory: directory,
     sourceFileCount,
+    svelteVersion,
+    vueVersion,
   };
 };

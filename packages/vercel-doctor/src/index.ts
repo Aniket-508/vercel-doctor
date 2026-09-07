@@ -1,7 +1,6 @@
 import path from "node:path";
 import { performance } from "node:perf_hooks";
 
-import { JSX_FILE_PATTERN } from "./constants.js";
 import type {
   Diagnostic,
   DiffInfo,
@@ -12,9 +11,15 @@ import type {
 import { calculateScore } from "./utils/calculate-score.js";
 import { discoverProject } from "./utils/discover-project.js";
 import { filterIgnoredDiagnostics } from "./utils/filter-diagnostics.js";
+import {
+  detectLinter,
+  oxlintRunner,
+  eslintRunner,
+  biomeRunner,
+  rslintRunner,
+} from "./utils/linters/index.js";
 import { loadConfig } from "./utils/load-config.js";
 import { runKnip } from "./utils/run-knip.js";
-import { runOxlint } from "./utils/run-oxlint.js";
 import { runVercelChecks } from "./utils/run-vercel-checks.js";
 
 export type {
@@ -39,12 +44,19 @@ export interface DiagnoseResult {
   elapsedMilliseconds: number;
 }
 
+const LINTER_RUNNERS = [oxlintRunner, rslintRunner, eslintRunner, biomeRunner];
+
+const resolveLinterRunner = (projectDirectory: string) => {
+  const detectedKind = detectLinter(projectDirectory);
+  return LINTER_RUNNERS.find((runner) => runner.kind === detectedKind) ?? null;
+};
+
 export const diagnose = async (
   directory: string,
   options: DiagnoseOptions = {},
 ): Promise<DiagnoseResult> => {
   const { includePaths = [] } = options;
-  const isDiffMode = includePaths.length > 0;
+  const isDiffMode = options.includePaths !== undefined;
 
   const startTime = performance.now();
   const resolvedDirectory = path.resolve(directory);
@@ -54,25 +66,28 @@ export const diagnose = async (
   const effectiveLint = options.lint ?? userConfig?.lint ?? true;
   const effectiveDeadCode = options.deadCode ?? userConfig?.deadCode ?? true;
 
-  if (!projectInfo.reactVersion) {
-    throw new Error("No React dependency found in package.json");
+  if (
+    !projectInfo.reactVersion &&
+    !projectInfo.vueVersion &&
+    !projectInfo.svelteVersion
+  ) {
+    throw new Error(
+      "No framework dependency (React, Vue, or Svelte) found in package.json",
+    );
   }
 
-  const jsxIncludePaths = isDiffMode
-    ? includePaths.filter((filePath) => JSX_FILE_PATTERN.test(filePath))
-    : undefined;
+  const linterRunner = resolveLinterRunner(resolvedDirectory);
 
   const runLint = async (): Promise<Diagnostic[]> => {
-    if (!effectiveLint) {
+    if (!effectiveLint || !linterRunner) {
       return [];
     }
     try {
-      return await runOxlint(
-        resolvedDirectory,
-        projectInfo.hasTypeScript,
-        projectInfo.framework,
-        jsxIncludePaths,
-      );
+      return await linterRunner.run(resolvedDirectory, projectInfo, {
+        framework: projectInfo.framework,
+        hasTypeScript: projectInfo.hasTypeScript,
+        includePaths: options.includePaths,
+      });
     } catch (error: unknown) {
       console.error("Lint failed:", error);
       return [];
@@ -91,9 +106,9 @@ export const diagnose = async (
     }
   };
 
-  const runVercelChecksSafe = async (): Promise<Diagnostic[]> => {
+  const runVercelChecksSafe = (): Diagnostic[] => {
     try {
-      return await runVercelChecks(resolvedDirectory, {
+      return runVercelChecks(resolvedDirectory, {
         includePaths: isDiffMode ? includePaths : undefined,
       });
     } catch (error: unknown) {
@@ -103,7 +118,11 @@ export const diagnose = async (
   };
 
   const [lintDiagnostics, deadCodeDiagnostics, vercelDiagnostics] =
-    await Promise.all([runLint(), runDeadCode(), runVercelChecksSafe()]);
+    await Promise.all([
+      runLint(),
+      runDeadCode(),
+      Promise.resolve(runVercelChecksSafe()),
+    ]);
   const allDiagnostics = [
     ...lintDiagnostics,
     ...deadCodeDiagnostics,

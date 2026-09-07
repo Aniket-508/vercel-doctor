@@ -78,21 +78,3 @@ module.exports = {
   },
 };
 ```
-
----
-
-## vercel-image-svg-without-unoptimized
-
-<Callout type="warn">Warning · `vercel-doctor/vercel-image-svg-without-unoptimized`</Callout>
-
-Виявляє компоненти `<Image>` з SVG у `src` без пропа `unoptimized`.
-
-**Чому це важливо:** SVG — це векторна графіка, яка не отримує переваг від конвеєра Image Optimization. Пропускання їх через нього витрачає квоту оптимізації без жодної користі.
-
-```tsx title="Bad"
-<Image src="/logo.svg" alt="Logo" width={100} height={40} />
-```
-
-```tsx title="Good"
-<Image src="/logo.svg" alt="Logo" width={100} height={40} unoptimized />
-```

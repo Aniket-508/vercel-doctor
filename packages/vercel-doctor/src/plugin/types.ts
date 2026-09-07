@@ -6,6 +6,7 @@ export interface ReportDescriptor {
 export interface RuleContext {
   report: (descriptor: ReportDescriptor) => void;
   getFilename?: () => string;
+  sourceCode?: { text: string };
 }
 
 export type RuleVisitors = Record<

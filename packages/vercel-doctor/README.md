@@ -26,7 +26,7 @@ Vercel Doctor detects your framework and project setup, then runs two analysis p
 1. **Billing lint** — detects patterns that inflate your Vercel invoice:
    - **Function duration**: sequential `await`s, blocking `after()` calls, side effects in GET handlers
    - **Caching**: missing cache policies, `force-dynamic` / `no-store` overrides, SSR where SSG would work
-   - **Image optimization**: global image optimization disabled, next/image with SVG without `unoptimized`, overly broad remote patterns, missing `sizes` prop
+   - **Image optimization**: global image optimization disabled, overly broad remote patterns, missing `sizes` prop
    - **Invocations**: Link prefetch default (use `prefetch={false}` or disable globally, then add `prefetch={true}` only to critical links)
    - **Edge functions**: heavy imports, sequential awaits that burn CPU time
    - **Version-aware handling**: Next.js 15/16+ caching guidance tailored to your detected Next.js major version
@@ -63,6 +63,8 @@ Supports Cursor, Claude Code, Amp Code, Codex, Gemini CLI, OpenCode, Windsurf, a
 
 ## Options
 
+Requires Node.js 22.17.0 or newer.
+
 ```
 Usage: vercel-doctor [directory] [options]
 
@@ -81,6 +83,30 @@ Options:
   --ai-prompts <file>   write AI fix prompts to JSON file for use with Cursor/Claude/Windsurf
   -h, --help            display help for command
 ```
+
+JSON output is a single document with no progress messages on stdout. A single
+selected project returns `{ diagnostics, scoreResult }`; multiple projects return
+an array of results with a `directory` field. Markdown, JSON, and score modes do
+not prompt or automatically select diff mode; use `--diff` explicitly when needed.
+
+Reports and AI prompt files include every selected project, with paths relative
+to the requested directory. Output-file failures exit with a nonzero status.
+Diff scans include tracked and untracked source files and reject invalid base refs.
+Lint scans are read-only and honor source-level disable directives.
+
+## Rslint support
+
+Projects using [`@rslint/core`](https://rslint.rs/guide/) are detected automatically,
+as are `rslint.config.js`, `.mjs`, `.ts`, and `.mts` files in the project root.
+Rslint remains an optional project dependency; Vercel Doctor does not install it.
+
+When multiple linters are present, selection order is Oxlint, Rslint, ESLint, then
+Biome. Both CLI scans and `diagnose()` run Rslint with the project's configuration,
+preserve file scopes, and report its JSON Lines diagnostics without applying fixes.
+Local and workspace-hoisted installations are supported, with a PATH fallback.
+
+Use `--no-lint` or `{ lint: false }` to skip it. Ignore individual rules using their
+diagnostic identifier, such as `rslint/no-debugger`, in `ignore.rules`.
 
 ## Configuration
 
@@ -182,6 +208,7 @@ The `diagnose` function accepts an optional second argument:
 const result = await diagnose(".", {
   lint: true, // run lint checks (default: true)
   deadCode: true, // run dead code detection (default: true)
+  includePaths: ["app/page.tsx"], // optional scope; [] scans no files
 });
 ```
 

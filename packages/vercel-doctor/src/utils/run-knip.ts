@@ -211,11 +211,10 @@ export const runKnip = async (rootDirectory: string): Promise<Diagnostic[]> => {
   let knipResult: KnipResults;
 
   if (monorepoRoot) {
-    const packageJsonPath = path.join(rootDirectory, "package.json");
-    const packageJson = fs.existsSync(packageJsonPath)
-      ? JSON.parse(fs.readFileSync(packageJsonPath, "utf8"))
-      : {};
-    const workspaceName = packageJson.name ?? path.basename(rootDirectory);
+    const workspaceName = path
+      .relative(monorepoRoot, rootDirectory)
+      .split(path.sep)
+      .join("/");
 
     try {
       knipResult = await runKnipWithOptions(monorepoRoot, workspaceName);
@@ -241,5 +240,12 @@ export const runKnip = async (rootDirectory: string): Promise<Diagnostic[]> => {
     );
   }
 
-  return diagnostics;
+  return diagnostics.filter((diagnostic) => {
+    const relativePath = diagnostic.filePath;
+    return (
+      !path.isAbsolute(relativePath) &&
+      relativePath !== ".." &&
+      !relativePath.startsWith(`..${path.sep}`)
+    );
+  });
 };

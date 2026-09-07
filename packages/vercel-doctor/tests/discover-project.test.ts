@@ -68,9 +68,11 @@ describe(formatFrameworkName, () => {
     expect(formatFrameworkName("cra")).toBe("Create React App");
     expect(formatFrameworkName("remix")).toBe("Remix");
     expect(formatFrameworkName("gatsby")).toBe("Gatsby");
+    expect(formatFrameworkName("nuxt")).toBe("Nuxt");
+    expect(formatFrameworkName("sveltekit")).toBe("SvelteKit");
   });
 
-  it("formats unknown framework as React", () => {
-    expect(formatFrameworkName("unknown")).toBe("React");
+  it("formats unknown framework as Unknown", () => {
+    expect(formatFrameworkName("unknown")).toBe("Unknown");
   });
 });

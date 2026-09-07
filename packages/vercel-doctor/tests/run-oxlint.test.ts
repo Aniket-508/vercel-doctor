@@ -84,12 +84,6 @@ describe(runOxlint, () => {
     }
   });
 
-  it("only reports diagnostics from JSX/TSX files", () => {
-    for (const diagnostic of basicReactDiagnostics) {
-      expect(diagnostic.filePath).toMatch(/\.(tsx|jsx)$/);
-    }
-  });
-
   describeRules(
     "function duration rules",
     {

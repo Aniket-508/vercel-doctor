@@ -1,20 +1,23 @@
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 
 import {
   DEFAULT_BRANCH_CANDIDATES,
+  GIT_LS_FILES_MAX_BUFFER_BYTES,
   SOURCE_FILE_PATTERN,
 } from "../constants.js";
 import type { DiffInfo } from "../types.js";
 
+const runGit = (directory: string, args: string[]): string =>
+  execFileSync("git", args, {
+    cwd: directory,
+    encoding: "utf8",
+    maxBuffer: GIT_LS_FILES_MAX_BUFFER_BYTES,
+    stdio: "pipe",
+  });
+
 const getCurrentBranch = (directory: string): string | null => {
   try {
-    const branch = execSync("git rev-parse --abbrev-ref HEAD", {
-      cwd: directory,
-      stdio: "pipe",
-    })
-      .toString()
-      .trim();
-    return branch === "HEAD" ? null : branch;
+    return runGit(directory, ["rev-parse", "--abbrev-ref", "HEAD"]).trim();
   } catch {
     return null;
   }
@@ -22,78 +25,46 @@ const getCurrentBranch = (directory: string): string | null => {
 
 const detectDefaultBranch = (directory: string): string | null => {
   try {
-    const reference = execSync("git symbolic-ref refs/remotes/origin/HEAD", {
-      cwd: directory,
-      stdio: "pipe",
-    })
-      .toString()
-      .trim();
-    return reference.replace("refs/remotes/origin/", "");
+    return runGit(directory, ["symbolic-ref", "refs/remotes/origin/HEAD"])
+      .trim()
+      .replace("refs/remotes/", "");
   } catch {
     for (const candidate of DEFAULT_BRANCH_CANDIDATES) {
       try {
-        execSync(`git rev-parse --verify ${candidate}`, {
-          cwd: directory,
-          stdio: "pipe",
-        });
+        runGit(directory, ["rev-parse", "--verify", candidate]);
         return candidate;
       } catch {
-        // Rev parse failed, try next candidate
+        continue;
       }
     }
     return null;
   }
 };
 
-const getChangedFilesSinceBranch = (
-  directory: string,
-  baseBranch: string,
-): string[] => {
-  try {
-    const mergeBase = execSync(`git merge-base ${baseBranch} HEAD`, {
-      cwd: directory,
-      stdio: "pipe",
-    })
-      .toString()
-      .trim();
-
-    const output = execSync(
-      `git diff --name-only --diff-filter=ACMR --relative ${mergeBase}`,
-      {
-        cwd: directory,
-        stdio: "pipe",
-      },
-    )
-      .toString()
-      .trim();
-
-    if (!output) {
-      return [];
-    }
-    return output.split("\n").filter(Boolean);
-  } catch {
-    return [];
-  }
-};
-
-const getUncommittedChangedFiles = (directory: string): string[] => {
-  try {
-    const output = execSync(
-      "git diff --name-only --diff-filter=ACMR --relative HEAD",
-      {
-        cwd: directory,
-        stdio: "pipe",
-      },
-    )
-      .toString()
-      .trim();
-    if (!output) {
-      return [];
-    }
-    return output.split("\n").filter(Boolean);
-  } catch {
-    return [];
-  }
+const getChangedFiles = (directory: string, reference: string): string[] => {
+  const trackedFiles = runGit(directory, [
+    "diff",
+    "--name-only",
+    "-z",
+    "--diff-filter=ACMR",
+    "--relative",
+    reference,
+    "--",
+    ".",
+  ])
+    .split("\0")
+    .filter(Boolean);
+  const untrackedFiles = runGit(directory, [
+    "ls-files",
+    "--others",
+    "--exclude-standard",
+    "-z",
+    "--",
+    ".",
+  ])
+    .split("\0")
+    .filter(Boolean);
+  return [...new Set([...trackedFiles, ...untrackedFiles])];
 };
 
 export const getDiffInfo = (
@@ -110,21 +81,34 @@ export const getDiffInfo = (
     return null;
   }
 
-  if (currentBranch === baseBranch) {
-    const uncommittedFiles = getUncommittedChangedFiles(directory);
-    if (uncommittedFiles.length === 0) {
-      return null;
-    }
+  try {
+    const baseCommit = runGit(directory, [
+      "rev-parse",
+      "--verify",
+      "--end-of-options",
+      `${baseBranch}^{commit}`,
+    ]).trim();
+    const currentCommit = runGit(directory, ["rev-parse", "HEAD"]).trim();
+    const isCurrentChanges = baseCommit === currentCommit;
+    const reference = isCurrentChanges
+      ? currentCommit
+      : runGit(directory, ["merge-base", baseCommit, currentCommit]).trim();
+    const changedFiles = getChangedFiles(directory, reference);
     return {
       baseBranch,
-      changedFiles: uncommittedFiles,
+      changedFiles,
       currentBranch,
-      isCurrentChanges: true,
+      ...(isCurrentChanges ? { isCurrentChanges: true } : {}),
     };
+  } catch (error) {
+    if (explicitBaseBranch !== undefined) {
+      throw new Error(
+        `Unable to compare changes with base branch ${explicitBaseBranch}`,
+        { cause: error },
+      );
+    }
+    return null;
   }
-
-  const changedFiles = getChangedFilesSinceBranch(directory, baseBranch);
-  return { baseBranch, changedFiles, currentBranch };
 };
 
 export const filterSourceFiles = (filePaths: string[]): string[] =>
