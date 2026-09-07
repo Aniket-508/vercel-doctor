@@ -61,7 +61,7 @@ interface ScoreBarSegments {
   emptySegment: string;
 }
 
-const LINTER_RUNNERS = [oxlintRunner, rslintRunner, eslintRunner, biomeRunner];
+const LINTER_RUNNERS = [oxlintRunner, biomeRunner, rslintRunner, eslintRunner];
 
 const resolveLinterRunner = (projectDirectory: string) => {
   const detectedKind = detectLinter(projectDirectory);

@@ -20,7 +20,7 @@ describe("rslint integration", () => {
     fs.rmSync(projectDirectory, { force: true, recursive: true });
   });
 
-  it("selects Rslint over legacy ESLint dependencies without displacing Oxlint", () => {
+  it("prefers Oxlint, Biome, Rslint, then ESLint when linters coexist", () => {
     fs.writeFileSync(
       path.join(projectDirectory, "package.json"),
       JSON.stringify({
@@ -28,6 +28,8 @@ describe("rslint integration", () => {
       }),
     );
     expect(detectLinter(projectDirectory)).toBe("rslint");
+    fs.writeFileSync(path.join(projectDirectory, "biome.json"), "{}");
+    expect(detectLinter(projectDirectory)).toBe("biome");
     fs.writeFileSync(path.join(projectDirectory, ".oxlintrc.json"), "{}");
     expect(detectLinter(projectDirectory)).toBe("oxlint");
   });

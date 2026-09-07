@@ -71,6 +71,19 @@ export const detectLinter = (projectDirectory: string): LinterKind => {
     return "oxlint";
   }
 
+  const hasBiomeDependency = hasPackageDependency(
+    projectDirectory,
+    "@biomejs/biome",
+  );
+  const hasBiomeConfig = hasConfigFile(
+    projectDirectory,
+    BIOME_CONFIG_FILE_PATTERNS,
+  );
+
+  if (hasBiomeDependency || hasBiomeConfig) {
+    return "biome";
+  }
+
   const hasRslintDependency = hasPackageDependency(
     projectDirectory,
     "@rslint/core",
@@ -92,19 +105,6 @@ export const detectLinter = (projectDirectory: string): LinterKind => {
 
   if (hasEslintDependency || hasEslintConfig) {
     return "eslint";
-  }
-
-  const hasBiomeDependency = hasPackageDependency(
-    projectDirectory,
-    "@biomejs/biome",
-  );
-  const hasBiomeConfig = hasConfigFile(
-    projectDirectory,
-    BIOME_CONFIG_FILE_PATTERNS,
-  );
-
-  if (hasBiomeDependency || hasBiomeConfig) {
-    return "biome";
   }
 
   return "none";
