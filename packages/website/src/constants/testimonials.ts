@@ -46,6 +46,13 @@ export const TESTIMONIALS_ROW_ONE: Testimonial[] = [
       "Love that you saw a problem and found a way to solve it with a very smart solution. And it's open source 😍",
     url: "https://community.vercel.com/t/kept-seeing-racked-up-vercel-bills-every-now-and-then-built-a-tool-to-fix-this-once-and-for-all/34159/3?u=aniket-508",
   },
+  {
+    authorAvatar: "https://unavatar.io/x/fortysevenfx",
+    authorName: "François Best",
+    quote:
+      "Really cool idea! Gonna go optimise the nuqs docs with it. btw you should use it for the share page 👀",
+    url: "https://x.com/fortysevenfx/status/2096144867046879620",
+  },
 ];
 
 export const TESTIMONIALS_ROW_TWO: Testimonial[] = [
@@ -67,5 +74,17 @@ export const TESTIMONIALS_ROW_TWO: Testimonial[] = [
     authorName: "krokodil",
     quote: "Yeah this is good. Nice work",
     url: "https://www.reddit.com/r/vercel/comments/1r9umkt/comment/o6f73bi",
+  },
+  {
+    authorAvatar: "https://unavatar.io/x/DanStepanov",
+    authorName: "Dan Stepanov",
+    quote: "This is really cool! Great job dude 🙂",
+    url: "https://x.com/DanStepanov/status/2096025604462379507",
+  },
+  {
+    authorAvatar: "https://unavatar.io/x/virgilerietsch",
+    authorName: "Virgile Rietsch",
+    quote: "amazing, thanks for building this!",
+    url: "https://x.com/virgilerietsch/status/2096126541210030363",
   },
 ];
