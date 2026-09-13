@@ -10,9 +10,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { LINK } from "@/constants/links";
 import { ROUTES } from "@/constants/routes";
-import { SHOWCASE_LOGO_SIZE_PX } from "@/constants/showcase";
+import {
+  SHOWCASE_LARGE_GRID_COLUMN_COUNT,
+  SHOWCASE_LOGO_SIZE_PX,
+  SHOWCASE_MEDIUM_GRID_COLUMN_COUNT,
+} from "@/constants/showcase";
 import { i18n } from "@/i18n/config";
 import { withLocalePrefix } from "@/i18n/navigation";
+import { cn } from "@/lib/utils";
 import { createMetadata } from "@/seo/metadata";
 import { getTranslation } from "@/translations";
 import { getShowcaseProjects } from "@/utils/get-showcase-projects";
@@ -43,6 +48,13 @@ const ShowcasePage = async ({
   const { lang } = await params;
   const translation = getTranslation(lang);
   const showcaseProjects = await getShowcaseProjects();
+  const shouldRenderMediumGridFiller = Boolean(
+    showcaseProjects.length % SHOWCASE_MEDIUM_GRID_COLUMN_COUNT,
+  );
+  const largeGridFillerCount =
+    (SHOWCASE_LARGE_GRID_COLUMN_COUNT -
+      (showcaseProjects.length % SHOWCASE_LARGE_GRID_COLUMN_COUNT)) %
+    SHOWCASE_LARGE_GRID_COLUMN_COUNT;
 
   return (
     <>
@@ -67,7 +79,7 @@ const ShowcasePage = async ({
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 *:border-grid-border max-sm:*:border-t max-lg:[&>*:nth-child(2n+1)]:border-r max-lg:[&>*:nth-child(n+3)]:border-t lg:[&>*:not(:nth-child(3n))]:border-r lg:[&>*:nth-child(n+4)]:border-t">
+          <div className="*:border-grid-border grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 lg:[&>article:not(:nth-child(3n))]:border-r sm:max-lg:[&>article:nth-child(2n+1)]:border-r max-sm:[&>article:nth-child(n+2)]:border-t sm:max-lg:[&>article:nth-child(n+3)]:border-t lg:[&>article:nth-child(n+4)]:border-t">
             {showcaseProjects.map((project) => (
               <article
                 key={project.name}
@@ -103,7 +115,9 @@ const ShowcasePage = async ({
                         aria-label={
                           project.stars === null
                             ? `${project.name} on GitHub`
-                            : `${project.name} on GitHub, ${project.stars.toLocaleString()} stars`
+                            : `${
+                                project.name
+                              } on GitHub, ${project.stars.toLocaleString()} stars`
                         }
                         className="border-fd-border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent pointer-events-auto relative z-10 inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-1 text-xs font-medium transition-colors"
                       >
@@ -120,6 +134,25 @@ const ShowcasePage = async ({
                 </div>
               </article>
             ))}
+            {shouldRenderMediumGridFiller && (
+              <div
+                aria-hidden="true"
+                className="hidden border-t sm:block lg:hidden"
+              />
+            )}
+            {Array.from(
+              { length: largeGridFillerCount },
+              (_unusedValue, fillerIndex) => (
+                <div
+                  key={`large-grid-filler-${fillerIndex}`}
+                  aria-hidden="true"
+                  className={cn(
+                    "hidden border-t lg:block",
+                    fillerIndex < largeGridFillerCount - 1 && "border-r",
+                  )}
+                />
+              ),
+            )}
           </div>
         </SectionContent>
       </SectionContainer>

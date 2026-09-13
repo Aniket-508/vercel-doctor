@@ -12,6 +12,8 @@ export interface ShowcaseProjectWithStars extends ShowcaseProject {
 
 export const GITHUB_STARS_REVALIDATE_SECONDS = 3600;
 export const SHOWCASE_LOGO_SIZE_PX = 24;
+export const SHOWCASE_MEDIUM_GRID_COLUMN_COUNT = 2;
+export const SHOWCASE_LARGE_GRID_COLUMN_COUNT = 3;
 
 export const SHOWCASE_PROJECTS: ShowcaseProject[] = [
   {
