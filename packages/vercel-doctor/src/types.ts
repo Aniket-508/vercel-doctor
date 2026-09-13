@@ -2,11 +2,22 @@ export type Framework =
   | "nextjs"
   | "nuxt"
   | "sveltekit"
+  | "tanstack-start"
+  | "astro"
+  | "react-router"
+  | "remix"
+  | "solidstart"
+  | "qwik"
+  | "angular"
   | "vite"
   | "cra"
-  | "remix"
   | "gatsby"
   | "unknown";
+
+export interface FrameworkDetector {
+  framework: Framework;
+  packages: string[];
+}
 
 export type LinterKind = "oxlint" | "rslint" | "eslint" | "biome" | "none";
 

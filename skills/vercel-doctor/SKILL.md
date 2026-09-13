@@ -11,7 +11,7 @@ Scans your Next.js codebase for patterns that drive up your Vercel bill, focusin
 ## Usage
 
 ```bash
-npx -y vercel-doctor@latest . --verbose --diff
+npx vercel-doctor@latest . --verbose --diff
 ```
 
 ## Workflow

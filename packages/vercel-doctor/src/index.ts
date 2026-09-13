@@ -67,12 +67,13 @@ export const diagnose = async (
   const effectiveDeadCode = options.deadCode ?? userConfig?.deadCode ?? true;
 
   if (
+    projectInfo.framework === "unknown" &&
     !projectInfo.reactVersion &&
     !projectInfo.vueVersion &&
     !projectInfo.svelteVersion
   ) {
     throw new Error(
-      "No framework dependency (React, Vue, or Svelte) found in package.json",
+      "No framework dependency (React, Vue, Svelte, or a supported Vercel framework) found in package.json",
     );
   }
 

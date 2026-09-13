@@ -30,7 +30,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: pnpm
-          node-version: 22.20.0
+          node-version: 24
+          registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -46,7 +47,6 @@ jobs:
           createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Tag and create GitHub release
         if: steps.changesets.outputs.published == 'true'

@@ -9,6 +9,7 @@ import {
 import type {
   DependencyInfo,
   Framework,
+  FrameworkDetector,
   PackageJson,
   ProjectInfo,
   WorkspacePackage,
@@ -16,23 +17,42 @@ import type {
 import { getSemverMajorVersion } from "./get-semver-major-version.js";
 import { readPackageJson } from "./read-package-json.js";
 
-const FRAMEWORK_PACKAGES: Record<string, Framework> = {
-  "@remix-run/react": "remix",
-  "@sveltejs/kit": "sveltekit",
-  gatsby: "gatsby",
-  next: "nextjs",
-  nuxt: "nuxt",
-  "react-scripts": "cra",
-  vite: "vite",
-};
+const FRAMEWORK_DETECTORS: FrameworkDetector[] = [
+  { framework: "nextjs", packages: ["next"] },
+  { framework: "nuxt", packages: ["nuxt"] },
+  { framework: "sveltekit", packages: ["@sveltejs/kit"] },
+  {
+    framework: "tanstack-start",
+    packages: [
+      "@tanstack/react-start",
+      "@tanstack/solid-start",
+      "@tanstack/start",
+    ],
+  },
+  { framework: "astro", packages: ["astro"] },
+  { framework: "react-router", packages: ["@react-router/dev"] },
+  { framework: "remix", packages: ["@remix-run/dev", "@remix-run/react"] },
+  { framework: "solidstart", packages: ["@solidjs/start", "solid-start"] },
+  { framework: "qwik", packages: ["@qwik.dev/router", "@builder.io/qwik-city"] },
+  { framework: "gatsby", packages: ["gatsby"] },
+  { framework: "cra", packages: ["react-scripts"] },
+  { framework: "angular", packages: ["@angular/core"] },
+  { framework: "vite", packages: ["vite"] },
+];
 
 const FRAMEWORK_DISPLAY_NAMES: Record<Framework, string> = {
+  angular: "Angular",
+  astro: "Astro",
   cra: "Create React App",
   gatsby: "Gatsby",
   nextjs: "Next.js",
   nuxt: "Nuxt",
+  qwik: "Qwik",
+  "react-router": "React Router",
   remix: "Remix",
+  solidstart: "SolidStart",
   sveltekit: "SvelteKit",
+  "tanstack-start": "TanStack Start",
   unknown: "Unknown",
   vite: "Vite",
 };
@@ -71,11 +91,9 @@ const collectAllDependencies = (
 });
 
 const detectFramework = (dependencies: Record<string, string>): Framework => {
-  for (const [packageName, frameworkName] of Object.entries(
-    FRAMEWORK_PACKAGES,
-  )) {
-    if (dependencies[packageName]) {
-      return frameworkName;
+  for (const detector of FRAMEWORK_DETECTORS) {
+    if (detector.packages.some((packageName) => dependencies[packageName])) {
+      return detector.framework;
     }
   }
   return "unknown";
@@ -279,14 +297,15 @@ const findDependencyInfoInWorkspaces = (
 
 const hasFrameworkDependency = (packageJson: PackageJson): boolean => {
   const allDependencies = collectAllDependencies(packageJson);
+  if (detectFramework(allDependencies) !== "unknown") {
+    return true;
+  }
   return Object.keys(allDependencies).some(
     (packageName) =>
-      packageName === "next" ||
-      packageName === "nuxt" ||
-      packageName === "@sveltejs/kit" ||
       packageName.includes("react") ||
       packageName.includes("vue") ||
-      packageName.includes("svelte"),
+      packageName.includes("svelte") ||
+      packageName.includes("solid"),
   );
 };
 

@@ -592,12 +592,13 @@ export const scan = async (
   const isDiffMode = options.includePaths !== undefined;
 
   if (
+    projectInfo.framework === "unknown" &&
     !projectInfo.reactVersion &&
     !projectInfo.vueVersion &&
     !projectInfo.svelteVersion
   ) {
     throw new Error(
-      "No framework dependency (React, Vue, or Svelte) found in package.json",
+      "No framework dependency (React, Vue, Svelte, or a supported Vercel framework) found in package.json",
     );
   }
 
