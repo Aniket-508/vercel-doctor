@@ -108,24 +108,26 @@ const ShowcasePage = async ({
                       <h2 className="text-fd-foreground truncate text-sm font-semibold">
                         {project.name}
                       </h2>
-                      <a
-                        href={`https://github.com/${project.githubRepository}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={
-                          project.stars === null
-                            ? `${project.name} on GitHub`
-                            : `${
-                                project.name
-                              } on GitHub, ${project.stars.toLocaleString()} stars`
-                        }
-                        className="border-fd-border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent pointer-events-auto relative z-10 inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-1 text-xs font-medium transition-colors"
-                      >
-                        <GithubIcon className="size-3.5" />
-                        {project.stars === null
-                          ? "—"
-                          : project.stars.toLocaleString()}
-                      </a>
+                      {project.githubRepository ? (
+                        <a
+                          href={`https://github.com/${project.githubRepository}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={
+                            project.stars === null
+                              ? `${project.name} on GitHub`
+                              : `${
+                                  project.name
+                                } on GitHub, ${project.stars.toLocaleString()} stars`
+                          }
+                          className="border-fd-border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent pointer-events-auto relative z-10 inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-1 text-xs font-medium transition-colors"
+                        >
+                          <GithubIcon className="size-3.5" />
+                          {project.stars === null
+                            ? "—"
+                            : project.stars.toLocaleString()}
+                        </a>
+                      ) : null}
                     </div>
                   </div>
                   <p className="text-fd-muted-foreground mt-2 text-sm leading-relaxed">

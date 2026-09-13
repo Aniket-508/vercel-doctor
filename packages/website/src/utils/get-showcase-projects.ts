@@ -24,6 +24,10 @@ if (process.env.GITHUB_TOKEN) {
 export const getShowcaseProjects = async () => {
   const projectsWithStars = await Promise.all(
     SHOWCASE_PROJECTS.map(async (project) => {
+      if (!project.githubRepository) {
+        return { ...project, stars: null };
+      }
+
       try {
         const response = await fetch(
           `${GITHUB_API_REPOSITORIES_URL}/${project.githubRepository}/stargazers/count`,

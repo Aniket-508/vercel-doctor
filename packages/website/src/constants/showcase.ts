@@ -33,6 +33,14 @@ export const SHOWCASE_PROJECTS: ShowcaseProject[] = [
     websiteUrl: "https://reicon.dev",
   },
   {
+    description:
+      "Analyze any public GitHub repository with actionable insights, visual diagrams, and exportable reports.",
+    githubRepository: "MxCorpIn/Repolyze",
+    logoUrl: "https://repolyze.mxcorp.in/favicon.ico",
+    name: "Repolyze",
+    websiteUrl: "https://repolyze.mxcorp.in",
+  },
+  {
     description: "QR menu platform for restaurants and cafés.",
     githubRepository: "dkast/biztro",
     logoUrl: "https://biztro.co/logo-bistro.svg",
@@ -46,6 +54,14 @@ export const SHOWCASE_PROJECTS: ShowcaseProject[] = [
     logoUrl: "https://openinstadm.vercel.app/icon0.svg",
     name: "OpenInstaDM",
     websiteUrl: "https://openinstadm.vercel.app",
+  },
+  {
+    description:
+      "Fast, free platform to discover open source projects, track contributions, and find GSoC opportunities.",
+    githubRepository: "",
+    logoUrl: "https://ossium.in/favicon.ico",
+    name: "ossium",
+    websiteUrl: "https://ossium.in",
   },
   {
     description: "Comprehensive census of coding agent harnesses.",
@@ -89,6 +105,14 @@ export const SHOWCASE_PROJECTS: ShowcaseProject[] = [
   },
   {
     description:
+      "A modern, lightweight React icon library with beautiful SVG icons in multiple style variants.",
+    githubRepository: "ig-imanish/mx-icons",
+    logoUrl: "https://mx-icons.vercel.app/favicon.ico",
+    name: "Mx Icons",
+    websiteUrl: "https://mxicons.vercel.app",
+  },
+  {
+    description:
       "Open-source shadcn/ui component registries and tools for React.",
     githubRepository: "shadcn-labs/shadcn-labs.com",
     logoUrl: "https://www.shadcn-labs.com/favicon.svg",
@@ -102,6 +126,14 @@ export const SHOWCASE_PROJECTS: ShowcaseProject[] = [
     logoUrl: "https://startercn.vercel.app/favicon.svg",
     name: "startercn",
     websiteUrl: "https://startercn.vercel.app",
+  },
+  {
+    description:
+      "TypeScript SaaS boilerplate with auth, billing, and production-ready infrastructure on TanStack Start and Hono.",
+    githubRepository: "",
+    logoUrl: "https://ts-saas.com/ts-logo.svg",
+    name: "TS-SAAS",
+    websiteUrl: "https://ts-saas.com",
   },
   {
     description: "Terminal UI components for React, built on Ink and OpenTUI.",
