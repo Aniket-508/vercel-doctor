@@ -26,8 +26,15 @@ export const de: Translation = {
     subtitle:
       "Lassen Sie KI-Agenten Ihre Vercel-Rechnung diagnostizieren und beheben",
   },
+  horrorsPage: {
+    description:
+      "Eine Sammlung von Vercel-Rechnungen, Bandbreitenlimits und Erkenntnissen aus dem Produktivbetrieb – geteilt von der Community.",
+    heading: "Horrorgeschichten",
+    shareYourStory: "Teile deine Geschichte",
+  },
   nav: {
     docs: "Dokumentation",
+    horrors: "Horrorgeschichten",
     showcase: "Galerien",
     sponsors: "Sponsoren",
   },
@@ -93,3 +100,5 @@ export const de: Translation = {
     sectionLabel: "[WAS DIE LEUTE SAGEN]",
   },
 };
+
+export default de;

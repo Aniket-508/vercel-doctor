@@ -26,8 +26,15 @@ export const pt: Translation = {
     subtitle:
       "Deixe agentes de código diagnosticar e corrigir sua fatura Vercel",
   },
+  horrorsPage: {
+    description:
+      "Uma coleção de faturas da Vercel, limites de largura de banda e lições de produção partilhadas pela comunidade.",
+    heading: "Histórias de terror",
+    shareYourStory: "Partilha a tua história",
+  },
   nav: {
     docs: "Docs",
+    horrors: "Histórias de terror",
     showcase: "Vitrines",
     sponsors: "Patrocinadores",
   },
@@ -93,3 +100,5 @@ export const pt: Translation = {
     sectionLabel: "[O QUE AS PESSOAS DIZEM]",
   },
 };
+
+export default pt;

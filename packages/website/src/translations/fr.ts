@@ -26,8 +26,15 @@ export const fr: Translation = {
     subtitle:
       "Laissez les agents de codage diagnostiquer et corriger votre facture Vercel",
   },
+  horrorsPage: {
+    description:
+      "Une collection de factures Vercel, de limites de bande passante et de leçons tirées de la production, partagées par la communauté.",
+    heading: "Histoires d’horreur",
+    shareYourStory: "Partagez votre histoire",
+  },
   nav: {
     docs: "Docs",
+    horrors: "Histoires d’horreur",
     showcase: "Vitrines",
     sponsors: "Sponsors",
   },
@@ -94,3 +101,5 @@ export const fr: Translation = {
     sectionLabel: "[CE QUE LES GENS DISENT]",
   },
 };
+
+export default fr;

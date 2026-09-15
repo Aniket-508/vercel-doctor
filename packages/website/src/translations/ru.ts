@@ -26,8 +26,15 @@ export const ru: Translation = {
     subtitle:
       "Позвольте ИИ-агентам диагностировать и исправить ваш счёт за Vercel",
   },
+  horrorsPage: {
+    description:
+      "Коллекция историй сообщества о счетах Vercel, лимитах пропускной способности и уроках, полученных в продакшене.",
+    heading: "Страшные истории",
+    shareYourStory: "Поделитесь своей историей",
+  },
   nav: {
     docs: "Документация",
+    horrors: "Страшные истории",
     showcase: "Витрины",
     sponsors: "Спонсоры",
   },
@@ -92,3 +99,5 @@ export const ru: Translation = {
     sectionLabel: "[ЧТО ГОВОРЯТ ЛЮДИ]",
   },
 };
+
+export default ru;

@@ -26,8 +26,15 @@ export const id: Translation = {
     subtitle:
       "Biarkan agen coding mendiagnosis dan memperbaiki tagihan Vercel Anda",
   },
+  horrorsPage: {
+    description:
+      "Kumpulan tagihan Vercel, batas bandwidth, dan pelajaran dari lingkungan produksi yang dibagikan komunitas.",
+    heading: "Kisah horor",
+    shareYourStory: "Bagikan kisah Anda",
+  },
   nav: {
     docs: "Dokumentasi",
+    horrors: "Kisah horor",
     showcase: "Etalase unggulan",
     sponsors: "Sponsor",
   },
@@ -92,3 +99,5 @@ export const id: Translation = {
     sectionLabel: "[APA KATA ORANG]",
   },
 };
+
+export default id;

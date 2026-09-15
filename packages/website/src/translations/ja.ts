@@ -25,8 +25,15 @@ export const ja: Translation = {
     selectPackageManager: "パッケージマネージャーを選択",
     subtitle: "コーディングエージェントが Vercel の請求を診断・修正します",
   },
+  horrorsPage: {
+    description:
+      "コミュニティから寄せられた、Vercelの請求、帯域幅制限、本番環境で得た教訓をまとめました。",
+    heading: "恐怖体験",
+    shareYourStory: "体験談を共有する",
+  },
   nav: {
     docs: "ドキュメント",
+    horrors: "恐怖体験",
     showcase: "ショーケース一覧",
     sponsors: "スポンサー",
   },
@@ -90,3 +97,5 @@ export const ja: Translation = {
     sectionLabel: "[利用者の声]",
   },
 };
+
+export default ja;

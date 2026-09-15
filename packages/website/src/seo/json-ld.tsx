@@ -4,7 +4,7 @@ import { i18n } from "@/i18n/config";
 
 const LOCALE_TO_BCP47: Record<string, string> = {
   en: "en-US",
-  "pt-br": "pt-BR",
+  "pt-BR": "pt-BR",
   zh: "zh-Hans",
 };
 

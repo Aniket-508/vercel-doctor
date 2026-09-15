@@ -13,6 +13,14 @@
     "**/tsconfig.tsbuildinfo",
     "**/tests/fixtures/**"
   ],
+  "overrides": [
+    {
+      "files": ["packages/website/src/translations/pt-BR.ts"],
+      "rules": {
+        "unicorn/filename-case": "off"
+      }
+    }
+  ],
   "settings": {
     "react": {
       "version": "19"
