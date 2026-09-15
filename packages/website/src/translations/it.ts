@@ -26,8 +26,15 @@ export const it: Translation = {
     subtitle:
       "Lascia che gli agenti di codifica diagnostichino e correggano la tua bolletta Vercel",
   },
+  horrorsPage: {
+    description:
+      "Una raccolta di fatture Vercel, limiti di larghezza di banda e lezioni apprese in produzione, condivise dalla community.",
+    heading: "Storie dell’orrore",
+    shareYourStory: "Condividi la tua storia",
+  },
   nav: {
     docs: "Documentazione",
+    horrors: "Storie dell’orrore",
     showcase: "Vetrine",
     sponsors: "Sponsor",
   },
@@ -92,3 +99,5 @@ export const it: Translation = {
     sectionLabel: "[COSA DICE LA GENTE]",
   },
 };
+
+export default it;

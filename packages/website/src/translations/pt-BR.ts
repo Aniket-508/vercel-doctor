@@ -26,8 +26,15 @@ export const ptBr: Translation = {
     subtitle:
       "Deixe agentes de código diagnosticar e corrigir sua conta do Vercel",
   },
+  horrorsPage: {
+    description:
+      "Uma coleção de contas da Vercel, limites de largura de banda e aprendizados em produção compartilhados pela comunidade.",
+    heading: "Histórias de terror",
+    shareYourStory: "Compartilhe sua história",
+  },
   nav: {
     docs: "Documentação",
+    horrors: "Histórias de terror",
     showcase: "Vitrines",
     sponsors: "Patrocinadores",
   },
@@ -92,3 +99,5 @@ export const ptBr: Translation = {
     sectionLabel: "[O QUE DIZEM POR AÍ]",
   },
 };
+
+export default ptBr;

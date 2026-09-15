@@ -26,8 +26,15 @@ export const uk: Translation = {
     subtitle:
       "Дозвольте ІІ-агентам діагностувати та виправити ваш рахунок за Vercel",
   },
+  horrorsPage: {
+    description:
+      "Добірка історій спільноти про рахунки Vercel, обмеження пропускної здатності та уроки, отримані в продакшені.",
+    heading: "Страшні історії",
+    shareYourStory: "Поділіться своєю історією",
+  },
   nav: {
     docs: "Документація",
+    horrors: "Страшні історії",
     showcase: "Вітрини",
     sponsors: "Спонсори",
   },
@@ -92,3 +99,5 @@ export const uk: Translation = {
     sectionLabel: "[ЩО КАЖУТЬ ЛЮДИ]",
   },
 };
+
+export default uk;

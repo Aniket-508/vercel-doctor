@@ -15,7 +15,7 @@ const TRANSLATIONS = {
   ja: { displayName: "日本語", search: "ドキュメントを検索" },
   ko: { displayName: "한국어", search: "문서 검색" },
   pt: { displayName: "Português", search: "Pesquisar documentação" },
-  "pt-br": {
+  "pt-BR": {
     displayName: "Português do Brasil",
     search: "Pesquisar documentação",
   },

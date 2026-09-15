@@ -8,7 +8,7 @@ export const { GET } = createFromSource(source, {
     hi: "indian",
     ja: "english",
     ko: "english",
-    "pt-br": "portuguese",
+    "pt-BR": "portuguese",
     zh: "english",
   },
 });

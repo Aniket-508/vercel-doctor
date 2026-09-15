@@ -1,0 +1,30 @@
+{
+  "$schema": "https://lingo.dev/schema/i18n.json",
+  "version": "1.10",
+  "locale": {
+    "source": "en",
+    "targets": [
+      "ar",
+      "da",
+      "de",
+      "es",
+      "fr",
+      "hi",
+      "id",
+      "it",
+      "ja",
+      "ko",
+      "pt",
+      "pt-BR",
+      "ru",
+      "tr",
+      "uk",
+      "zh"
+    ]
+  },
+  "buckets": {
+    "typescript": {
+      "include": ["src/translations/[locale].ts"]
+    }
+  }
+}

@@ -26,8 +26,15 @@ export const tr: Translation = {
     subtitle:
       "Kodlama ajanlarının Vercel faturanızı teşhis edip düzeltmesine izin verin",
   },
+  horrorsPage: {
+    description:
+      "Topluluğun paylaştığı Vercel faturaları, bant genişliği sınırları ve canlı ortamdan çıkarılan derslerden oluşan bir koleksiyon.",
+    heading: "Korku hikâyeleri",
+    shareYourStory: "Hikâyeni paylaş",
+  },
   nav: {
     docs: "Belgeler",
+    horrors: "Korku hikâyeleri",
     showcase: "Vitrinler",
     sponsors: "Sponsorlar",
   },
@@ -91,3 +98,5 @@ export const tr: Translation = {
     sectionLabel: "[İNSANLAR NE DİYOR]",
   },
 };
+
+export default tr;

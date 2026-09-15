@@ -12,7 +12,7 @@ import { it } from "./it";
 import { ja } from "./ja";
 import { ko } from "./ko";
 import { pt } from "./pt";
-import { ptBr } from "./pt-br";
+import { ptBr } from "./pt-BR";
 import { ru } from "./ru";
 import { tr } from "./tr";
 import { uk } from "./uk";
@@ -21,8 +21,14 @@ import { zh } from "./zh";
 export interface Translation {
   nav: {
     docs: string;
+    horrors: string;
     showcase: string;
     sponsors: string;
+  };
+  horrorsPage: {
+    heading: string;
+    description: string;
+    shareYourStory: string;
   };
   hero: {
     copied: string;
@@ -120,7 +126,7 @@ const translations: Record<string, Translation> = {
   ja,
   ko,
   pt,
-  "pt-br": ptBr,
+  "pt-BR": ptBr,
   ru,
   tr,
   uk,

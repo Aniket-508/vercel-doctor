@@ -25,8 +25,15 @@ export const en: Translation = {
     selectPackageManager: "Select a package manager",
     subtitle: "Let coding agents diagnose and fix your Vercel bill",
   },
+  horrorsPage: {
+    description:
+      "A collection of Vercel bills, bandwidth limits, and production lessons from the community.",
+    heading: "Horrors",
+    shareYourStory: "Share your story",
+  },
   nav: {
     docs: "Docs",
+    horrors: "Horrors",
     showcase: "Showcases",
     sponsors: "Sponsors",
   },
@@ -91,3 +98,5 @@ export const en: Translation = {
     sectionLabel: "[WHAT PEOPLE ARE SAYING]",
   },
 };
+
+export default en;

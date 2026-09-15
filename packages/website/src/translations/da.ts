@@ -25,8 +25,15 @@ export const da: Translation = {
     selectPackageManager: "Vælg en pakkehåndterer",
     subtitle: "Lad kodeagenter diagnosticere og rette din Vercel-regning",
   },
+  horrorsPage: {
+    description:
+      "En samling af Vercel-regninger, båndbreddegrænser og erfaringer fra produktion, delt af fællesskabet.",
+    heading: "Skrækhistorier",
+    shareYourStory: "Del din historie",
+  },
   nav: {
     docs: "Dokumentation",
+    horrors: "Skrækhistorier",
     showcase: "Udstillinger",
     sponsors: "Sponsorer",
   },
@@ -91,3 +98,5 @@ export const da: Translation = {
     sectionLabel: "[HVAD FOLK SIGER]",
   },
 };
+
+export default da;
