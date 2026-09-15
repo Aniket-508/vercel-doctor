@@ -1,13 +1,7 @@
 import { NEXT_MAJOR_VERSION_15, NEXT_MAJOR_VERSION_16 } from "../constants.js";
 import type { ProjectInfo } from "../types.js";
 
-export const getNextVersionCostGuidance = (
-  projectInfo: ProjectInfo,
-): string[] => {
-  if (projectInfo.framework !== "nextjs") {
-    return [];
-  }
-
+const getNextVersionCostGuidance = (projectInfo: ProjectInfo): string[] => {
   if (
     projectInfo.nextMajorVersion !== null &&
     projectInfo.nextMajorVersion >= NEXT_MAJOR_VERSION_16
@@ -34,4 +28,33 @@ export const getNextVersionCostGuidance = (
   return [
     "Next.js detected but version was not parsed. Set an explicit next semver range to unlock version-aware cost guidance.",
   ];
+};
+
+const getNuxtCostGuidance = (_projectInfo: ProjectInfo): string[] => [
+  "Use `routeRules` in nuxt.config.ts to set SWR/ISR caching for frequently accessed routes.",
+  "Enable SSR (default) for optimal Vercel edge rendering performance.",
+  "Use `useFetch()` or `useAsyncData()` instead of raw `$fetch()` for SSR-compatible data fetching.",
+];
+
+const getSvelteKitCostGuidance = (_projectInfo: ProjectInfo): string[] => [
+  "Enable `split: true` in adapter-vercel options for smaller, faster serverless functions.",
+  "Add `export const prerender = true` to static pages to reduce function invocations.",
+  "Use SvelteKit's `load` functions for server-side data loading instead of client-side fetching.",
+];
+
+export const getVersionCostGuidance = (projectInfo: ProjectInfo): string[] => {
+  switch (projectInfo.framework) {
+    case "nextjs": {
+      return getNextVersionCostGuidance(projectInfo);
+    }
+    case "nuxt": {
+      return getNuxtCostGuidance(projectInfo);
+    }
+    case "sveltekit": {
+      return getSvelteKitCostGuidance(projectInfo);
+    }
+    default: {
+      return [];
+    }
+  }
 };

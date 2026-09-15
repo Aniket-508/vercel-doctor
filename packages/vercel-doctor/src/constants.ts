@@ -1,6 +1,15 @@
-export const SOURCE_FILE_PATTERN = /\.(tsx?|jsx?)$/;
+export const SOURCE_FILE_PATTERN = /\.(?:[cm]?[jt]sx?|vue|svelte)$/;
 
 export const JSX_FILE_PATTERN = /\.(tsx|jsx)$/;
+
+export const VUE_FILE_PATTERN = /\.vue$/;
+
+export const SVELTE_FILE_PATTERN = /\.svelte$/;
+
+export const NUXT_CONFIG_FILE_PATTERN = /(?:^|\/)nuxt\.config\.[cm]?[jt]s$/;
+
+export const SVELTEKIT_CONFIG_FILE_PATTERN =
+  /(?:^|\/)svelte\.config\.[cm]?[jt]s$/;
 
 export const MILLISECONDS_PER_SECOND = 1000;
 

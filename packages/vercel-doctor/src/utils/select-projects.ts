@@ -2,7 +2,7 @@ import path from "node:path";
 
 import type { WorkspacePackage } from "../types.js";
 import {
-  discoverReactSubprojects,
+  discoverFrameworkSubprojects,
   listWorkspacePackages,
 } from "./discover-project.js";
 import { highlighter } from "./highlighter.js";
@@ -13,28 +13,31 @@ export const selectProjects = (
   rootDirectory: string,
   projectFlag: string | undefined,
   skipPrompts: boolean,
+  shouldLog = true,
 ): Promise<string[]> => {
   let packages = listWorkspacePackages(rootDirectory);
   if (packages.length === 0) {
-    packages = discoverReactSubprojects(rootDirectory);
+    packages = discoverFrameworkSubprojects(rootDirectory);
   }
 
   if (packages.length === 0) {
     return Promise.resolve([rootDirectory]);
   }
-  if (packages.length === 1) {
-    logger.log(
-      `${highlighter.success("✔")} Select projects to scan ${highlighter.dim("›")} ${packages[0].name}`,
-    );
-    return Promise.resolve([packages[0].directory]);
-  }
-
   if (projectFlag) {
     return Promise.resolve(resolveProjectFlag(projectFlag, packages));
   }
 
+  if (packages.length === 1) {
+    if (shouldLog) {
+      printDiscoveredProjects(packages);
+    }
+    return Promise.resolve([packages[0].directory]);
+  }
+
   if (skipPrompts) {
-    printDiscoveredProjects(packages);
+    if (shouldLog) {
+      printDiscoveredProjects(packages);
+    }
     return Promise.resolve(
       packages.map((workspacePackage) => workspacePackage.directory),
     );

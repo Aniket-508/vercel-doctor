@@ -78,21 +78,3 @@ module.exports = {
   },
 };
 ```
-
----
-
-## vercel-image-svg-without-unoptimized
-
-<Callout type="warn">Warning · `vercel-doctor/vercel-image-svg-without-unoptimized`</Callout>
-
-检测 `src` 为 SVG 但未设置 `unoptimized` 的 `<Image>` 组件。
-
-**为何重要：** SVG 为矢量图，不会从 Image Optimization 获益，经过该流程只会消耗优化配额而没有任何好处。
-
-```tsx title="Bad"
-<Image src="/logo.svg" alt="Logo" width={100} height={40} />
-```
-
-```tsx title="Good"
-<Image src="/logo.svg" alt="Logo" width={100} height={40} unoptimized />
-```

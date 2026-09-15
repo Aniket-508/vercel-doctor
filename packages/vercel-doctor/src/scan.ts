@@ -5,7 +5,6 @@ import { join } from "node:path";
 import { performance } from "node:perf_hooks";
 
 import {
-  JSX_FILE_PATTERN,
   MILLISECONDS_PER_SECOND,
   OFFLINE_FLAG_MESSAGE,
   OFFLINE_MESSAGE,
@@ -39,14 +38,20 @@ import { filterIgnoredDiagnostics } from "./utils/filter-diagnostics.js";
 import { createFramedLine, printFramedBox } from "./utils/framed-box.js";
 import type { FramedLine } from "./utils/framed-box.js";
 import { generateMarkdownReport } from "./utils/generate-report.js";
-import { getNextVersionCostGuidance } from "./utils/get-next-version-cost-guidance.js";
+import { getVersionCostGuidance } from "./utils/get-next-version-cost-guidance.js";
 import { groupBy } from "./utils/group-by.js";
 import { highlighter } from "./utils/highlighter.js";
 import { indentMultilineText } from "./utils/indent-multiline-text.js";
+import {
+  detectLinter,
+  oxlintRunner,
+  eslintRunner,
+  biomeRunner,
+  rslintRunner,
+} from "./utils/linters/index.js";
 import { loadConfig } from "./utils/load-config.js";
 import { logger } from "./utils/logger.js";
 import { runKnip } from "./utils/run-knip.js";
-import { runOxlint } from "./utils/run-oxlint.js";
 import { runVercelChecks } from "./utils/run-vercel-checks.js";
 import { spinner } from "./utils/spinner.js";
 import { summarizeDiagnostics } from "./utils/summarize-diagnostics.js";
@@ -55,6 +60,13 @@ interface ScoreBarSegments {
   filledSegment: string;
   emptySegment: string;
 }
+
+const LINTER_RUNNERS = [oxlintRunner, biomeRunner, rslintRunner, eslintRunner];
+
+const resolveLinterRunner = (projectDirectory: string) => {
+  const detectedKind = detectLinter(projectDirectory);
+  return LINTER_RUNNERS.find((runner) => runner.kind === detectedKind) ?? null;
+};
 
 const sortBySeverity = (
   diagnosticGroups: [string, Diagnostic[]][],
@@ -255,16 +267,16 @@ const printVersionAwareGuidance = (guidanceLines: string[]): void => {
 
 const logTaskError = (error: unknown, shouldIncludeStack: boolean): void => {
   if (error instanceof Error) {
-    logger.error(error.message);
+    console.error(error.message);
 
     if (shouldIncludeStack && error.stack) {
-      logger.dim(error.stack);
+      console.error(error.stack);
     }
 
     return;
   }
 
-  logger.error(String(error));
+  console.error(String(error));
 };
 
 const runDiagnosticTask = async (
@@ -457,6 +469,7 @@ const resolveScanOptions = (
   offline: inputOptions.offline ?? false,
   output: inputOptions.output ?? "human",
   scoreOnly: inputOptions.scoreOnly ?? false,
+  silent: inputOptions.silent,
   verbose: inputOptions.verbose ?? userConfig?.verbose ?? false,
 });
 
@@ -484,7 +497,11 @@ const buildProjectStepMessages = (
           `Detecting Next.js version. Found ${highlighter.info(nextVersionLabel)}.`,
         ]
       : []),
-    `Detecting React version. Found ${highlighter.info(`React ${projectInfo.reactVersion}`)}.`,
+    ...(projectInfo.reactVersion
+      ? [
+          `Detecting React version. Found ${highlighter.info(`React ${projectInfo.reactVersion}`)}.`,
+        ]
+      : []),
     `Detecting language. Found ${highlighter.info(languageLabel)}.`,
     isDiffMode
       ? `Scanning ${highlighter.info(`${includePathsLength}`)} changed source files.`
@@ -516,6 +533,9 @@ const printScanOutput = ({
   elapsedMilliseconds,
   noScoreMessage,
 }: ScanOutputParams): void => {
+  if (options.silent) {
+    return;
+  }
   if (options.scoreOnly) {
     if (scoreResult) {
       logger.log(`${scoreResult.score}`);
@@ -526,6 +546,10 @@ const printScanOutput = ({
   }
   if (options.output === "json") {
     logger.log(JSON.stringify({ diagnostics, scoreResult }, null, 2));
+    return;
+  }
+  if (options.output === "markdown") {
+    logger.log(generateMarkdownReport(diagnostics, projectInfo.projectName));
     return;
   }
   if (diagnostics.length === 0) {
@@ -552,15 +576,6 @@ const printScanOutput = ({
       displayedSourceFileCount,
       noScoreMessage,
     );
-    return;
-  }
-  if (options.output === "markdown") {
-    const markdownReport = generateMarkdownReport(
-      diagnostics,
-      projectInfo.projectName,
-    );
-    logger.break();
-    logger.log(markdownReport);
   }
 };
 
@@ -574,13 +589,22 @@ export const scan = async (
   const options = resolveScanOptions(inputOptions, userConfig);
 
   const includePaths = options.includePaths ?? [];
-  const isDiffMode = includePaths.length > 0;
+  const isDiffMode = options.includePaths !== undefined;
 
-  if (!projectInfo.reactVersion) {
-    throw new Error("No React dependency found in package.json");
+  if (
+    projectInfo.framework === "unknown" &&
+    !projectInfo.reactVersion &&
+    !projectInfo.vueVersion &&
+    !projectInfo.svelteVersion
+  ) {
+    throw new Error(
+      "No framework dependency (React, Vue, Svelte, or a supported Vercel framework) found in package.json",
+    );
   }
 
-  if (!options.scoreOnly) {
+  const shouldLogProgress =
+    !options.scoreOnly && !options.silent && options.output === "human";
+  if (shouldLogProgress) {
     const projectStepMessages = buildProjectStepMessages(
       projectInfo,
       Boolean(userConfig),
@@ -588,32 +612,30 @@ export const scan = async (
       includePaths.length,
     );
     printCompletedSteps(projectStepMessages);
-    printVersionAwareGuidance(getNextVersionCostGuidance(projectInfo));
+    printVersionAwareGuidance(getVersionCostGuidance(projectInfo));
   }
 
-  const jsxIncludePaths = isDiffMode
-    ? includePaths.filter((filePath) => JSX_FILE_PATTERN.test(filePath))
-    : undefined;
+  const linterRunner = resolveLinterRunner(directory);
 
   const lintPromise = runDiagnosticTask(
-    options.lint,
-    !options.scoreOnly,
+    options.lint && Boolean(linterRunner),
+    shouldLogProgress,
     "Running lint checks...",
     "Running lint checks.",
     "Lint checks failed (non-fatal, skipping).",
     () =>
-      runOxlint(
-        directory,
-        projectInfo.hasTypeScript,
-        projectInfo.framework,
-        jsxIncludePaths,
-      ),
+      // eslint-disable-next-line typescript-eslint/no-non-null-assertion -- guarded by Boolean(linterRunner) above
+      linterRunner!.run(directory, projectInfo, {
+        framework: projectInfo.framework,
+        hasTypeScript: projectInfo.hasTypeScript,
+        includePaths: options.includePaths,
+      }),
     true,
   );
 
   const deadCodePromise = runDiagnosticTask(
     options.deadCode && !isDiffMode,
-    !options.scoreOnly,
+    shouldLogProgress,
     "Detecting dead code...",
     "Detecting dead code.",
     "Dead code detection failed (non-fatal, skipping).",
@@ -622,7 +644,7 @@ export const scan = async (
 
   const vercelChecksPromise = runDiagnosticTask(
     true,
-    !options.scoreOnly,
+    shouldLogProgress,
     "Running Vercel optimization checks...",
     "Running Vercel optimization checks.",
     "Vercel optimization checks failed (non-fatal, skipping).",

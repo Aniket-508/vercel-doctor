@@ -14,6 +14,8 @@
     "build": "pnpm --filter vercel-doctor run build",
     "test": "pnpm --filter vercel-doctor run test",
     "typecheck": "pnpm --filter vercel-doctor run typecheck",
+    "lint": "oxlint",
+    "format": "oxfmt --write",
     "check": "ultracite check",
     "fix": "ultracite fix",
     "changeset": "changeset",

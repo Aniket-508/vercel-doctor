@@ -78,21 +78,3 @@ module.exports = {
   },
 };
 ```
-
----
-
-## vercel-image-svg-without-unoptimized
-
-<Callout type="warn">Warning · `vercel-doctor/vercel-image-svg-without-unoptimized`</Callout>
-
-Opdager `<Image>`-komponenter med en SVG `src`, der ikke har `unoptimized`-prop'en.
-
-**Hvorfor det er vigtigt:** SVG'er er vektorgrafik og drager ikke fordel af Image Optimization-pipelinen. At køre dem igennem den spilder optimeringskvoten uden nogen fordel.
-
-```tsx title="Bad"
-<Image src="/logo.svg" alt="Logo" width={100} height={40} />
-```
-
-```tsx title="Good"
-<Image src="/logo.svg" alt="Logo" width={100} height={40} unoptimized />
-```

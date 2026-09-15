@@ -15,12 +15,12 @@ inputs:
     description: "Workspace project(s) to scan (comma-separated)"
     required: false
   node-version:
-    description: "Node.js version to use"
-    default: "20"
+    description: "Node.js version to use (22.17.0 or newer)"
+    default: "22"
 
 outputs:
   score:
-    description: "Health score (0-100)"
+    description: "Health score (0-100), one line per selected project"
     value: ${{ steps.score.outputs.score }}
 
 runs:
@@ -36,15 +36,22 @@ runs:
         INPUT_VERBOSE: ${{ inputs.verbose }}
         INPUT_PROJECT: ${{ inputs.project }}
       run: |
-        FLAGS=""
-        if [ "$INPUT_VERBOSE" = "true" ]; then FLAGS="$FLAGS --verbose"; fi
-        if [ -n "$INPUT_PROJECT" ]; then FLAGS="$FLAGS --project $INPUT_PROJECT"; fi
-        npx -y vercel-doctor@latest "$INPUT_DIRECTORY" $FLAGS
+        FLAGS=()
+        if [ "$INPUT_VERBOSE" = "true" ]; then FLAGS+=(--verbose); fi
+        if [ -n "$INPUT_PROJECT" ]; then FLAGS+=(--project "$INPUT_PROJECT"); fi
+        npx -y vercel-doctor@latest "$INPUT_DIRECTORY" "${FLAGS[@]}"
 
     - id: score
       shell: bash
       env:
         INPUT_DIRECTORY: ${{ inputs.directory }}
+        INPUT_PROJECT: ${{ inputs.project }}
       run: |
-        SCORE=$(npx -y vercel-doctor@latest "$INPUT_DIRECTORY" --score 2>/dev/null || echo "")
-        echo "score=$SCORE" >> "$GITHUB_OUTPUT"
+        FLAGS=(--score)
+        if [ -n "$INPUT_PROJECT" ]; then FLAGS+=(--project "$INPUT_PROJECT"); fi
+        SCORE=$(npx -y vercel-doctor@latest "$INPUT_DIRECTORY" "${FLAGS[@]}")
+        {
+          echo "score<<VERCEL_DOCTOR_SCORE"
+          printf '%s\n' "$SCORE"
+          echo "VERCEL_DOCTOR_SCORE"
+        } >> "$GITHUB_OUTPUT"

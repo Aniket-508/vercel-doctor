@@ -19,7 +19,7 @@ export default defineConfig([
     external: ["oxlint", "knip", "knip/session"],
     fixedExtension: false,
     platform: "node",
-    target: "node18",
+    target: "node22",
   },
   {
     dts: true,
@@ -29,7 +29,7 @@ export default defineConfig([
     external: ["oxlint", "knip", "knip/session"],
     fixedExtension: false,
     platform: "node",
-    target: "node18",
+    target: "node22",
   },
   {
     entry: {
@@ -37,6 +37,6 @@ export default defineConfig([
     },
     fixedExtension: false,
     platform: "node",
-    target: "node18",
+    target: "node22",
   },
 ]);

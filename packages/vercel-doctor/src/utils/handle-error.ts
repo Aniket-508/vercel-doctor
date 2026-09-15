@@ -1,5 +1,4 @@
 import type { HandleErrorOptions } from "../types.js";
-import { logger } from "./logger.js";
 
 const DEFAULT_HANDLE_ERROR_OPTIONS: HandleErrorOptions = {
   shouldExit: true,
@@ -9,16 +8,11 @@ export const handleError = (
   error: unknown,
   options: HandleErrorOptions = DEFAULT_HANDLE_ERROR_OPTIONS,
 ): void => {
-  logger.break();
-  logger.error(
+  console.error(
     "Something went wrong. Please check the error below for more details.",
   );
-  logger.error("If the problem persists, please open an issue on GitHub.");
-  logger.error("");
-  if (error instanceof Error) {
-    logger.error(error.message);
-  }
-  logger.break();
+  console.error("If the problem persists, please open an issue on GitHub.");
+  console.error(error instanceof Error ? error.message : String(error));
   if (options.shouldExit) {
     process.exit(1);
   }

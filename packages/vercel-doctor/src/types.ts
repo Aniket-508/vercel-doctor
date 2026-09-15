@@ -1,15 +1,32 @@
 export type Framework =
   | "nextjs"
+  | "nuxt"
+  | "sveltekit"
+  | "tanstack-start"
+  | "astro"
+  | "react-router"
+  | "remix"
+  | "solidstart"
+  | "qwik"
+  | "angular"
   | "vite"
   | "cra"
-  | "remix"
   | "gatsby"
   | "unknown";
+
+export interface FrameworkDetector {
+  framework: Framework;
+  packages: string[];
+}
+
+export type LinterKind = "oxlint" | "rslint" | "eslint" | "biome" | "none";
 
 export interface ProjectInfo {
   rootDirectory: string;
   projectName: string;
   reactVersion: string | null;
+  vueVersion: string | null;
+  svelteVersion: string | null;
   framework: Framework;
   nextVersion: string | null;
   nextMajorVersion: number | null;
@@ -71,6 +88,8 @@ export interface PackageJson {
 
 export interface DependencyInfo {
   reactVersion: string | null;
+  vueVersion: string | null;
+  svelteVersion: string | null;
   framework: Framework;
   nextVersion: string | null;
   nextMajorVersion: number | null;
@@ -109,6 +128,7 @@ export interface ScanOptions {
   offline?: boolean;
   includePaths?: string[];
   output?: "human" | "json" | "markdown";
+  silent?: boolean;
 }
 
 export interface DiffInfo {
@@ -211,4 +231,36 @@ export interface PluginRuleMetadata {
   category: string;
   help: string;
   severity: "warn" | "error";
+}
+
+export interface LinterRunOptions {
+  hasTypeScript: boolean;
+  framework: Framework;
+  includePaths?: string[];
+}
+
+export interface LinterRunner {
+  kind: LinterKind;
+  detect: (projectDirectory: string) => boolean;
+  run: (
+    rootDirectory: string,
+    projectInfo: ProjectInfo,
+    options: LinterRunOptions,
+  ) => Promise<Diagnostic[]>;
+}
+
+export interface FrameworkCheckProvider {
+  framework: Framework;
+  collectFileDiagnostics: (
+    relativeFilePath: string,
+    fileContent: string,
+    projectContext: ProjectInfo,
+    diagnostics: Diagnostic[],
+  ) => void;
+  collectConfigDiagnostics?: (
+    rootDirectory: string,
+    projectFilePaths: string[],
+    includedPathSet: Set<string> | null,
+    diagnostics: Diagnostic[],
+  ) => void;
 }

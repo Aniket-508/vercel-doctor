@@ -98,6 +98,26 @@ export const PLUGIN_RULE_METADATA: Record<string, PluginRuleMetadata> = {
     help: "Use `const [a, b] = await Promise.all([fetchA(), fetchB()])` to run independent operations concurrently",
     severity: "warn",
   },
+  [PLUGIN_RULE_IDS.NUXT_CONFIG_SSR_FALSE]: {
+    category: RULE_CATEGORY_NAMES.VERCEL,
+    help: "Enable SSR (remove `ssr: false`) for optimal Vercel deployment with edge rendering",
+    severity: "warn",
+  },
+  [PLUGIN_RULE_IDS.NUXT_NO_TOP_LEVEL_AWAIT_IN_SERVER_ROUTE]: {
+    category: RULE_CATEGORY_NAMES.FUNCTION_DURATION,
+    help: "Use `Promise.all()` for independent async operations in Nitro server route handlers",
+    severity: "warn",
+  },
+  [PLUGIN_RULE_IDS.SVELTEKIT_LOAD_SEQUENTIAL_AWAIT]: {
+    category: RULE_CATEGORY_NAMES.FUNCTION_DURATION,
+    help: "Use `Promise.all()` for independent async operations in SvelteKit load functions",
+    severity: "warn",
+  },
+  [PLUGIN_RULE_IDS.SVELTEKIT_SERVER_IMPORT_IN_CLIENT_LOAD]: {
+    category: RULE_CATEGORY_NAMES.CACHING,
+    help: "Move server-only imports to `+page.server.ts` to avoid shipping server code to the client bundle",
+    severity: "error",
+  },
 };
 
 const createQualifiedPluginRuleMetadata = (): Record<
@@ -183,13 +203,6 @@ export const RULE_FIX_STRATEGIES: Record<string, RuleFixStrategy> = {
     explanation:
       "Use specific path patterns instead of broad wildcards to prevent abuse",
     title: "Restrict remotePatterns pathname",
-  },
-  [VERCEL_RULE_IDS.IMAGE_SVG_WITHOUT_UNOPTIMIZED]: {
-    after: "<Image src='/icon.svg' width={32} height={32} unoptimized />",
-    before: "<Image src='/icon.svg' width={32} height={32} />",
-    explanation:
-      "SVGs don't benefit from image optimization, so mark them as unoptimized",
-    title: "Add unoptimized for SVG",
   },
   [VERCEL_RULE_IDS.SUGGEST_TURBOPACK_BUILD_CACHE]: {
     after: "experimental: { turbopackFileSystemCacheForBuild: true }",
@@ -294,5 +307,35 @@ export const RULE_FIX_STRATEGIES: Record<string, RuleFixStrategy> = {
     before: "console.log('done'); analytics.track(event);",
     explanation: "Use after() to run non-critical work after response is sent",
     title: "Wrap logging in after()",
+  },
+  [PLUGIN_RULE_IDS.NUXT_CONFIG_SSR_FALSE]: {
+    after: "export default defineNuxtConfig({ /* remove ssr: false */ })",
+    before: "export default defineNuxtConfig({ ssr: false })",
+    explanation: "Enable SSR for optimal Vercel edge rendering and performance",
+    title: "Enable SSR in Nuxt config",
+  },
+  [PLUGIN_RULE_IDS.NUXT_NO_TOP_LEVEL_AWAIT_IN_SERVER_ROUTE]: {
+    after:
+      "const [users, posts] = await Promise.all([\n  getUsers(),\n  getPosts()\n]);",
+    before: "const users = await getUsers();\nconst posts = await getPosts();",
+    explanation:
+      "Use Promise.all() for independent async operations in Nitro server routes",
+    title: "Parallelize Nitro server route awaits",
+  },
+  [PLUGIN_RULE_IDS.SVELTEKIT_LOAD_SEQUENTIAL_AWAIT]: {
+    after:
+      "const [a, b] = await Promise.all([\n  fetch(url1).then(r => r.json()),\n  fetch(url2).then(r => r.json())\n]);",
+    before:
+      "const a = await fetch(url1).then(r => r.json());\nconst b = await fetch(url2).then(r => r.json());",
+    explanation:
+      "Use Promise.all() for independent async operations in SvelteKit load functions",
+    title: "Parallelize SvelteKit load awaits",
+  },
+  [PLUGIN_RULE_IDS.SVELTEKIT_SERVER_IMPORT_IN_CLIENT_LOAD]: {
+    after: "// +page.server.ts\nimport { db } from '$lib/server/database';",
+    before: "// +page.ts\nimport { db } from '$lib/server/database';",
+    explanation:
+      "Move server-only imports to +page.server.ts to avoid shipping server code to the client",
+    title: "Move server import to server load",
   },
 };

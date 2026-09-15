@@ -59,7 +59,7 @@ Vercel Doctor runs two analysis passes in parallel:
 | <DynamicLink href="/[lang]/docs/rules/function-duration">Function Duration</DynamicLink>   | 3     | Sequential awaits, blocking logging, non-parallel I/O                                      |
 | <DynamicLink href="/[lang]/docs/rules/caching">Caching</DynamicLink>                       | 6     | `force-dynamic`, missing cache policies, `no-store` fetches, side effects in GET handlers  |
 | <DynamicLink href="/[lang]/docs/rules/invocations">Invocations</DynamicLink>               | 2     | Client-side fetching in pages, aggressive link prefetching                                 |
-| <DynamicLink href="/[lang]/docs/rules/image-optimization">Image Optimization</DynamicLink> | 4     | Global `unoptimized`, missing `sizes`, broad remote patterns, SVG without `unoptimized`    |
+| <DynamicLink href="/[lang]/docs/rules/image-optimization">Image Optimization</DynamicLink> | 3 | Global `unoptimized`, missing `sizes`, broad remote patterns |
 | <DynamicLink href="/[lang]/docs/rules/platform">Platform</DynamicLink>                     | 8     | Edge heavy imports, cron jobs, Bun runtime, Fluid Compute, deploy archive, Turbopack cache |
 | <DynamicLink href="/[lang]/docs/rules/dead-code">Dead Code</DynamicLink>                   | 4     | Unused files, exports, types, and duplicates                                               |
 

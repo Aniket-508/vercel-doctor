@@ -19,9 +19,16 @@ import { createMetadata } from "@/seo/metadata";
 import { getTranslation } from "@/translations";
 import getScoreColorClass from "@/utils/get-score-color-class";
 import getScoreLabel from "@/utils/get-score-label";
-import { getSharePageData } from "@/utils/get-share-page-data";
-import type { ShareSearchParams } from "@/utils/get-share-page-data";
+import {
+  getSharePageData,
+  getShareSearchParamsFromRecord,
+} from "@/utils/get-share-page-data";
 import getTranslatedScoreLabel from "@/utils/get-translated-score-label";
+
+interface SharePageProps {
+  params: Promise<{ lang: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
 
 const getShareBaseUrl = (lang: string) =>
   `${SITE.URL}${withLocalePrefix(lang, ROUTES.SHARE)}`;
@@ -29,12 +36,11 @@ const getShareBaseUrl = (lang: string) =>
 export const generateMetadata = async ({
   params,
   searchParams,
-}: {
-  params: Promise<{ lang: string }>;
-  searchParams: Promise<ShareSearchParams>;
-}): Promise<Metadata> => {
+}: SharePageProps): Promise<Metadata> => {
   const { lang } = await params;
-  const sharePageData = getSharePageData(await searchParams);
+  const sharePageData = getSharePageData(
+    getShareSearchParamsFromRecord(await searchParams),
+  );
   const { projectName, score, errorCount, warningCount, searchParamsString } =
     sharePageData;
 
@@ -65,13 +71,7 @@ export const generateMetadata = async ({
   });
 };
 
-export const SharePage = async ({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ lang: string }>;
-  searchParams: Promise<ShareSearchParams>;
-}) => {
+export const SharePage = async ({ params, searchParams }: SharePageProps) => {
   const { lang } = await params;
 
   const {
@@ -81,7 +81,7 @@ export const SharePage = async ({
     warningCount,
     fileCount,
     searchParamsString,
-  } = getSharePageData(await searchParams);
+  } = getSharePageData(getShareSearchParamsFromRecord(await searchParams));
   const colorClass = getScoreColorClass(score);
   const shareBaseUrl = getShareBaseUrl(lang);
   const shareUrl = `${shareBaseUrl}?${searchParamsString}`;

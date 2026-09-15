@@ -2,94 +2,92 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-import { afterAll, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 
 import { scan } from "../src/scan.js";
 
-const FIXTURES_DIRECTORY = path.resolve(import.meta.dirname, "fixtures");
-
-const mockOraStart = function mockOraStart(this: { stop: () => unknown }) {
-  return this;
-};
-const mockOraStop = function mockOraStop(this: { start: () => unknown }) {
-  return this;
-};
-
-vi.mock("ora", () => ({
-  default: () => ({
-    fail: () => {},
-    start: mockOraStart,
-    stop: mockOraStop,
-    succeed: () => {},
-    text: "",
-  }),
-}));
-
-const noReactTempDirectory = fs.mkdtempSync(
-  path.join(os.tmpdir(), "vercel-doctor-test-"),
+const projectDirectory = fs.mkdtempSync(
+  path.join(os.tmpdir(), "vercel-doctor-scan-"),
 );
 fs.writeFileSync(
-  path.join(noReactTempDirectory, "package.json"),
-  JSON.stringify({ dependencies: {}, name: "no-react" }),
+  path.join(projectDirectory, "package.json"),
+  JSON.stringify({
+    dependencies: { next: "16.0.0", react: "19.0.0" },
+    name: "scan-project",
+  }),
+);
+fs.mkdirSync(path.join(projectDirectory, "app"));
+fs.writeFileSync(
+  path.join(projectDirectory, "app/page.tsx"),
+  'export const dynamic = "force-dynamic";\nexport default () => <div />;\n',
 );
 
 describe("project scan", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
   afterAll(() => {
-    fs.rmSync(noReactTempDirectory, { force: true, recursive: true });
+    fs.rmSync(projectDirectory, { force: true, recursive: true });
+  });
+  it("emits parseable JSON containing discovered diagnostics without progress text", async () => {
+    const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    await scan(projectDirectory, {
+      deadCode: false,
+      lint: false,
+      offline: true,
+      output: "json",
+    });
+    const output = JSON.parse(
+      consoleSpy.mock.calls.map((args) => args.join(" ")).join("\n"),
+    );
+    expect(output.diagnostics).toStrictEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          filePath: "app/page.tsx",
+          rule: "vercel-no-force-dynamic",
+        }),
+      ]),
+    );
+    expect(output.scoreResult).toBeNull();
   });
 
-  describe(scan, () => {
-    it("completes without throwing on a valid React project", async () => {
-      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-      try {
-        await scan(path.join(FIXTURES_DIRECTORY, "basic-react"), {
-          deadCode: false,
-          lint: true,
-        });
-        expect(consoleSpy).toHaveBeenCalledWith(expect.anything());
-      } finally {
-        consoleSpy.mockRestore();
-      }
+  it("does not expand an explicitly empty diff into a full scan", async () => {
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    const result = await scan(projectDirectory, {
+      includePaths: [],
+      offline: true,
+      output: "json",
     });
+    expect(result.diagnostics).toStrictEqual([]);
+  });
 
-    it("throws when React dependency is missing", async () => {
-      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-      try {
-        await expect(
-          scan(noReactTempDirectory, { deadCode: false, lint: true }),
-        ).rejects.toThrow("No React dependency found");
-      } finally {
-        consoleSpy.mockRestore();
-      }
+  it("keeps clean Markdown scans in Markdown format", async () => {
+    const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    await scan(projectDirectory, {
+      includePaths: [],
+      offline: true,
+      output: "markdown",
     });
+    const output = consoleSpy.mock.calls
+      .map((args) => args.join(" "))
+      .join("\n");
+    expect(output.startsWith("# ")).toBeTruthy();
+  });
 
-    it("skips lint when option is disabled", async () => {
-      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-      try {
-        await scan(path.join(FIXTURES_DIRECTORY, "basic-react"), {
-          deadCode: false,
-          lint: false,
-        });
-        expect(consoleSpy).toHaveBeenCalledWith(expect.anything());
-      } finally {
-        consoleSpy.mockRestore();
-      }
-    });
-
-    it("runs lint and dead code in parallel when both enabled", async () => {
-      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-      try {
-        const startTime = performance.now();
-        await scan(path.join(FIXTURES_DIRECTORY, "basic-react"), {
-          deadCode: true,
-          lint: true,
-        });
-        const elapsedMilliseconds = performance.now() - startTime;
-
-        expect(elapsedMilliseconds).toBeLessThan(30_000);
-      } finally {
-        consoleSpy.mockRestore();
-      }
-    });
+  it("rejects projects without supported framework dependencies", async () => {
+    const emptyDirectory = fs.mkdtempSync(
+      path.join(os.tmpdir(), "vercel-doctor-no-framework-"),
+    );
+    try {
+      fs.writeFileSync(
+        path.join(emptyDirectory, "package.json"),
+        JSON.stringify({ name: "empty" }),
+      );
+      await expect(scan(emptyDirectory, { offline: true })).rejects.toThrow(
+        "No framework dependency",
+      );
+    } finally {
+      fs.rmSync(emptyDirectory, { force: true, recursive: true });
+    }
   });
 });

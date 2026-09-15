@@ -43,7 +43,7 @@ npx -y vercel-doctor@latest . --verbose --diff
 - **Vercel Platform Checks** — Scans for force-dynamic, missing cache policies, no-store fetches, and GET handlers with side effects that prevent ISR.
 
 ### 3. Bandwidth & Image Optimization
-- **Image Optimization** — Detects global image optimization disabled, next/image with SVG without unoptimized, missing sizes, and overly broad remote patterns.
+- **Image Optimization** — Detects global image optimization disabled, missing sizes, and overly broad remote patterns.
 - **Static Assets** — Finds large static files that consume CDN bandwidth.
 
 ## Workflow
@@ -152,7 +152,7 @@ fi
 
 # Codex
 if command -v codex &> /dev/null || [ -d "$HOME/.codex" ]; then
-  SKILL_DIR="$HOME/.codex/skills/$SKILL_NAME"
+  SKILL_DIR="$HOME/.agents/skills/$SKILL_NAME"
   mkdir -p "$SKILL_DIR"
   mkdir -p "$SKILL_DIR/agents"
   printf '%s\\n' "$SKILL_CONTENT" > "$SKILL_DIR/SKILL.md"
@@ -166,12 +166,12 @@ YAMLEOF
   INSTALLED=$((INSTALLED + 1))
 fi
 
-# Project-level .agents/
-AGENTS_DIR=".agents/$SKILL_NAME"
+# Project-level .agents/skills/
+AGENTS_DIR=".agents/skills/$SKILL_NAME"
 mkdir -p "$AGENTS_DIR"
 printf '%s\\n' "$SKILL_CONTENT" > "$AGENTS_DIR/SKILL.md"
 printf '%s\\n' "$AGENTS_CONTENT" > "$AGENTS_DIR/AGENTS.md"
-printf "\${GREEN}✔\${RESET} .agents/\\n"
+printf "\${GREEN}✔\${RESET} .agents/skills/\\n"
 INSTALLED=$((INSTALLED + 1))
 
 echo ""
