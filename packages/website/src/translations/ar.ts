@@ -25,8 +25,15 @@ export const ar: Translation = {
     selectPackageManager: "اختر مدير الحزم",
     subtitle: "دع وكلاء الترميز يشخصون ويصلحون فاتورة Vercel",
   },
+  horrorsPage: {
+    description:
+      "مجموعة من فواتير Vercel وحدود النطاق الترددي والدروس المستفادة من بيئات الإنتاج، يشاركها المجتمع.",
+    heading: "قصص مرعبة",
+    shareYourStory: "شارك قصتك",
+  },
   nav: {
     docs: "التوثيق",
+    horrors: "قصص مرعبة",
     showcase: "المعارض",
     sponsors: "الرعاة",
   },
@@ -90,3 +97,5 @@ export const ar: Translation = {
     sectionLabel: "[ماذا يقول الناس]",
   },
 };
+
+export default ar;

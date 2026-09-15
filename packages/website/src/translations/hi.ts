@@ -25,8 +25,15 @@ export const hi: Translation = {
     selectPackageManager: "पैकेज मैनेजर चुनें",
     subtitle: "कोडिंग एजेंट आपके Vercel बिल का निदान और ठीक करें",
   },
+  horrorsPage: {
+    description:
+      "समुदाय द्वारा साझा किए गए Vercel बिलों, बैंडविड्थ सीमाओं और प्रोडक्शन से मिली सीखों का संग्रह।",
+    heading: "डरावनी कहानियाँ",
+    shareYourStory: "अपनी कहानी साझा करें",
+  },
   nav: {
     docs: "डॉक्स",
+    horrors: "डरावनी कहानियाँ",
     showcase: "प्रदर्शनियाँ",
     sponsors: "स्पॉन्सर",
   },
@@ -91,3 +98,5 @@ export const hi: Translation = {
     sectionLabel: "[लोग क्या कह रहे हैं]",
   },
 };
+
+export default hi;

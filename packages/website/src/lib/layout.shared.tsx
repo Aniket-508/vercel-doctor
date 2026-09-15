@@ -19,6 +19,10 @@ export const baseOptions = (locale: string): BaseLayoutProps => {
         url: withLocalePrefix(locale, ROUTES.DOCS),
       },
       {
+        text: translation.nav.horrors,
+        url: withLocalePrefix(locale, ROUTES.HORRORS),
+      },
+      {
         text: translation.nav.showcase,
         url: withLocalePrefix(locale, ROUTES.SHOWCASE),
       },

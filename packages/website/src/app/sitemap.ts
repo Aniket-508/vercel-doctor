@@ -9,6 +9,7 @@ import { source } from "@/lib/source";
 const STATIC_PATHS: { path: `/${string}`; priority: number }[] = [
   { path: ROUTES.HOME, priority: 1 },
   { path: ROUTES.DOCS, priority: 0.9 },
+  { path: ROUTES.HORRORS, priority: 0.7 },
   { path: ROUTES.SHARE, priority: 0.7 },
   { path: ROUTES.SHOWCASE, priority: 0.6 },
   { path: ROUTES.SPONSORS, priority: 0.6 },

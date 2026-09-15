@@ -7,11 +7,13 @@
     "dev": "next dev",
     "start": "next start",
     "typecheck": "fumadocs-mdx && next typegen && tsc --noEmit",
+    "translate": "lingo.dev -y run",
     "postinstall": "fumadocs-mdx"
   },
   "dependencies": {
     "@takumi-rs/image-response": "^0.69.4",
     "@vercel/analytics": "^1.6.1",
+    "@virtuoso.dev/masonry": "^1.4.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "fumadocs-core": "16.6.4",
@@ -24,6 +26,7 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-fast-marquee": "^1.6.5",
+    "react-tweet": "^3.3.1",
     "tailwind-merge": "^3.4.1"
   },
   "devDependencies": {
@@ -32,6 +35,7 @@
     "@types/node": "^25.2.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "lingo.dev": "^0.138.8",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3"

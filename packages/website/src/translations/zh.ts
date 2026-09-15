@@ -25,8 +25,14 @@ export const zh: Translation = {
     selectPackageManager: "选择包管理器",
     subtitle: "让编程代理诊断并修复你的 Vercel 账单",
   },
+  horrorsPage: {
+    description: "来自社区的 Vercel 账单、带宽限制和生产环境经验教训合集。",
+    heading: "恐怖故事",
+    shareYourStory: "分享你的故事",
+  },
   nav: {
     docs: "文档",
+    horrors: "恐怖故事",
     showcase: "案例集锦",
     sponsors: "赞助者",
   },
@@ -88,3 +94,5 @@ export const zh: Translation = {
     sectionLabel: "[用户评价]",
   },
 };
+
+export default zh;

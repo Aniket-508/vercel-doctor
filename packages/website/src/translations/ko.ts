@@ -25,8 +25,15 @@ export const ko: Translation = {
     selectPackageManager: "패키지 매니저 선택",
     subtitle: "코딩 에이전트가 Vercel 청구서를 진단하고 수정합니다",
   },
+  horrorsPage: {
+    description:
+      "커뮤니티에서 공유한 Vercel 요금 청구, 대역폭 제한, 프로덕션 환경에서 얻은 교훈을 모았습니다.",
+    heading: "공포 사례",
+    shareYourStory: "경험 공유하기",
+  },
   nav: {
     docs: "문서",
+    horrors: "공포 사례",
     showcase: "쇼케이스 모음",
     sponsors: "스폰서",
   },
@@ -90,3 +97,5 @@ export const ko: Translation = {
     sectionLabel: "[이용자 후기]",
   },
 };
+
+export default ko;
